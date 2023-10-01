@@ -28,7 +28,7 @@ namespace SomoTaskManagement.Domain.Entities
         [Required(ErrorMessage = "EndDate is required.")]
         public DateTime EndDate { set; get; }
 
-        [Required(ErrorMessage = "Description is required.")]
+        //[Required(ErrorMessage = "Description is required.")]
         public string Description { set; get; }
 
 

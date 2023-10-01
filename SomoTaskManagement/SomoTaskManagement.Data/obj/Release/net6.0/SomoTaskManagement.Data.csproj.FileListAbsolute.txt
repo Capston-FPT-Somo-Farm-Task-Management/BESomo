@@ -32,3 +32,20 @@ C:\Users\Admin\Documents\HOC\New folder\Project_API\SomoTaskManagement\SomoTaskM
 C:\Users\Admin\Documents\HOC\New folder\Project_API\SomoTaskManagement\SomoTaskManagement.Data\obj\Release\net6.0\SomoTaskManagement.Data.pdb
 C:\Users\Admin\Documents\HOC\New folder\Project_API\SomoTaskManagement\SomoTaskManagement.Data\obj\Release\net6.0\SomoTaskManagement.Data.genruntimeconfig.cache
 C:\Users\Admin\Documents\HOC\New folder\Project_API\SomoTaskManagement\SomoTaskManagement.Data\obj\Release\net6.0\ref\SomoTaskManagement.Data.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\bin\Release\net6.0\SomoTaskManagement.Data.deps.json
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\bin\Release\net6.0\SomoTaskManagement.Data.runtimeconfig.json
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\bin\Release\net6.0\SomoTaskManagement.Data.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\bin\Release\net6.0\SomoTaskManagement.Data.pdb
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\bin\Release\net6.0\SomoTaskManagement.Domain.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\bin\Release\net6.0\SomoTaskManagement.Domain.pdb
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\obj\Release\net6.0\SomoTaskManagement.Data.csproj.AssemblyReference.cache
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\obj\Release\net6.0\SomoTaskManagement.Data.GeneratedMSBuildEditorConfig.editorconfig
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\obj\Release\net6.0\SomoTaskManagement.Data.AssemblyInfoInputs.cache
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\obj\Release\net6.0\SomoTaskManagement.Data.AssemblyInfo.cs
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\obj\Release\net6.0\SomoTaskManagement.Data.csproj.CoreCompileInputs.cache
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\obj\Release\net6.0\SomoTaskManagement.Data.csproj.CopyComplete
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\obj\Release\net6.0\SomoTaskManagement.Data.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\obj\Release\net6.0\refint\SomoTaskManagement.Data.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\obj\Release\net6.0\SomoTaskManagement.Data.pdb
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\obj\Release\net6.0\SomoTaskManagement.Data.genruntimeconfig.cache
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Data\obj\Release\net6.0\ref\SomoTaskManagement.Data.dll

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "T2tU1+mXdzajV0Mv5D17Zuosw3omwbLJsVx2KRgiTmSXEQ6TIfzAY/RT2lodjglPgrxqJ7CevO/v1yiJzwz5lQ==",
+  "dgSpecHash": "FiPUe/GwPleAKM5oDT8etS0dpm7cNx8SZHjrM+6rOogR5x7Y9YILmNmeixf85jk9PWtXlbFDe6eSz5EPbyQSRw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj",
+  "projectFilePath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

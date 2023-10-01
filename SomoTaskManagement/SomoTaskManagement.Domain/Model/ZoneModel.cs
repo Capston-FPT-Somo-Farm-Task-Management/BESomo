@@ -12,7 +12,7 @@ namespace SomoTaskManagement.Domain.Model
         public int Id { get; set; }
 
         [Required]
-        [RegularExpression("^[a-zA-Z ]*$", ErrorMessage = "Name must contain only letters.")]
+        //[RegularExpression("^[a-zA-Z ]*$", ErrorMessage = "Name must contain only letters.")]
         [StringLength(100, ErrorMessage = "Name must not exceed 100 characters.")]
         public string AreaName { get; set; }
 

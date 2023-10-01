@@ -21,3 +21,15 @@ C:\Users\Admin\Documents\HOC\New folder\Project_API\SomoTaskManagement\SomoTaskM
 C:\Users\Admin\Documents\HOC\New folder\Project_API\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\refint\SomoTaskManagement.Domain.dll
 C:\Users\Admin\Documents\HOC\New folder\Project_API\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\SomoTaskManagement.Domain.pdb
 C:\Users\Admin\Documents\HOC\New folder\Project_API\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\ref\SomoTaskManagement.Domain.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\bin\Release\net6.0\SomoTaskManagement.Domain.deps.json
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\bin\Release\net6.0\SomoTaskManagement.Domain.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\bin\Release\net6.0\SomoTaskManagement.Domain.pdb
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\SomoTaskManagement.Domain.csproj.AssemblyReference.cache
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\SomoTaskManagement.Domain.GeneratedMSBuildEditorConfig.editorconfig
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\SomoTaskManagement.Domain.AssemblyInfoInputs.cache
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\SomoTaskManagement.Domain.AssemblyInfo.cs
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\SomoTaskManagement.Domain.csproj.CoreCompileInputs.cache
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\SomoTaskManagement.Domain.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\refint\SomoTaskManagement.Domain.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\SomoTaskManagement.Domain.pdb
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\ref\SomoTaskManagement.Domain.dll

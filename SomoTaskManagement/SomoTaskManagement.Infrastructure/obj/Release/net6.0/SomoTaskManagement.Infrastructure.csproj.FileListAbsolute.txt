@@ -44,3 +44,26 @@ C:\Users\Admin\Documents\HOC\New folder\Project_API\SomoTaskManagement\SomoTaskM
 C:\Users\Admin\Documents\HOC\New folder\Project_API\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\refint\SomoTaskManagement.Infrastructure.dll
 C:\Users\Admin\Documents\HOC\New folder\Project_API\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.pdb
 C:\Users\Admin\Documents\HOC\New folder\Project_API\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\ref\SomoTaskManagement.Infrastructure.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Infrastructure.deps.json
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Infrastructure.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Infrastructure.pdb
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Authentication.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Data.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Domain.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Notify.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Services.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Authentication.pdb
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Data.pdb
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Notify.pdb
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Domain.pdb
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Services.pdb
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.csproj.AssemblyReference.cache
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.AssemblyInfoInputs.cache
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.AssemblyInfo.cs
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.csproj.CoreCompileInputs.cache
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.csproj.CopyComplete
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\refint\SomoTaskManagement.Infrastructure.dll
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.pdb
+E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\ref\SomoTaskManagement.Infrastructure.dll

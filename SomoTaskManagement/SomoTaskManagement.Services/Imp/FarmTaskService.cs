@@ -63,7 +63,7 @@ namespace SomoTaskManagement.Services.Imp
             };
 
             var farmTasks = await _unitOfWork.RepositoryFarmTask
-                .GetData(expression: t => t.Status == 0 || t.Status == 1 || t.Status == 2 || t.Status == 3, includes: includes) ;
+                .GetData(expression: t => t.Status == 0 || t.Status == 1 || t.Status == 2 || t.Status == 3, includes: includes);
 
             return _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
         }
@@ -209,7 +209,7 @@ namespace SomoTaskManagement.Services.Imp
                     case "Hằng ngày":
                         currentDay = currentDay.AddDays(1 * farmTaskmodel.Iterations);
                         break;
-                    case "None":
+                    case "Không":
                         currentDay = farmTaskmodel.StartDate;
                         break;
                     default:
@@ -294,17 +294,17 @@ namespace SomoTaskManagement.Services.Imp
         {
             Console.WriteLine($"Attempting to parse priority: '{priorityString}'");
 
-            switch (priorityString.Trim())
+            switch (priorityString.Trim().ToLower())
             {
-                case "Thấp nhất":
+                case "thấp nhất":
                     return PriorityEnum.Shortest;
-                case "Thấp":
+                case "thấp":
                     return PriorityEnum.Short;
-                case "Trung bình":
+                case "trung bình":
                     return PriorityEnum.Medium;
-                case "Cao":
+                case "cao":
                     return PriorityEnum.High;
-                case "Cao nhất":
+                case "cao nhất":
                     return PriorityEnum.Tallest;
                 default:
                     Console.WriteLine("Invalid priority string.");
