@@ -1,0 +1,570 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement\\SomoTaskManagement.Api.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj",
+        "projectName": "SomoTaskManagement.Authentication",
+        "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Authentication\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj"
+              },
+              "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[6.0.21, )"
+            },
+            "Microsoft.Extensions.Configuration": {
+              "target": "Package",
+              "version": "[6.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.408\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj",
+        "projectName": "SomoTaskManagement.Data",
+        "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Data\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "AutoMapper": {
+              "target": "Package",
+              "version": "[12.0.1, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[6.0.21, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[6.0.21, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[6.0.21, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[6.0.21, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.408\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj",
+        "projectName": "SomoTaskManagement.Domain",
+        "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Domain\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.408\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\SomoTaskManagement.Infrastructure.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\SomoTaskManagement.Infrastructure.csproj",
+        "projectName": "SomoTaskManagement.Infrastructure",
+        "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\SomoTaskManagement.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj"
+              },
+              "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj"
+              },
+              "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[6.0.21, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[6.0.21, )"
+            },
+            "Microsoft.Extensions.Configuration": {
+              "target": "Package",
+              "version": "[6.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.408\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj",
+        "projectName": "SomoTaskManagement.Notify",
+        "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Notification\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj"
+              },
+              "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Session": {
+              "target": "Package",
+              "version": "[2.1.1, )"
+            },
+            "Microsoft.AspNetCore.SignalR": {
+              "target": "Package",
+              "version": "[1.0.4, )"
+            },
+            "SqlTableDependency": {
+              "target": "Package",
+              "version": "[8.5.8, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.408\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj",
+        "projectName": "SomoTaskManagement.Services",
+        "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Services\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "FirebaseStorage.net": {
+              "target": "Package",
+              "version": "[1.0.3, )"
+            },
+            "Microsoft.AspNetCore.Http": {
+              "target": "Package",
+              "version": "[2.2.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.408\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement\\SomoTaskManagement.Api.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement\\SomoTaskManagement.Api.csproj",
+        "projectName": "SomoTaskManagement.Api",
+        "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement\\SomoTaskManagement.Api.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\SomoTaskManagement.Infrastructure.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\SomoTaskManagement.Infrastructure.csproj"
+              },
+              "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\New folder\\Project_API\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "AutoMapper.Extensions.Microsoft.DependencyInjection": {
+              "target": "Package",
+              "version": "[12.0.1, )"
+            },
+            "FirebaseStorage.net": {
+              "target": "Package",
+              "version": "[1.0.3, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[6.0.22, )"
+            },
+            "Microsoft.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[6.0.1, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[6.2.3, )"
+            },
+            "Swashbuckle.AspNetCore.SwaggerUI": {
+              "target": "Package",
+              "version": "[6.5.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.408\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

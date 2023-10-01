@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "1aeUz2PQUmZTewwf6aHndAzwHs4xJELNc7onw+5n5NA=",
+  "Source": "SomoTaskManagement.Api",
+  "BasePath": "_content/SomoTaskManagement.Api",
+  "Mode": "Default",
+  "ManifestType": "Publish",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
