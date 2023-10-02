@@ -137,6 +137,35 @@ namespace SomoTaskManagement.Api.Controllers
 
             }
         }
+
+        [HttpGet("TaskActive/Member/{memberId}")]
+        public async Task<IActionResult> GetListActiveByMemberId(int memberId)
+        {
+            try
+            {
+                if (memberId <= 0)
+                {
+                    return NotFound("Member id must be greater than 0 ");
+                }
+                var task = await _farmTaskService.GetListActiveByMemberId(memberId);
+                if (task == null)
+                {
+                    return NotFound("Task not found");
+                }
+                return Ok(new ApiResponseModel
+                {
+                    Data = task,
+                    Message = "List task Active By MemberId success",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create(int memberId, [FromBody] TaskRequestModel taskModel)
         {

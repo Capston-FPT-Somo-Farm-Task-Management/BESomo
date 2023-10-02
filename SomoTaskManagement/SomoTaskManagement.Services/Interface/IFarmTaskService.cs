@@ -17,6 +17,7 @@ namespace SomoTaskManagement.Services.Interface
         Task<IEnumerable<FarmTaskModel>> GetListActive();
         Task<IEnumerable<FarmTaskModel>> GetTaskByDay(DateTime dateStr);
         Task<IEnumerable<FarmTaskModel>> GetTaskByMemberId(int id);
+        Task<IEnumerable<FarmTaskModel>> GetListActiveByMemberId(int id);
         Task Update(int farmTaskId, int memberId, FarmTask farmTaskUpdate, List<int> employeeIds, List<int> materialIds);
         Task UpdateStatus(int id, int status);
     }
