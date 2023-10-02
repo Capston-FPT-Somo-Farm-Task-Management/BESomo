@@ -21,7 +21,7 @@ namespace SomoTaskManagement.Domain.Enum
         [Description("Hoàn thành")]
         Complete = 3,
 
-        [Description("Hoàn thành")]
+        [Description("Đã xóa")]
         IsDelete = 4,
     }
 }
