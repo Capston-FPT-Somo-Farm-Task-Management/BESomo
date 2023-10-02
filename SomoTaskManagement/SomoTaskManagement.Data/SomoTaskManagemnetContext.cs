@@ -80,9 +80,10 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.MemberId)
                     .HasMaxLength(50)
                     .IsUnicode(false);
-                //entity.HasOne(e => e.Member)
-                //    .WithOne()
-                //    .HasForeignKey<HubConnection>(e => e.MemberId);
+
+                entity.HasOne(e => e.Member)
+                .WithOne(e => e.HubConnection)
+                .HasForeignKey<Member>(e => e.HubConnectionId);
             });
 
             //Farm
@@ -316,11 +317,8 @@ namespace SomoTaskManagement.Data
 
                 entity.HasOne(d => d.Role).WithMany(p => p.Members).HasForeignKey(d => d.RoleId).HasConstraintName("FK_Role_Member");
                 entity.HasOne(d => d.Farm).WithMany(p => p.Members).HasForeignKey(d => d.FarmId).HasConstraintName("FK_Farms_Member");
-                
-                //entity.HasOne(d => d.Notification).WithMany(p => p.Members).HasForeignKey(d => d.NotificcationId).HasConstraintName("FK_Notification_Member");
-                //entity.HasOne(e => e.HubConnection)
-                //   .WithOne()
-                //   .HasForeignKey<Member>(e => e.HubConnectionId);
+
+                entity.HasOne(d => d.Notification).WithMany(p => p.Members).HasForeignKey(d => d.NotificcationId).HasConstraintName("FK_Notification_Member");
             });
 
             //MemberToken

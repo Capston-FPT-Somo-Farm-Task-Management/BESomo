@@ -22,16 +22,21 @@ namespace SomoTaskManagement.Services.Imp
             _mapper = mapper;
         }
 
-        public Task<IEnumerable<TaskType>> ListTaskType()
+        public async Task<IEnumerable<TaskTypeModel>> ListTaskType()
         {
-            return _unitOfWork.RepositoryTaskTaskType.GetData(null);
+            var taskType = await _unitOfWork.RepositoryTaskTaskType.GetData(null);
+            return _mapper.Map<IEnumerable<TaskType>, IEnumerable<TaskTypeModel>>(taskType);
         }
         public async Task<IEnumerable<TaskTypeModel>> ListTaskTypePlant()
         {
             var taskType = await _unitOfWork.RepositoryTaskTaskType.GetData(expression:e=>e.Status ==0);
             return _mapper.Map<IEnumerable<TaskType>, IEnumerable<TaskTypeModel>>(taskType);
         }
-
+        public async Task<IEnumerable<TaskTypeModel>> ListTaskTypeActive()
+        {
+            var taskType = await _unitOfWork.RepositoryTaskTaskType.GetData(expression: e => e.IsDelete == false);
+            return _mapper.Map<IEnumerable<TaskType>, IEnumerable<TaskTypeModel>>(taskType);
+        }
         public async Task<IEnumerable<TaskTypeModel>> ListTaskTypeLivestock()
         {
             var taskType = await _unitOfWork.RepositoryTaskTaskType.GetData(expression: e => e.Status == 1);

@@ -16,7 +16,7 @@ namespace SomoTaskManagement.Domain.Model
         public string Name { get; set; }
 
         [Required]
-        public int Status { set; get; }
+        public string Status { set; get; }
         [EmailAddress(ErrorMessage = "Invalid email address.")]
         [Required(ErrorMessage = "Email is required.")]
         public string Email { set; get; }

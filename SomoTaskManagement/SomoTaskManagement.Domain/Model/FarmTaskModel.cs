@@ -38,8 +38,10 @@ namespace SomoTaskManagement.Domain.Model
         public int Iterations { get; set; }
 
         public string ReceiverName { set; get; }
+        public int ReceiverId { set; get; }
         public string? FieldName { set; get; }
         public string TaskTypeName { set; get; }
+        public string StatusTaskType { set; get; }
         public string MemberName { set; get; }
         public string? OtherName { set; get; }
         public string? PlantName { set; get; }
@@ -50,5 +52,7 @@ namespace SomoTaskManagement.Domain.Model
         public string ExternalId { set; get; }
         public string ZoneName { set; get; }
         public string AreaName { set; get; }
+
+        public string EmployeeName {  set; get; }
     }
 }

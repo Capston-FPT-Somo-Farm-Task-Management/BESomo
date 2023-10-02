@@ -16,11 +16,12 @@ namespace SomoTaskManagement.Domain.Model
         public string Name { get; set; }
 
         [Required]
-        public int Status { set; get; }
+        public string Status { set; get; }
         [Required(ErrorMessage = "Area is required.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "FarmArea must be greater than 0.")]
         public double Area { set; get; }
 
         public string ZoneName { set; get; }
+        public string AreaName { set; get; }
     }
 }

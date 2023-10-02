@@ -58,17 +58,22 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromForm]IFormFile imageFile,[FromBody]EvidenceImage evidenceImage)
+        public async Task<IActionResult> Create([FromForm] EvidenceImageModel evidenceImageModel)
         {
             try
             {
                 var response = new ApiResponseModel();
+                var imageEvidecne = new EvidenceImage
+                {
+                    Name = evidenceImageModel.Name,
+                    TaskEvidenceId = evidenceImageModel.TaskEvidenceId,
+                };
                 if (ModelState.IsValid)
                 {
-                    if (imageFile != null && imageFile.Length > 0)
+                    if (evidenceImageModel.ImageFile != null && evidenceImageModel.ImageFile.Length > 0)
                     {
                         string fileName = Guid.NewGuid().ToString();
-                        string fileExtension = Path.GetExtension(imageFile.FileName);
+                        string fileExtension = Path.GetExtension(evidenceImageModel.ImageFile.FileName);
 
                         var options = new FirebaseStorageOptions
                         {
@@ -79,18 +84,16 @@ namespace SomoTaskManagement.Api.Controllers
                             .Child("images")
                             .Child(fileName + fileExtension);
 
-                        await firebaseStorage.PutAsync(imageFile.OpenReadStream());
+                        await firebaseStorage.PutAsync(evidenceImageModel.ImageFile.OpenReadStream());
 
                         string imageUrl = await firebaseStorage.GetDownloadUrlAsync();
 
-                        evidenceImage.ImageUrl = imageUrl;
+                        imageEvidecne.ImageUrl = imageUrl;
                     }
-                    evidenceImage.Name = "string";
-
-                    await _evidenceImageService.AddEvidenceImage(evidenceImage);
+                    await _evidenceImageService.AddEvidenceImage(imageEvidecne);
                     var responseData = new ApiResponseModel
                     {
-                        Data = evidenceImage,
+                        Data = imageEvidecne,
                         Message = "EvidenceImage is added",
                         Success = true,
                     };

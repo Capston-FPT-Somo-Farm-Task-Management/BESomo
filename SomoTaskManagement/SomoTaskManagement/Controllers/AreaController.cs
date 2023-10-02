@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
 namespace SomoTaskManagement.Api.Controllers
@@ -48,8 +49,50 @@ namespace SomoTaskManagement.Api.Controllers
                 Success = true,
             });
         }
+        [HttpPut("Delete/{id}")]
+        public async Task<IActionResult> UpdateStatus(int id)
+        {
+            //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+            //{
+            //    return Unauthorized("You do not have access to this method.");
+            //}
+            try
+            {
+                var response = new ApiResponseModel();
+                if (ModelState.IsValid)
+                {
+                    if (id <= 0)
+                    {
+                        return NotFound("Area id must be greater than 0 ");
+                    }
+                    await _areaService.DeleteByStatus(id);
+                    var responseData = new ApiResponseModel
+                    {
+                        Data = null,
+                        Message = "Delete success",
+                        Success = true,
+                    };
+                    return Ok(responseData);
+                }
+                else
+                {
+                    var errorMessages = new List<string>();
+                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        errorMessages.Add(modelError.ErrorMessage);
+                    }
 
-        [HttpGet("Farm({id})")]
+                    response.Message = "Invalid area data: " + string.Join(" ", errorMessages);
+                    return BadRequest(response);
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+
+        }
+        [HttpGet("Active/Farm({id})")]
         public async Task<IActionResult> GetAreaByFarm(int id)
         {
             //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
@@ -60,7 +103,7 @@ namespace SomoTaskManagement.Api.Controllers
             {
                 return NotFound("Farm id must be greater than 0");
             }
-            var area = await _areaService.GetAreaByFarm(id);
+            var area = await _areaService.GetAreaByFarmId(id);
             return Ok(new ApiResponseModel
             {
                 Data = area,
@@ -68,6 +111,42 @@ namespace SomoTaskManagement.Api.Controllers
                 Success = true,
             });
         }
+
+        [HttpGet("Farm({id})")]
+        public async Task<IActionResult> GetAllAreaByFarmId(int id)
+        {
+            //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+            //{
+            //    return Unauthorized("You do not have access to this method.");
+            //}
+            if (id <= 0)
+            {
+                return NotFound("Farm id must be greater than 0");
+            }
+            var area = await _areaService.GetAllAreaByFarmId(id);
+            return Ok(new ApiResponseModel
+            {
+                Data = area,
+                Message = "Area is found",
+                Success = true,
+            });
+        }
+        [HttpGet("Active")]
+        public async Task<IActionResult> GetAreaActive()
+        {
+            //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+            //{
+            //    return Unauthorized("You do not have access to this method.");
+            //}
+            var area = await _areaService.ListAreaActive();
+            return Ok(new ApiResponseModel
+            {
+                Data = area,
+                Message = "Area is found",
+                Success = true,
+            });
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateArea([FromBody] Area area)
         {

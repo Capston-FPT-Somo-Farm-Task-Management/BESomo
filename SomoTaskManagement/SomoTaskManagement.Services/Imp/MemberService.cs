@@ -56,7 +56,6 @@ namespace SomoTaskManagement.Services.Imp
         {
             return await _unitOfWork.RepositoryMember.GetSingleByCondition(m => m.Id == memberId);
         }
-
         public async Task<GetMemberModel> GetById(int memberId)
         {
             var member = await _unitOfWork.RepositoryMember.GetSingleByCondition(m => m.Id == memberId);
@@ -95,10 +94,15 @@ namespace SomoTaskManagement.Services.Imp
             return _mapper.Map<IEnumerable<Member>, IEnumerable<MemberModel>>(member);
         }
 
-        public async Task<IEnumerable<Member>> ListSupervisor (int id)
+        public async Task<IEnumerable<MemberModel>> ListSupervisor (int id)
         {
-            var member = await _unitOfWork.RepositoryMember.GetData(expression: m=>m.FarmId == id && m.RoleId == 3, includes: null);
-            return member;
+            var includes = new Expression<Func<Member, object>>[]
+            {
+                t => t.Role,
+                t => t.Farm,
+            };
+            var member = await _unitOfWork.RepositoryMember.GetData(expression: m=>m.FarmId == id && m.RoleId == 3, includes: includes);
+            return _mapper.Map<IEnumerable<Member>, IEnumerable<MemberModel>>(member);
         }
     }
 }

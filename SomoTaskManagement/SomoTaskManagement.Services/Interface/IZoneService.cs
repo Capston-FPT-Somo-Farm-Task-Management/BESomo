@@ -12,12 +12,15 @@ namespace SomoTaskManagement.Services.Interface
     {
         Task AddZone(Zone zone);
         Task DeleteZone(Zone zone);
+        Task<IEnumerable<ZoneModel>> GetAllByArea(int id);
         Task<IEnumerable<ZoneModel>> GetByArea(int id);
         Task<IEnumerable<ZoneModel>> GetByAreaAndLivestock(int id);
         Task<IEnumerable<ZoneModel>> GetByAreaAndPlant(int id);
+        Task<IEnumerable<ZoneModel>> GetByFarmId(int id);
         Task<IEnumerable<ZoneModel>> GetByZoneTypeId(int id);
         Task<Zone> GetZone(int id);
-        Task<IEnumerable<Zone>> ListZone();
+        Task<IEnumerable<ZoneModel>> ListZone();
+        Task<IEnumerable<ZoneModel>> ListZoneActive();
         Task UpdateStatus(int id);
         Task UpdateZone(Zone zone);
     }

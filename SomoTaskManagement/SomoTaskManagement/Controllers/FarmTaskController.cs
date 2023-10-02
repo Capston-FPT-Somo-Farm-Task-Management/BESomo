@@ -37,6 +37,26 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+        [HttpGet("TaskActive/Page({pageIndex})/PageSize({pageSize})")]
+        public async Task<IActionResult> GetListActiveWithPagging(int pageIndex, int pageSize)
+        {
+            try
+            {
+                var area = await _farmTaskService.GetListActiveWithPagging(pageIndex, pageSize);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "List task success",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+
         [HttpGet("TaskActive")]
         public async Task<IActionResult> GetListActive()
         {
@@ -67,6 +87,30 @@ namespace SomoTaskManagement.Api.Controllers
                     return NotFound("Task id must be greater than 0");
                 }
                 var task = await _farmTaskService.Get(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = task,
+                    Message = "Task is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+
+        [HttpGet("Member({id})/TaskDate/{date}")]
+        public async Task<IActionResult> GetTaskByTotalDay(DateTime date, int id)
+        {
+            try
+            {
+                var task = await _farmTaskService.GetTaskByTotalDay(date, id);
+                if (task == null)
+                {
+                    return BadRequest("Not found");
+                }
                 return Ok(new ApiResponseModel
                 {
                     Data = task,
@@ -137,6 +181,35 @@ namespace SomoTaskManagement.Api.Controllers
 
             }
         }
+
+        [HttpGet("TaskActive/Member/{memberId}")]
+        public async Task<IActionResult> GetListActiveByMemberId(int memberId)
+        {
+            try
+            {
+                if (memberId <= 0)
+                {
+                    return NotFound("Member id must be greater than 0 ");
+                }
+                var task = await _farmTaskService.GetListActiveByMemberId(memberId);
+                if (task == null)
+                {
+                    return NotFound("Task not found");
+                }
+                return Ok(new ApiResponseModel
+                {
+                    Data = task,
+                    Message = "List task Active By MemberId success",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create(int memberId, [FromBody] TaskRequestModel taskModel)
         {
@@ -218,33 +291,43 @@ namespace SomoTaskManagement.Api.Controllers
             //{
             //    return Unauthorized("You do not have access to this method.");
             //}
-            var response = new ApiResponseModel();
-            if (ModelState.IsValid)
+            try
             {
-                if (id <= 0)
+                var response = new ApiResponseModel();
+                if (ModelState.IsValid)
                 {
-                    return NotFound("Task id must be greater than 0 ");
-                }
-                await _farmTaskService.UpdateStatus(id, status);
-                var responseData = new ApiResponseModel
-                {
-                    Data = null,
-                    Message = "FarmTask is updated",
-                    Success = true,
-                };
-                return Ok(responseData);
-            }
-            else
-            {
-                var errorMessages = new List<string>();
-                foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    errorMessages.Add(modelError.ErrorMessage);
-                }
+                    if (id <= 0)
+                    {
+                        return NotFound("Task id must be greater than 0 ");
+                    }
+                    //var task = await _farmTaskService.Get(id);
+                    await _farmTaskService.UpdateStatus(id, status);
 
-                response.Message = "Invalid FarmTask data: " + string.Join(" ", errorMessages);
-                return BadRequest(response);
+                    var responseData = new ApiResponseModel
+                    {
+                        Data = null,
+                        Message = "FarmTask is updated",
+                        Success = true,
+                    };
+                    return Ok(responseData);
+                }
+                else
+                {
+                    var errorMessages = new List<string>();
+                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        errorMessages.Add(modelError.ErrorMessage);
+                    }
+
+                    response.Message = "Invalid FarmTask data: " + string.Join(" ", errorMessages);
+                    return BadRequest(response);
+                }
             }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+
         }
     }
 }

@@ -1,0 +1,38 @@
+﻿@model SomoTaskManagement.Domain.Entities.EvidenceImage
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Create</h1>
+
+@using (Html.BeginForm("Create", "Image", FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return validateForm();" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="TaskEvidenceId" class="control-label"></label>
+        <input asp-for="TaskEvidenceId" class="form-control" />
+        <span asp-validation-for="TaskEvidenceId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Name" class="control-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="file">Choose a file:</label>
+        <input type="file" id="fileInput" name="imageFile" accept=".jpg,.jpeg,.png,.gif" />
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Create" class="btn btn-primary" />
+    </div>
+}
+
+

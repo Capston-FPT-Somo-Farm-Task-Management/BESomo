@@ -15,6 +15,6 @@ namespace SomoTaskManagement.Domain.Entities
         public int TaskEvidenceId { set; get; }
 
         [JsonIgnore]
-        public virtual TaskEvidence TaskEvidence { get; set; }
+        public virtual TaskEvidence? TaskEvidence { get; set; }
     }
 }

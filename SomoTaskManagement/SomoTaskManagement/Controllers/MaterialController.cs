@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
 namespace SomoTaskManagement.Api.Controllers
@@ -22,14 +23,37 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                return Ok(await _materialService.ListMaterial());
+                var material = await _materialService.ListMaterial();
+                return Ok(new ApiResponseModel
+                {
+                    Data = material,
+                    Message = "Material is found",
+                    Success = true,
+                });
             }
             catch (Exception e)
             {
                 return BadRequest(e.Message);
             }
         }
-
+        [HttpGet("Active")]
+        public async Task<IActionResult> ListMaterialActive()
+        {
+            try
+            {
+                var material = await _materialService.ListMaterial();
+                return Ok(new ApiResponseModel
+                {
+                    Data = material,
+                    Message = "Material is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -109,6 +133,49 @@ namespace SomoTaskManagement.Api.Controllers
                     {
                         Data = material,
                         Message = "Material is updated",
+                        Success = true,
+                    };
+                    return Ok(responseData);
+                }
+                else
+                {
+                    var errorMessages = new List<string>();
+                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        errorMessages.Add(modelError.ErrorMessage);
+                    }
+
+                    response.Message = "Invalid Material data: " + string.Join(" ", errorMessages);
+                    return BadRequest(response);
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+
+        }
+        [HttpPut("Delete/{id}")]
+        public async Task<IActionResult> UpdateStatus(int id)
+        {
+            //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+            //{
+            //    return Unauthorized("You do not have access to this method.");
+            //}
+            try
+            {
+                var response = new ApiResponseModel();
+                if (ModelState.IsValid)
+                {
+                    if (id <= 0)
+                    {
+                        return NotFound("Material id must be greater than 0 ");
+                    }
+                    await _materialService.DeleteByStatus(id);
+                    var responseData = new ApiResponseModel
+                    {
+                        Data = null,
+                        Message = "Delete success",
                         Success = true,
                     };
                     return Ok(responseData);

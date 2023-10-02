@@ -10,6 +10,6 @@ namespace SomoTaskManagement.Domain.Model
     public class EmployeeRequestModel
     {
         public List<int> TaskTypeId { get; set; }
-        public Employee Employee { get; set; }
+        public EmployeeCreateModel Employee { get; set; }
     }
 }

@@ -47,16 +47,16 @@ namespace SomoTaskManagement.Domain.Entities
         public string Address { set; get; }
         public int RoleId { set; get; }
         public int FarmId { set; get; }
-        //public int HubConnectionId { set; get; }
-        //public int? NotificcationId { set; get; }
+        public int? HubConnectionId { set; get; }
+        public int? NotificcationId { set; get; }
 
         [JsonIgnore]
         public virtual Role? Role { set; get; }
 
         [JsonIgnore]
         public virtual Farm? Farm { set; get; }
-        //public virtual HubConnection? HubConnection { set; get; }
-        //public virtual Notification? Notification { set; get; }
+        public virtual HubConnection? HubConnection { set; get; }
+        public virtual Notification? Notification { set; get; }
         [JsonIgnore]
         public virtual ICollection<FarmTask> Tasks { set; get; }
         [JsonIgnore]

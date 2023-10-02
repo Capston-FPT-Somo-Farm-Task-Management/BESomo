@@ -13,7 +13,8 @@ namespace SomoTaskManagement.Services.Interface
         Task AddTaskType(TaskType taskType);
         Task DeleteTaskType(TaskType taskType);
         Task<TaskType> GetTaskType(int id);
-        Task<IEnumerable<TaskType>> ListTaskType();
+        Task<IEnumerable<TaskTypeModel>> ListTaskType();
+        Task<IEnumerable<TaskTypeModel>> ListTaskTypeActive();
         Task<IEnumerable<TaskTypeModel>> ListTaskTypeLivestock();
         Task<IEnumerable<TaskTypeModel>> ListTaskTypePlant();
         Task UpdateTaskType(TaskType taskType);

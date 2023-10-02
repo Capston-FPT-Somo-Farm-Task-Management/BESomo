@@ -1,4 +1,5 @@
 ﻿using SomoTaskManagement.Domain.Entities;
+using SomoTaskManagement.Domain.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,13 +10,16 @@ namespace SomoTaskManagement.Services.Interface
 {
     public interface IEmployeeService
     {
-        Task AddEmployee(List<int> taskTypeIds, Employee employee);
+        Task AddEmployee(List<int> taskTypeIds, EmployeeCreateModel employee);
         Task DeleteEmployee(Employee employee);
-        Task<IEnumerable<Employee>> GetByTaskType(int id);
-        Task<Employee> GetEmployee(int id);
-        Task<IEnumerable<Employee>> ListByTaskTypeFarm(int taskTypeid, int farmId);
-        Task<IEnumerable<Employee>> ListEmployee();
-        Task<IEnumerable<Employee>> ListEmployeeByFarm(int id);
+        Task<IEnumerable<EmployeeListModel>> GetByTaskType(int id);
+        Task<EmployeeListModel> GetEmployee(int id);
+        Task<IEnumerable<EmployeeListModel>> ListByTaskTypeFarm(int taskTypeid, int farmId);
+        Task<IEnumerable<EmployeeListModel>> ListEmployee();
+        Task<IEnumerable<EmployeeListModel>> ListEmployeeActive();
+        Task<IEnumerable<EmployeeFarmModel>> ListEmployeeByFarm(int id);
+        Task<IEnumerable<string>> ListTaskEmployee(int taskId);
         Task UpdateEmployee(Employee employee);
+        Task UpdateStatus(int id);
     }
 }

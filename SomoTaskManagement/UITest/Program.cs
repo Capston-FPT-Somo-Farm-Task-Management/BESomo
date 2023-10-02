@@ -11,9 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSignalR();
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("MyDB");
-builder.Services.AddDbContext<SomoTaskManagemnetContext>(options => options.UseSqlServer(connectionString), ServiceLifetime.Singleton);
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+//var connectionString = builder.Configuration.GetConnectionString("MyDB");
+//builder.Services.AddDbContext<SomoTaskManagemnetContext>(options => options.UseSqlServer(connectionString), ServiceLifetime.Singleton);
+//builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -48,5 +48,5 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Login}/{action=SignIn}/{id?}");
 
-app.UseSqlTableDependency<SubscribeNotificationTableDependency>(connectionString);
+//app.UseSqlTableDependency<SubscribeNotificationTableDependency>(connectionString);
 app.Run();

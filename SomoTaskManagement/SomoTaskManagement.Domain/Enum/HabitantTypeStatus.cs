@@ -13,8 +13,8 @@ namespace SomoTaskManagement.Domain.Enum
         [Description("Thực vật")]
         Plant = 0,
         [Description("Động vật")]
-        LiveStock = 1
+        LiveStock = 1,
+        [Description("Xóa")]
+        IsDelete = 2
     }
-
-    
 }

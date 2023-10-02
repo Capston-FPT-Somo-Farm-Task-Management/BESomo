@@ -32,40 +32,170 @@ namespace SomoTaskManagement.Services.Imp
         {
             var includes = new Expression<Func<FarmTask, object>>[]
             {
-                t =>t.Member,
+                t => t.Member,
                 t => t.Plant,
                 t => t.LiveStrock,
                 t => t.Field.Zone,
                 t => t.Field.Zone.Area,
                 t => t.Field,
-                t=>t.Other,
-                t=>t.TaskType,
+                t => t.Other,
+                t => t.TaskType,
             };
 
             var farmTasks = await _unitOfWork.RepositoryFarmTask
-                .GetData(expression: null, includes: includes);
+                                        .GetData(expression: null, includes: includes);
 
-            return _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
+            var map = new Dictionary<FarmTask, FarmTaskModel>();
+
+            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
+
+            foreach (var pair in farmTasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
+            {
+                map.Add(pair.ft, pair.ftModel);
+            }
+
+            foreach (var farmTask in farmTasks)
+            {
+                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
+
+                if (member != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].ReceiverName = member.Name;
+                }
+
+                var employeeNames = await ListTaskEmployee(farmTask.Id);
+
+                if (employeeNames != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].EmployeeName = string.Join(", ", employeeNames);
+                }
+            }
+
+            return map.Values;
         }
 
+        public async Task<IEnumerable<string>> ListTaskEmployee(int taskId)
+        {
+            var task = await _unitOfWork.RepositoryFarmTask.GetById(taskId);
+            if (task == null)
+            {
+                throw new Exception("Task not found");
+            }
+            var employee_task = await _unitOfWork.RepositoryEmployee_Task.GetData(expression: e => e.TaskId == task.Id, includes: null);
+            var employeeIds = employee_task.Select(x => x.EmployeeId).ToList();
+            if (employee_task != null)
+            {
+                var employees = await _unitOfWork.RepositoryEmployee.GetData(expression: e => employeeIds.Contains(e.Id));
+
+                return employees.Select(e => e.Name);
+            }
+
+            return null;
+        }
+
+        public async Task<IEnumerable<FarmTaskModel>> GetListActiveWithPagging(int pageIndex, int pageSize)
+        {
+            var includes = new Expression<Func<FarmTask, object>>[]
+            {
+                t => t.Member,
+                t => t.Plant,
+                t => t.LiveStrock,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area,
+                t => t.Field,
+                t => t.Other,
+                t => t.TaskType,
+            };
+
+            int skipCount = (pageIndex - 1) * pageSize;
+
+            var farmTasks = await _unitOfWork.RepositoryFarmTask.GetData(
+                expression: t => t.Status == 0 || t.Status == 1 || t.Status == 2 || t.Status == 3,
+                includes: includes
+            );
+
+            farmTasks = farmTasks.OrderByDescending(t => t.CreateDate)
+                                 .Skip(skipCount)
+                                 .Take(pageSize)
+                                 .ToList();
+
+            var map = new Dictionary<FarmTask, FarmTaskModel>();
+
+            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
+
+            foreach (var pair in farmTasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
+            {
+                map.Add(pair.ft, pair.ftModel);
+            }
+
+            foreach (var farmTask in farmTasks)
+            {
+                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
+
+                if (member != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].ReceiverName = member.Name;
+                }
+
+                var employeeNames = await ListTaskEmployee(farmTask.Id);
+
+                if (employeeNames != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].EmployeeName = string.Join(", ", employeeNames);
+                }
+            }
+
+            return map.Values;
+        }
         public async Task<IEnumerable<FarmTaskModel>> GetListActive()
         {
             var includes = new Expression<Func<FarmTask, object>>[]
             {
-                t =>t.Member,
+                t => t.Member,
                 t => t.Plant,
                 t => t.LiveStrock,
                 t => t.Field.Zone,
                 t => t.Field.Zone.Area,
                 t => t.Field,
-                t=>t.Other,
-                t=>t.TaskType,
+                t => t.Other,
+                t => t.TaskType,
             };
 
-            var farmTasks = await _unitOfWork.RepositoryFarmTask
-                .GetData(expression: t => t.Status == 0 || t.Status == 1 || t.Status == 2 || t.Status == 3, includes: includes);
 
-            return _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
+            var farmTasks = await _unitOfWork.RepositoryFarmTask.GetData(
+                expression: t => t.Status == 0 || t.Status == 1 || t.Status == 2 || t.Status == 3,
+                includes: includes
+            );
+
+            farmTasks = farmTasks.OrderByDescending(t => t.CreateDate).ToList();
+
+            var map = new Dictionary<FarmTask, FarmTaskModel>();
+
+            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
+
+            foreach (var pair in farmTasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
+            {
+                map.Add(pair.ft, pair.ftModel);
+            }
+
+            foreach (var farmTask in farmTasks)
+            {
+                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
+
+                if (member != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].ReceiverName = member.Name;
+                }
+
+                var employeeNames = await ListTaskEmployee(farmTask.Id);
+
+                if (employeeNames != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].EmployeeName = string.Join(", ", employeeNames);
+                }
+            }
+
+            return map.Values;
         }
 
         public async Task<FarmTaskModel> Get(int id)
@@ -78,6 +208,7 @@ namespace SomoTaskManagement.Services.Imp
             }
 
             var member = await _unitOfWork.RepositoryMember.GetById(farmTask.MemberId);
+            var receiver = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
             var plant = await _unitOfWork.RepositoryPlant.GetById(farmTask.PlantId);
             var liveStock = await _unitOfWork.RepositoryLiveStock.GetById(farmTask.LiveStockId);
             var field = await _unitOfWork.RepositoryField.GetById(farmTask.FieldId);
@@ -93,6 +224,9 @@ namespace SomoTaskManagement.Services.Imp
             var priority = (PriorityEnum)farmTask.Priority;
             var priorityString = GetPriorityDescription(priority);
 
+            var employeeNames = await ListTaskEmployee(farmTask.Id);
+
+            var employeeNamesString = String.Join(", ", employeeNames);
             var farmTaskModel = new FarmTaskModel
             {
                 Id = farmTask.Id,
@@ -103,7 +237,7 @@ namespace SomoTaskManagement.Services.Imp
                 Priority = priorityString,
                 Repeat = farmTask.Repeat,
                 Iterations = farmTask.Iterations,
-                ReceiverName = member != null ? member.Name : null,
+                ReceiverName = receiver != null ? receiver.Name : null,
                 MemberName = member != null ? member.Name : null,
                 PlantName = plant != null ? plant.Name : null,
                 liveStockName = liveStock != null ? liveStock.Name : null,
@@ -115,7 +249,8 @@ namespace SomoTaskManagement.Services.Imp
                 Status = statusString,
                 ZoneName = zone.Name,
                 AreaName = area.Name,
-                ExternalId = liveStock != null ? liveStock.ExternalId : null
+                ExternalId = liveStock != null ? liveStock.ExternalId : null,
+                EmployeeName = employeeNamesString
             };
 
             return farmTaskModel;
@@ -146,43 +281,222 @@ namespace SomoTaskManagement.Services.Imp
         {
             var includes = new Expression<Func<FarmTask, object>>[]
             {
-                t =>t.Member,
-                t => t.Plant,
-                t => t.LiveStrock,
-                t => t.Field,
-                t=>t.Other,
-                t=>t.TaskType,
-            };
-
-            var farmTasks = await _unitOfWork.RepositoryFarmTask
-                .GetData(expression: task => task.StartDate.Date == date.Date || task.EndDate.Date == date.Date || task.CreateDate.Date == date.Date,
-                        includes: includes
-                        );
-            return _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
-        }
-
-        public async Task<IEnumerable<FarmTaskModel>> GetTaskByMemberId(int id)
-        {
-            var includes = new Expression<Func<FarmTask, object>>[]
-            {
-                t =>t.Member,
+                t => t.Member,
                 t => t.Plant,
                 t => t.LiveStrock,
                 t => t.Field.Zone,
                 t => t.Field.Zone.Area,
                 t => t.Field,
-                t=>t.Other,
-                t=>t.TaskType,
+                t => t.Other,
+                t => t.TaskType,
             };
 
             var farmTasks = await _unitOfWork.RepositoryFarmTask
-                .GetData(expression: t => t.MemberId == id, includes: includes);
+                    .GetData(expression: task => task.StartDate.Date == date.Date || task.EndDate.Date == date.Date || task.CreateDate.Date == date.Date
+                     && task.Status == 0 || task.Status == 1 || task.Status == 2 || task.Status == 3,
+                     includes: includes
+                     );
+            farmTasks = farmTasks.OrderByDescending(t => t.Status)
+                     .ThenByDescending(t => t.Priority)
+                     .ToList();
 
-            return _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
+            var map = new Dictionary<FarmTask, FarmTaskModel>();
 
+            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
 
+            foreach (var pair in farmTasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
+            {
+                map.Add(pair.ft, pair.ftModel);
+            }
+
+            foreach (var farmTask in farmTasks)
+            {
+                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
+
+                if (member != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].ReceiverName = member.Name;
+                }
+
+                var employeeNames = await ListTaskEmployee(farmTask.Id);
+
+                if (employeeNames != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].EmployeeName = string.Join(", ", employeeNames);
+                }
+            }
+
+            return map.Values;
         }
 
+        public async Task<IEnumerable<FarmTaskModel>> GetTaskByTotalDay(DateTime date, int id)
+        {
+
+            var includes = new Expression<Func<FarmTask, object>>[]
+            {
+                t => t.Member,
+                t => t.Plant,
+                t => t.LiveStrock,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area,
+                t => t.Field,
+                t => t.Other,
+                t => t.TaskType,
+            };
+
+            var farmTasks = await _unitOfWork.RepositoryFarmTask.GetData(
+                   expression:
+                     t =>
+                          date.Year >= t.StartDate.Year &&
+                          date.Year <= t.EndDate.Year &&
+
+                          date.Month >= t.StartDate.Month &&
+                          date.Month <= t.EndDate.Month &&
+
+                          date.Day >= t.StartDate.Day &&
+                          date.Day <= t.EndDate.Day &&
+
+                          t.MemberId == id &&
+                          (t.Status == 0 ||
+                           t.Status == 1 ||
+                           t.Status == 2 ||
+                           t.Status == 3),
+
+                   includes: includes
+
+                 );
+            farmTasks = farmTasks.OrderByDescending(t => t.Status)
+                     .ThenByDescending(t => t.Priority)
+                     .ToList();
+
+            var map = new Dictionary<FarmTask, FarmTaskModel>();
+
+            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
+
+            foreach (var pair in farmTasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
+            {
+                map.Add(pair.ft, pair.ftModel);
+            }
+
+            foreach (var farmTask in farmTasks)
+            {
+                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
+
+                if (member != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].ReceiverName = member.Name;
+                }
+
+                var employeeNames = await ListTaskEmployee(farmTask.Id);
+
+                if (employeeNames != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].EmployeeName = string.Join(", ", employeeNames);
+                }
+            }
+
+            return map.Values;
+        }
+
+
+        public async Task<IEnumerable<FarmTaskModel>> GetTaskByMemberId(int id)
+        {
+            var includes = new Expression<Func<FarmTask, object>>[]
+           {
+                t => t.Member,
+                t => t.Plant,
+                t => t.LiveStrock,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area,
+                t => t.Field,
+                t => t.Other,
+                t => t.TaskType,
+           };
+
+            var farmTasks = await _unitOfWork.RepositoryFarmTask
+                    .GetData(expression: t => t.MemberId == id, includes: includes);
+            farmTasks = farmTasks.OrderByDescending(t => t.Status)
+                     .ThenByDescending(t => t.Priority)
+                     .ToList();
+
+            var map = new Dictionary<FarmTask, FarmTaskModel>();
+
+            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
+
+            foreach (var pair in farmTasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
+            {
+                map.Add(pair.ft, pair.ftModel);
+            }
+
+            foreach (var farmTask in farmTasks)
+            {
+                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
+
+                if (member != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].ReceiverName = member.Name;
+                }
+
+                var employeeNames = await ListTaskEmployee(farmTask.Id);
+
+                if (employeeNames != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].EmployeeName = string.Join(", ", employeeNames);
+                }
+            }
+
+            return map.Values;
+        }
+
+
+        public async Task<IEnumerable<FarmTaskModel>> GetListActiveByMemberId(int id)
+        {
+            var includes = new Expression<Func<FarmTask, object>>[]
+           {
+                t => t.Member,
+                t => t.Plant,
+                t => t.LiveStrock,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area,
+                t => t.Field,
+                t => t.Other,
+                t => t.TaskType,
+           };
+
+            var farmTasks = await _unitOfWork.RepositoryFarmTask
+                .GetData(expression: t => t.MemberId == id && t.Status == 0 || t.Status == 1 || t.Status == 2 || t.Status == 3, includes: includes);
+            farmTasks = farmTasks.OrderByDescending(t => t.Status)
+                     .ThenByDescending(t => t.Priority)
+                     .ToList();
+
+            var map = new Dictionary<FarmTask, FarmTaskModel>();
+
+            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
+
+            foreach (var pair in farmTasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
+            {
+                map.Add(pair.ft, pair.ftModel);
+            }
+
+            foreach (var farmTask in farmTasks)
+            {
+                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
+
+                if (member != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].ReceiverName = member.Name;
+                }
+
+                var employeeNames = await ListTaskEmployee(farmTask.Id);
+
+                if (employeeNames != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].EmployeeName = string.Join(", ", employeeNames);
+                }
+            }
+
+            return map.Values;
+        }
         public async Task Add(int memberId, TaskCreateUpdateModel farmTaskmodel, List<int> employeeIds, List<int> materialIds)
         {
             var member = await _unitOfWork.RepositoryMember.GetById(memberId) ?? throw new Exception("Member not found");
@@ -190,34 +504,35 @@ namespace SomoTaskManagement.Services.Imp
             int totalDays = (farmTaskmodel.EndDate - farmTaskmodel.StartDate).Days;
 
             int currentDayIndex = 0;
-            while (currentDayIndex <= totalDays)
-            {
-                var currentDay = farmTaskmodel.StartDate.AddDays(currentDayIndex);
+            //while (currentDayIndex <= totalDays)
+            //{
+            var currentDay = farmTaskmodel.StartDate.AddDays(currentDayIndex);
 
-                switch (farmTaskmodel.Repeat)
-                {
-                    case "Hằng tuần":
-                        DateTime nextWeek = farmTaskmodel.StartDate.AddDays(7 * farmTaskmodel.Iterations);
-                        currentDay = currentDay >= nextWeek ? nextWeek : currentDay;
-                        break;
+            //    switch (farmTaskmodel.Repeat)
+            //    {
+            //        case "Hằng tuần":
+            //            DateTime nextWeek = farmTaskmodel.StartDate.AddDays(7 * farmTaskmodel.Iterations);
+            //            currentDay = currentDay >= nextWeek ? nextWeek : currentDay;
+            //            break;
 
-                    case "Hằng tháng":
-                        DateTime nextMonth = farmTaskmodel.StartDate.AddMonths(1 * farmTaskmodel.Iterations);
-                        currentDay = currentDay >= nextMonth ? nextMonth : currentDay;
-                        break;
+            //        case "Hằng tháng":
+            //            DateTime nextMonth = farmTaskmodel.StartDate.AddMonths(1 * farmTaskmodel.Iterations);
+            //            currentDay = currentDay >= nextMonth ? nextMonth : currentDay;
+            //            break;
 
-                    case "Hằng ngày":
-                        currentDay = currentDay.AddDays(1 * farmTaskmodel.Iterations);
-                        break;
-                    case "Không":
-                        currentDay = farmTaskmodel.StartDate;
-                        break;
-                    default:
-                        break;
-                }
+            //        case "Hằng ngày":
+            //            currentDay = currentDay.AddDays(1 * farmTaskmodel.Iterations);
+            //            break;
+            //        case "Không":
+            //            currentDay = farmTaskmodel.StartDate;
+            //            break;
+            //        default:
+            //            break;
+            //    }
 
 
-                var farmTaskNew = new FarmTask
+
+            var farmTaskNew = new FarmTask
                 {
                     CreateDate = DateTime.Now,
                     StartDate = currentDay,
@@ -232,7 +547,7 @@ namespace SomoTaskManagement.Services.Imp
                     PlantId = farmTaskmodel.PlantId == 0 ? (int?)null : farmTaskmodel.PlantId,
                     LiveStockId = farmTaskmodel.LiveStockId == 0 ? (int?)null : farmTaskmodel.LiveStockId,
                     Name = farmTaskmodel.Name,
-                    Status = 0,
+                    Status = 1,
                     Repeat = farmTaskmodel.Repeat,
                     Iterations = farmTaskmodel.Iterations,
                     Remind = farmTaskmodel.Remind
@@ -287,7 +602,7 @@ namespace SomoTaskManagement.Services.Imp
 
                 await _unitOfWork.RepositoryFarmTask.Add(farmTaskNew);
                 await _unitOfWork.RepositoryFarmTask.Commit();
-            }
+            //}
         }
 
         public PriorityEnum ParsePriorityFromString(string priorityString)
@@ -391,12 +706,17 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task UpdateStatus(int id, int status)
         {
-            var task = await _unitOfWork.RepositoryFarmTask.GetSingleByCondition(f => f.Id == id);
-            if (task != null)
+            var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
+            if (task == null)
             {
-                task.Status = status;
-                await _unitOfWork.RepositoryFarmTask.Commit();
+                throw new Exception("Task not found");
             }
+            if (status < 0 || status > 4)
+            {
+                throw new Exception("Status must be between 0 - 4");
+            }
+            task.Status = status;
+            await _unitOfWork.RepositoryFarmTask.Commit();
         }
 
         public async Task Delete(FarmTask farmTask)

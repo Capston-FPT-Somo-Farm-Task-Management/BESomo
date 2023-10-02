@@ -9,10 +9,10 @@ namespace SomoTaskManagement.Domain.Entities
 {
     public class Notification
     {
-        //public Notification()
-        //{
-        //    Members = new HashSet<Member>();
-        //}
+        public Notification()
+        {
+            Members = new HashSet<Member>();
+        }
 
         [Key]
         public int Id { get; set; }
@@ -20,6 +20,6 @@ namespace SomoTaskManagement.Domain.Entities
         public string MessageType { get; set; } = null!;
         public DateTime NotificationDateTime { get; set; }
 
-        //public virtual ICollection<Member> Members { get; set; }
+        public virtual ICollection<Member> Members { get; set; }
     }
 }

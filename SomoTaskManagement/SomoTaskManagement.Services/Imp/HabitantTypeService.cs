@@ -44,7 +44,6 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task AddHabitantType(HabitantType habitantType)
         {
-            habitantType.Status = 1;
             await _unitOfWork.RepositoryHabitantType.Add(habitantType);
             await _unitOfWork.RepositoryHabitantType.Commit();
         }

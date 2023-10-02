@@ -12,10 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.OperationFilter<FileUploadOperationFilter>();
-});
+
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -45,16 +42,18 @@ builder.Services.RegisterTokenBear(builder.Configuration);
 builder.Services.AddAuthorization();
 builder.Services.AddSignalR();
 
+string policyName = "Policy";
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
-    {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
+    options.AddPolicy(name: policyName,
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:3000", "https://localhost:7095")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
 });
-
 builder.Services.AddAutoMapper(typeof(MapperApplication));
 var app = builder.Build();
 
@@ -64,8 +63,10 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 app.UseSwaggerUI();
+
 app.UseSwagger();
 
+app.UseCors(policyName);
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

@@ -12,8 +12,8 @@ namespace SomoTaskManagement.Domain.Entities
         [Key]
         public int Id { get; set; }
         public string ConnectionId { get; set; } = null!;
-        public int  MemberId { get; set; } 
+        public int  MemberId { get; set; }
 
-        //public virtual Member? Member { set; get; }
+        public virtual Member? Member { set; get; }
     }
 }

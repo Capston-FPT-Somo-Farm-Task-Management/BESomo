@@ -48,6 +48,25 @@ namespace SomoTaskManagement.Api.Controllers
 
             }
         }
+        [HttpGet("Active")]
+        public async Task<IActionResult> ListTaskTypeActive()
+        {
+            try
+            {
+                var members = await _taskTypeService.ListTaskTypeActive();
+                return Ok(new ApiResponseModel
+                {
+                    Data = members,
+                    Message = "List task type of plant ",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
 
         [HttpGet("ListTaskTypeLivestock")]
         public async Task<IActionResult> ListTaskTypeLivestock()

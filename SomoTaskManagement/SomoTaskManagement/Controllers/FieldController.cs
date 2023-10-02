@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
 namespace SomoTaskManagement.Api.Controllers
@@ -39,11 +40,57 @@ namespace SomoTaskManagement.Api.Controllers
                 {
                     return NotFound("Field id nmust be greater than 0");
                 }
-                var area = await _fieldService.GetZoneField(id);
+                var field = await _fieldService.GetZoneField(id);
                 return Ok(new ApiResponseModel
                 {
-                    Data = area,
-                    Message = "Area is found",
+                    Data = field,
+                    Message = "Field is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+        [HttpGet("Plant/Farm({id})")]
+        public async Task<IActionResult> GetPlantFieldByFarm(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return NotFound("Farm id nmust be greater than 0");
+                }
+                var field = await _fieldService.GetPlantFieldByFarm(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = field,
+                    Message = "Field is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+        [HttpGet("Livestock/Farm({id})")]
+        public async Task<IActionResult> GetLivestockFieldByFarm(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return NotFound("Farm id nmust be greater than 0");
+                }
+                var field = await _fieldService.GetLivestockFieldByFarm(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = field,
+                    Message = "Field is found",
                     Success = true,
                 });
             }
@@ -54,7 +101,70 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpGet("Zone({id})")]
+        [HttpGet("Active")]
+        public async Task<IActionResult> GetActive()
+        {
+            try
+            {
+                var field = await _fieldService.ListFieldActive();
+                return Ok(new ApiResponseModel
+                {
+                    Data = field,
+                    Message = "Field is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+        [HttpPut("Delete/{id}")]
+        public async Task<IActionResult> UpdateStatus(int id)
+        {
+            //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+            //{
+            //    return Unauthorized("You do not have access to this method.");
+            //}
+            try
+            {
+                var response = new ApiResponseModel();
+                if (ModelState.IsValid)
+                {
+                    if (id <= 0)
+                    {
+                        return NotFound("Field id must be greater than 0 ");
+                    }
+                    await _fieldService.DeleteFieldByStatus(id);
+                    var responseData = new ApiResponseModel
+                    {
+                        Data = null,
+                        Message = "Delete success",
+                        Success = true,
+                    };
+                    return Ok(responseData);
+                }
+                else
+                {
+                    var errorMessages = new List<string>();
+                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        errorMessages.Add(modelError.ErrorMessage);
+                    }
+
+                    response.Message = "Invalid Field data: " + string.Join(" ", errorMessages);
+                    return BadRequest(response);
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+
+        }
+
+        [HttpGet("Active/Zone({id})")]
         public async Task<IActionResult> GetByZone(int id)
         {
             try
@@ -78,6 +188,68 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+        [HttpGet("Zone({id})")]
+        public async Task<IActionResult> GetAllByZone(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return NotFound("Zone id nmust be greater than 0");
+                }
+                var area = await _fieldService.GetAllByZone(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Field is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+        [HttpGet("Plant")]
+        public async Task<IActionResult> ListFieldPlant()
+        {
+            try
+            {
+                var area = await _fieldService.ListFieldPlant();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Field is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+
+        [HttpGet("Livestock")]
+        public async Task<IActionResult> ListFieldLivestock()
+        {
+            try
+            {
+                var area = await _fieldService.ListFieldLivestock();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Field is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
 
         [HttpGet("AreaZoneByField({id})")]
         public async Task<IActionResult> GetAreaZoneByField(int id)

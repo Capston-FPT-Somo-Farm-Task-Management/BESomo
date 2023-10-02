@@ -15,7 +15,5 @@ namespace SomoTaskManagement.Notify.MiddlewareExtensions
             var service = serviceProvider.GetService<T>();
             service?.SubscribeTableDependency(connectionString);
         }
-
-
     }
 }

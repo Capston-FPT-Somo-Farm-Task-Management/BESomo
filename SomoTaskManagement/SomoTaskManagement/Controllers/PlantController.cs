@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
 namespace SomoTaskManagement.Api.Controllers
@@ -53,8 +54,49 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+        [HttpGet("Farm({id})")]
+        public async Task<IActionResult> GetPlantFarm(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return BadRequest("Plant id must be greater than 0");
+                }
+                var area = await _plantService.GetPlantFarm(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Plant is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("Active")]
+        public async Task<IActionResult> GetListActive()
+        {
+            try
+            {
+                var area = await _plantService.GetListActive();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Plant is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Plant plant)
+        public async Task<IActionResult> Create([FromBody] PlantCreateModel plant)
         {
             try
             {
@@ -154,39 +196,46 @@ namespace SomoTaskManagement.Api.Controllers
 
         }
 
-        [HttpPut("ChangeStatus/{id}")]
+        [HttpPut("Delete/{id}")]
         public async Task<IActionResult> UpdateStatus(int id)
         {
             //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
             //{
             //    return Unauthorized("You do not have access to this method.");
             //}
-            var response = new ApiResponseModel();
-            if (ModelState.IsValid)
+            try
             {
-                if (id <= 0)
+                var response = new ApiResponseModel();
+                if (ModelState.IsValid)
                 {
-                    return NotFound("Plant id must be greater than 0 ");
+                    if (id <= 0)
+                    {
+                        return NotFound("Plant id must be greater than 0 ");
+                    }
+                    await _plantService.UpdateStatus(id);
+                    var responseData = new ApiResponseModel
+                    {
+                        Data = null,
+                        Message = "Status plant is updated",
+                        Success = true,
+                    };
+                    return Ok(responseData);
                 }
-                await _plantService.UpdateStatus(id);
-                var responseData = new ApiResponseModel
+                else
                 {
-                    Data = null,
-                    Message = "Status plant is updated",
-                    Success = true,
-                };
-                return Ok(responseData);
-            }
-            else
-            {
-                var errorMessages = new List<string>();
-                foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    errorMessages.Add(modelError.ErrorMessage);
-                }
+                    var errorMessages = new List<string>();
+                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        errorMessages.Add(modelError.ErrorMessage);
+                    }
 
-                response.Message = "Invalid FarmTask data: " + string.Join(" ", errorMessages);
-                return BadRequest(response);
+                    response.Message = "Invalid FarmTask data: " + string.Join(" ", errorMessages);
+                    return BadRequest(response);
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
             }
         }
 

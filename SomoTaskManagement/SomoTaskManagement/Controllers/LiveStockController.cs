@@ -52,7 +52,47 @@ namespace SomoTaskManagement.Api.Controllers
                 return BadRequest(e.Message);
             }
         }
+        [HttpGet("Farm({id})")]
+        public async Task<IActionResult> GetLiveStockFarm(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return BadRequest("Livestock id must be greater than 0");
+                }
+                var area = await _liveStockService.GetLiveStockFarm(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Habitant is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
+        [HttpGet("Active")]
+        public async Task<IActionResult> GetListActive()
+        {
+            try
+            {
+                var area = await _liveStockService.GetListActive();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Habitant is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
         [HttpGet("ExternalId/Field({id})")]
         public async Task<IActionResult> GetExternalId(int id)
         {
@@ -77,7 +117,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] LiveStock liveStock)
+        public async Task<IActionResult> Create([FromBody] LivestockCreateModel liveStock)
         {
             try
             {
@@ -160,40 +200,48 @@ namespace SomoTaskManagement.Api.Controllers
 
         }
 
-        [HttpPut("ChangeStatus/{id}")]
+        [HttpPut("Delete/{id}")]
         public async Task<IActionResult> UpdateStatus(int id)
         {
             //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
             //{
             //    return Unauthorized("You do not have access to this method.");
             //}
-            var response = new ApiResponseModel();
-            if (ModelState.IsValid)
+            try
             {
-                if (id <= 0)
+                var response = new ApiResponseModel();
+                if (ModelState.IsValid)
                 {
-                    return NotFound("Livestock id must be greater than 0 ");
+                    if (id <= 0)
+                    {
+                        return NotFound("Livestock id must be greater than 0 ");
+                    }
+                    await _liveStockService.UpdateStatus(id);
+                    var responseData = new ApiResponseModel
+                    {
+                        Data = null,
+                        Message = "Status livestock is updated",
+                        Success = true,
+                    };
+                    return Ok(responseData);
                 }
-                await _liveStockService.UpdateStatus(id);
-                var responseData = new ApiResponseModel
+                else
                 {
-                    Data = null,
-                    Message = "Status livestock is updated",
-                    Success = true,
-                };
-                return Ok(responseData);
-            }
-            else
-            {
-                var errorMessages = new List<string>();
-                foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    errorMessages.Add(modelError.ErrorMessage);
-                }
+                    var errorMessages = new List<string>();
+                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        errorMessages.Add(modelError.ErrorMessage);
+                    }
 
-                response.Message = "Invalid liveStock data: " + string.Join(" ", errorMessages);
-                return BadRequest(response);
+                    response.Message = "Invalid liveStock data: " + string.Join(" ", errorMessages);
+                    return BadRequest(response);
+                }
             }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+
         }
     }
 }

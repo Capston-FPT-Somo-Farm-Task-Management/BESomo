@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\SomoTaskManagement.Infrastructure.csproj": {}
+    "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\SomoTaskManagement.Infrastructure.csproj": {}
   },
   "projects": {
-    "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj": {
+    "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj",
         "projectName": "SomoTaskManagement.Authentication",
-        "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj",
-        "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Authentication\\obj\\",
+        "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Authentication\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\DELL\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -33,11 +33,11 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj": {
-                "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj"
+              "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj"
               },
-              "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj": {
-                "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj"
+              "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj"
               }
             }
           }
@@ -77,24 +77,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.408\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj": {
+    "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj",
         "projectName": "SomoTaskManagement.Data",
-        "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj",
-        "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\obj\\",
+        "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\DELL\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -110,8 +110,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj": {
-                "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj"
+              "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj"
               }
             }
           }
@@ -167,24 +167,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.408\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj": {
+    "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj",
         "projectName": "SomoTaskManagement.Domain",
-        "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj",
-        "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\obj\\",
+        "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\SomoTaskManagement.Domain.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\DELL\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -211,6 +211,16 @@
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Http.Features": {
+              "target": "Package",
+              "version": "[5.0.17, )"
+            },
+            "Microsoft.AspNetCore.Mvc.Core": {
+              "target": "Package",
+              "version": "[2.2.5, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -227,24 +237,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.408\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\SomoTaskManagement.Infrastructure.csproj": {
+    "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\SomoTaskManagement.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\SomoTaskManagement.Infrastructure.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\SomoTaskManagement.Infrastructure.csproj",
         "projectName": "SomoTaskManagement.Infrastructure",
-        "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\SomoTaskManagement.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\obj\\",
+        "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\SomoTaskManagement.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\DELL\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -260,14 +270,14 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj": {
-                "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj"
+              "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Authentication\\SomoTaskManagement.Authentication.csproj"
               },
-              "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj": {
-                "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj"
+              "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj"
               },
-              "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj": {
-                "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj"
+              "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj"
               }
             }
           }
@@ -311,24 +321,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.408\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj": {
+    "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj",
         "projectName": "SomoTaskManagement.Notify",
-        "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj",
-        "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Notification\\obj\\",
+        "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Notification\\SomoTaskManagement.Notify.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Notification\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\DELL\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -344,11 +354,11 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj": {
-                "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj"
+              "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj"
               },
-              "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj": {
-                "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj"
+              "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj"
               }
             }
           }
@@ -392,24 +402,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.408\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj": {
+    "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj",
         "projectName": "SomoTaskManagement.Services",
-        "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj",
-        "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\obj\\",
+        "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\SomoTaskManagement.Services.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Services\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\DELL\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -425,8 +435,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj": {
-                "projectPath": "E:\\Capstone\\BE\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj"
+              "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj": {
+                "projectPath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Data\\SomoTaskManagement.Data.csproj"
               }
             }
           }
@@ -466,7 +476,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.408\\RuntimeIdentifierGraph.json"
         }
       }
     }

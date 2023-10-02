@@ -1,10 +1,13 @@
-﻿using SomoTaskManagement.Data;
+﻿using AutoMapper;
+using SomoTaskManagement.Data;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
+using SomoTaskManagement.Domain.Model;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,20 +16,55 @@ namespace SomoTaskManagement.Services.Imp
     public class AreaService : IAreaService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public AreaService(IUnitOfWork unitOfWork)
+        public AreaService(IUnitOfWork unitOfWork,IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
-        public Task<IEnumerable<Area>> ListArea()
+        public async Task<IEnumerable<AreaModel>> ListArea()
         {
-            return _unitOfWork.RepositoryArea.GetData(null);
+            var includes = new Expression<Func<Area, object>>[]
+               {
+                    t => t.Farm,
+               };
+            var areas = await _unitOfWork.RepositoryArea.GetData(expression: null, includes: includes);
+            areas = areas.OrderBy(x => x.Name).ToList();
+            return _mapper.Map<IEnumerable<Area>, IEnumerable<AreaModel>>(areas);
+        }
+        public async Task<IEnumerable<AreaModel>> ListAreaActive()
+        {
+            var includes = new Expression<Func<Area, object>>[]
+               {
+                    t => t.Farm,
+               };
+            var areas = await _unitOfWork.RepositoryArea.GetData(expression: a=>a.Status == 1, includes: includes);
+            areas = areas.OrderBy(x => x.Name).ToList();
+            return _mapper.Map<IEnumerable<Area>, IEnumerable<AreaModel>>(areas);
         }
 
-        public Task<Area> GetAreaByFarmId(int id)
+        public async Task<IEnumerable<AreaModel>> GetAreaByFarmId(int id)
         {
-            return _unitOfWork.RepositoryArea.GetSingleByCondition(a => a.FarmId == id);
+            var includes = new Expression<Func<Area, object>>[]
+              {
+                    t => t.Farm,
+              };
+            var areas = await _unitOfWork.RepositoryArea.GetData(expression: a => a.FarmId == id && a.Status == 1, includes: includes);
+            areas = areas.OrderBy(x => x.Name).ToList();
+            return _mapper.Map<IEnumerable<Area>, IEnumerable<AreaModel>>(areas);
+        }
+
+        public async Task<IEnumerable<AreaModel>> GetAllAreaByFarmId(int id)
+        {
+            var includes = new Expression<Func<Area, object>>[]
+              {
+                    t => t.Farm,
+              };
+            var areas = await _unitOfWork.RepositoryArea.GetData(expression: a => a.FarmId == id, includes: includes);
+            areas = areas.OrderBy(x => x.Name).ToList();
+            return _mapper.Map<IEnumerable<Area>, IEnumerable<AreaModel>>(areas);
         }
 
         public Task<Area> GetArea(int id)
@@ -40,6 +78,17 @@ namespace SomoTaskManagement.Services.Imp
                 .GetData(expression: f => f.FarmId == id, includes: null);
 
             return area;
+        }
+
+        public async Task DeleteByStatus(int id)
+        {
+            var area = await _unitOfWork.RepositoryArea.GetById(id);
+            if (area == null)
+            {
+                throw new Exception("Area not found");
+            }
+            area.Status = area.Status == 1 ? 0 : 1;
+            await _unitOfWork.RepositoryLiveStock.Commit();
         }
 
         public async Task AddArea(Area area)

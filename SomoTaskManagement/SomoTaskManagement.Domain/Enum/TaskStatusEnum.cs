@@ -9,17 +9,18 @@ namespace SomoTaskManagement.Domain.Enum
 {
     public enum TaskStatusEnum
     {
-        [Description("Không hoàn thành")]
-        Unfinished = 0,
 
         [Description("Chuẩn bị")]
-        Prepare = 1,
+        Prepare = 0,
 
         [Description("Đang thực hiện")]
-        Processing = 2,
+        Processing = 1,
 
         [Description("Hoàn thành")]
-        Complete = 3,
+        Complete = 2,
+
+        [Description("Không hoàn thành")]
+        Unfinished = 3,
 
         [Description("Đã xóa")]
         IsDelete = 4,

@@ -449,10 +449,16 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<int>("FarmId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("HubConnectionId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("NotificcationId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -476,6 +482,12 @@ namespace SomoTaskManagement.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FarmId");
+
+                    b.HasIndex("HubConnectionId")
+                        .IsUnique()
+                        .HasFilter("[HubConnectionId] IS NOT NULL");
+
+                    b.HasIndex("NotificcationId");
 
                     b.HasIndex("RoleId");
 
@@ -950,6 +962,15 @@ namespace SomoTaskManagement.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_Farms_Member");
 
+                    b.HasOne("SomoTaskManagement.Domain.Entities.HubConnection", "HubConnection")
+                        .WithOne("Member")
+                        .HasForeignKey("SomoTaskManagement.Domain.Entities.Member", "HubConnectionId");
+
+                    b.HasOne("SomoTaskManagement.Domain.Entities.Notification", "Notification")
+                        .WithMany("Members")
+                        .HasForeignKey("NotificcationId")
+                        .HasConstraintName("FK_Notification_Member");
+
                     b.HasOne("SomoTaskManagement.Domain.Entities.Role", "Role")
                         .WithMany("Members")
                         .HasForeignKey("RoleId")
@@ -958,6 +979,10 @@ namespace SomoTaskManagement.Data.Migrations
                         .HasConstraintName("FK_Role_Member");
 
                     b.Navigation("Farm");
+
+                    b.Navigation("HubConnection");
+
+                    b.Navigation("Notification");
 
                     b.Navigation("Role");
                 });
@@ -1074,6 +1099,11 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Navigation("Plants");
                 });
 
+            modelBuilder.Entity("SomoTaskManagement.Domain.Entities.HubConnection", b =>
+                {
+                    b.Navigation("Member");
+                });
+
             modelBuilder.Entity("SomoTaskManagement.Domain.Entities.LiveStock", b =>
                 {
                     b.Navigation("Tasks");
@@ -1089,6 +1119,11 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Navigation("MemberTokens");
 
                     b.Navigation("Tasks");
+                });
+
+            modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Notification", b =>
+                {
+                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Other", b =>

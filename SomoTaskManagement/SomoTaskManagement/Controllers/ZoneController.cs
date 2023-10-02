@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
 namespace SomoTaskManagement.Api.Controllers
@@ -30,6 +31,24 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+        [HttpGet("Active")]
+        public async Task<IActionResult> ListZoneActive()
+        {
+            try
+            {
+                var zones =  Ok(await _zoneService.ListZoneActive());
+                return Ok(new ApiResponseModel
+                {
+                    Data = zones,
+                    Message = "Zone is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -39,7 +58,31 @@ namespace SomoTaskManagement.Api.Controllers
                 {
                     return NotFound("Zone is not found");
                 }
-                var area = await _zoneService.GetZone(id);
+                var zone = await _zoneService.GetZone(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = zone,
+                    Message = "Zone is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+
+        [HttpGet("Active/Area({id})")]
+        public async Task<IActionResult> GetByArea(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return NotFound("Zone id must be greater than 0");
+                }
+                var area = await _zoneService.GetByArea(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
@@ -53,9 +96,8 @@ namespace SomoTaskManagement.Api.Controllers
 
             }
         }
-
         [HttpGet("Area({id})")]
-        public async Task<IActionResult> GetByArea(int id)
+        public async Task<IActionResult> GetAllByArea(int id)
         {
             try
             {
@@ -63,7 +105,30 @@ namespace SomoTaskManagement.Api.Controllers
                 {
                     return NotFound("Zone id must be greater than 0");
                 }
-                var area = await _zoneService.GetByArea(id);
+                var area = await _zoneService.GetAllByArea(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Zone is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+        [HttpGet("Farm({id})")]
+        public async Task<IActionResult> GetByFarm(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return NotFound("Zone id must be greater than 0");
+                }
+                var area = await _zoneService.GetByFarmId(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
@@ -250,40 +315,48 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpPut("ChangeStatus/{id}")]
+        [HttpPut("Delete/{id}")]
         public async Task<IActionResult> UpdateStatus(int id)
         {
             //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
             //{
             //    return Unauthorized("You do not have access to this method.");
             //}
-            var response = new ApiResponseModel();
-            if (ModelState.IsValid)
+            try
             {
-                if (id <= 0)
+                var response = new ApiResponseModel();
+                if (ModelState.IsValid)
                 {
-                    return NotFound("Zone id must be greater than 0 ");
+                    if (id <= 0)
+                    {
+                        return NotFound("Zone id must be greater than 0 ");
+                    }
+                    await _zoneService.UpdateStatus(id);
+                    var responseData = new ApiResponseModel
+                    {
+                        Data = null,
+                        Message = "Delete success",
+                        Success = true,
+                    };
+                    return Ok(responseData);
                 }
-                await _zoneService.UpdateStatus(id);
-                var responseData = new ApiResponseModel
+                else
                 {
-                    Data = null,
-                    Message = "Status livestock is updated",
-                    Success = true,
-                };
-                return Ok(responseData);
-            }
-            else
-            {
-                var errorMessages = new List<string>();
-                foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    errorMessages.Add(modelError.ErrorMessage);
-                }
+                    var errorMessages = new List<string>();
+                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        errorMessages.Add(modelError.ErrorMessage);
+                    }
 
-                response.Message = "Invalid liveStock data: " + string.Join(" ", errorMessages);
-                return BadRequest(response);
+                    response.Message = "Invalid area data: " + string.Join(" ", errorMessages);
+                    return BadRequest(response);
+                }
             }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+
         }
     }
 }

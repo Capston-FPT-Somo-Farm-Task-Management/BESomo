@@ -33,11 +33,51 @@ namespace SomoTaskManagement.Services.Imp
                 t => t.Field.Zone, 
                 t => t.Field.Zone.Area 
             };
-            var liveStock = await _unitOfWork.RepositoryLiveStock
+            var liveStocks = await _unitOfWork.RepositoryLiveStock
                 .GetData(expression: null, includes: includes);
 
-            return _mapper.Map<IEnumerable<LiveStock>, IEnumerable<LiveStockModel>>(liveStock);
+            liveStocks = liveStocks.OrderBy(ls => ls.CreateDate).ToList();
+            return _mapper.Map<IEnumerable<LiveStock>, IEnumerable<LiveStockModel>>(liveStocks);
         }
+        public async Task<IEnumerable<LiveStockModel>> GetListActive()
+        {
+            var includes = new Expression<Func<LiveStock, object>>[]
+            {
+                t => t.Field,
+                t => t.HabitantType,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area
+            };
+            var liveStocks = await _unitOfWork.RepositoryLiveStock
+                .GetData(expression: l=>l.Status ==1, includes: includes);
+
+            liveStocks = liveStocks.OrderBy(ls => ls.CreateDate).ToList();
+            return _mapper.Map<IEnumerable<LiveStock>, IEnumerable<LiveStockModel>>(liveStocks);
+        }
+
+        public async Task<IEnumerable<LiveStockModel>> GetLiveStockFarm(int farmId)
+        {
+            var areas = await _unitOfWork.RepositoryArea.GetData(expression: a => a.FarmId == farmId);
+            var zonesId = areas.Select(z => z.Id).ToList();
+
+            var field = await _unitOfWork.RepositoryField.GetData(expression: a => zonesId.Contains(a.ZoneId));
+
+            var fieldId = field.Select(f=> f.Id);
+            var includes = new Expression<Func<LiveStock, object>>[]
+            {
+                t => t.Field,
+                t => t.HabitantType,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area
+            };
+
+            var liveStocks = await _unitOfWork.RepositoryLiveStock
+                .GetData(expression: l => fieldId.ToList().Contains(l.FieldId), includes: includes);
+            liveStocks = liveStocks.OrderBy(ls => ls.CreateDate).ToList();
+
+            return _mapper.Map<IEnumerable<LiveStock>, IEnumerable<LiveStockModel>>(liveStocks);
+        }
+
 
         public async Task<LiveStockModel> Get(int id)
         {
@@ -90,16 +130,27 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task<IEnumerable<ExternalIdModel>> GetExternalIds(int id)
         {
-            var livestock = await _unitOfWork.RepositoryLiveStock.GetData(expression:l=>l.FieldId==id,includes:null);
+            var livestock = await _unitOfWork.RepositoryLiveStock.GetData(expression:l=>l.FieldId==id && l.Status == 1,includes:null);
 
             return _mapper.Map<IEnumerable<LiveStock>, IEnumerable<ExternalIdModel>>(livestock);
         }
 
 
-        public async Task Add(LiveStock liveStock)
+        public async Task Add(LivestockCreateModel liveStock)
         {
-            liveStock.Status = 1;
-            await _unitOfWork.RepositoryLiveStock.Add(liveStock);
+            var livestockNew = new LiveStock
+            {
+                Name = liveStock.Name,
+                Status = 1,
+                ExternalId = liveStock.ExternalId,
+                CreateDate = DateTime.Now,
+                Weight = liveStock.Weight,
+                DateOfBirth = liveStock.DateOfBirth,
+                Gender = liveStock.Gender,
+                HabitantTypeId = liveStock.HabitantTypeId,
+                FieldId = liveStock.FieldId
+            };
+            await _unitOfWork.RepositoryLiveStock.Add(livestockNew);
             await _unitOfWork.RepositoryLiveStock.Commit();
         }
         public async Task Update(LiveStock liveStock)
@@ -124,12 +175,13 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task UpdateStatus(int id)
         {
-            var liveStock = await _unitOfWork.RepositoryLiveStock.GetSingleByCondition(f => f.Id == id);
-            if (liveStock != null)
+            var liveStock = await _unitOfWork.RepositoryLiveStock.GetById(id);
+            if (liveStock == null)
             {
-                liveStock.Status = liveStock.Status == 1 ? 0 : 1;
-                await _unitOfWork.RepositoryLiveStock.Commit();
+                throw new Exception("Livestock not found");
             }
+            liveStock.Status = liveStock.Status == 1 ? 0 : 1;
+            await _unitOfWork.RepositoryLiveStock.Commit();
         }
 
         public async Task DeleteHabitant(LiveStock liveStock)

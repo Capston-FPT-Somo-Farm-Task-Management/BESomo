@@ -17,7 +17,7 @@ namespace SomoTaskManagement.Services.Interface
         Task<GetMemberModel> GetById(int memberId);
         Task<Member> GetByUser(string userName, string password);
         Task<IEnumerable<MemberModel>> List();
-        Task<IEnumerable<Member>> ListSupervisor(int id);
+        Task<IEnumerable<MemberModel>> ListSupervisor(int id);
         Task UdateMember(Member member);
     }
 }

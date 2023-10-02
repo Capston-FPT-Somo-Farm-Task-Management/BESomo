@@ -28,7 +28,9 @@ namespace SomoTaskManagement.Services.Imp
         public async Task AddTaskEvidencee(TaskEvidence taskEvidence)
         {
             taskEvidence.Status = 1;
+            taskEvidence.SubmitDate = DateTime.Now;
             await _unitOfWork.RepositoryTaskEvidence.Add(taskEvidence);
+            await _unitOfWork.RepositoryTaskEvidence.Commit();
         }
         public async Task UpdateTaskEvidence(TaskEvidence taskEvidence)
         {

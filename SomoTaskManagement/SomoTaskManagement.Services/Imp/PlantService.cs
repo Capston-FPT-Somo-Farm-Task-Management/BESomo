@@ -34,19 +34,56 @@ namespace SomoTaskManagement.Services.Imp
             };
             var plants = await _unitOfWork.RepositoryPlant
                 .GetData(expression: null, includes: includes);
+            plants = plants.OrderByDescending(p => p.CreateDate).ToList();
 
             return _mapper.Map<IEnumerable<Plant>, IEnumerable<PlantModel>>(plants);
         }
 
+        public async Task<IEnumerable<PlantModel>> GetListActive()
+        {
+            var includes = new Expression<Func<Plant, object>>[]
+            {
+                t => t.Field,
+                t => t.HabitantType,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area
+            };
+            var plants = await _unitOfWork.RepositoryPlant
+                .GetData(expression: l => l.Status == 1, includes: includes);
+
+            plants = plants.OrderByDescending(p => p.CreateDate).ToList();
+            return _mapper.Map<IEnumerable<Plant>, IEnumerable<PlantModel>>(plants);
+        }
 
         public async Task<IEnumerable<ExternalIdModel>> GetExternalIds(int id)
         {
-            var plants = await _unitOfWork.RepositoryPlant.GetData(expression: l => l.FieldId == id, includes: null);
+            var plants = await _unitOfWork.RepositoryPlant.GetData(expression: l => l.FieldId == id && l.Status == 1, includes: null);
 
             return _mapper.Map<IEnumerable<Plant>, IEnumerable<ExternalIdModel>>(plants);
         }
 
+        public async Task<IEnumerable<PlantModel>> GetPlantFarm(int farmId)
+        {
+            var areas = await _unitOfWork.RepositoryArea.GetData(expression: a => a.FarmId == farmId);
+            var zonesId = areas.Select(z => z.Id).ToList();
 
+            var field = await _unitOfWork.RepositoryField.GetData(expression: a => zonesId.Contains(a.ZoneId));
+
+            var fieldId = field.Select(f => f.Id);
+            var includes = new Expression<Func<Plant, object>>[]
+            {
+                t => t.Field,
+                t => t.HabitantType,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area
+            };
+
+            var plants = await _unitOfWork.RepositoryPlant
+                .GetData(expression: l => fieldId.ToList().Contains(l.FieldId), includes: includes);
+            plants = plants.OrderByDescending(p => p.CreateDate).ToList();
+
+            return _mapper.Map<IEnumerable<Plant>, IEnumerable<PlantModel>>(plants);
+        }
         public async Task<PlantModel> Get(int id)
         {
             var plant = await _unitOfWork.RepositoryPlant.GetById(id);
@@ -78,10 +115,19 @@ namespace SomoTaskManagement.Services.Imp
 
             return plantModel;
         }
-        public async Task Add(Plant plant)
+        public async Task Add(PlantCreateModel plant)
         {
-            plant.Status = 1;
-            await _unitOfWork.RepositoryPlant.Add(plant);
+            var plantNew = new Plant
+            {
+                Name = plant.Name,
+                ExternalId = plant.ExternalId,
+                CreateDate = DateTime.Now,
+                Status = 1,
+                HabitantTypeId = plant.HabitantTypeId,
+                FieldId = plant.FieldId,
+                Height = plant.Height,
+            };
+            await _unitOfWork.RepositoryPlant.Add(plantNew);
             await _unitOfWork.RepositoryPlant.Commit();
         }
         public async Task Update(Plant plant)
@@ -103,12 +149,13 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task UpdateStatus(int id)
         {
-            var plant = await _unitOfWork.RepositoryPlant.GetSingleByCondition(f => f.Id == id);
-            if (plant != null)
+            var plant = await _unitOfWork.RepositoryPlant.GetById(id);
+            if (plant == null)
             {
-                plant.Status = plant.Status == 1 ? 0 : 1;
-                await _unitOfWork.RepositoryLiveStock.Commit();
+                throw new Exception("Plant not found");
             }
+            plant.Status = plant.Status == 1 ? 0 : 1;
+            await _unitOfWork.RepositoryLiveStock.Commit();
         }
 
 

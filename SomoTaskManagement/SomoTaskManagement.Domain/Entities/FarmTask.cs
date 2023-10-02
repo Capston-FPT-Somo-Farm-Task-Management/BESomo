@@ -29,7 +29,7 @@ namespace SomoTaskManagement.Domain.Entities
         public DateTime EndDate { set; get; }
 
         //[Required(ErrorMessage = "Description is required.")]
-        public string Description { set; get; }
+        public string? Description { set; get; }
 
 
         [Required(ErrorMessage = "Priority is required.")]
@@ -45,6 +45,8 @@ namespace SomoTaskManagement.Domain.Entities
         public int? OtherId { set; get; }
         public int? PlantId { set; get; }
         public int? LiveStockId { set; get; }
+
+        
 
         [JsonIgnore]
         public virtual Member? Member { set; get; }

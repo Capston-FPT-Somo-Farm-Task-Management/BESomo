@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
 namespace SomoTaskManagement.Api.Controllers
@@ -65,7 +66,32 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpGet("TaskType({taskTypeId})/Farm({farmId})")]
+        [HttpGet("EmployeeActive")]
+        public async Task<IActionResult> GetEmployeeActive()
+        {
+            try
+            {
+                //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+                //{
+                //    return Unauthorized("You do not have access to this method.");
+                //}
+               
+                var area = await _employeeService.ListEmployeeActive();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Employee is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+
+        [HttpGet("Active/TaskType({taskTypeId})/Farm({farmId})")]
         public async Task<IActionResult> ListByTaskTypeFarm(int taskTypeId, int farmId)
         {
             try
@@ -140,6 +166,33 @@ namespace SomoTaskManagement.Api.Controllers
                 {
                     return NotFound("Employee is not foundesd");
                 }
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Employee is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+        [HttpGet("Task({id})")]
+        public async Task<IActionResult> ListEmployeeTask(int id)
+        {
+            try
+            {
+                //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+                //{
+                //    return Unauthorized("You do not have access to this method.");
+                //}
+                if (id <= 0)
+                {
+                    return NotFound("Employee id must be greater than 0");
+                }
+                var area = await _employeeService.ListTaskEmployee(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
@@ -240,32 +293,76 @@ namespace SomoTaskManagement.Api.Controllers
 
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> Delete(int id)
+        //{
+        //    try
+        //    {
+        //        //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+        //        //{
+        //        //    return Unauthorized("You do not have access to this method.");
+        //        //}
+        //        var response = new ApiResponseModel();
+        //        var existingArea = await _employeeService.GetEmployee(id);
+        //        if (existingArea == null)
+        //        {
+        //            response.Message = "Employee not found";
+        //            return NotFound(response);
+        //        }
+
+        //        await _employeeService.DeleteEmployee(existingArea);
+        //        response.Message = "Employee is deleted";
+        //        response.Success = true;
+        //        return Ok(response);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
+
+        [HttpPut("ChangeStatus/{id}")]
+        public async Task<IActionResult> UpdateStatus(int id)
         {
+            //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+            //{
+            //    return Unauthorized("You do not have access to this method.");
+            //}
             try
             {
-                //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
-                //{
-                //    return Unauthorized("You do not have access to this method.");
-                //}
                 var response = new ApiResponseModel();
-                var existingArea = await _employeeService.GetEmployee(id);
-                if (existingArea == null)
+                if (ModelState.IsValid)
                 {
-                    response.Message = "Employee not found";
-                    return NotFound(response);
+                    if (id <= 0)
+                    {
+                        return NotFound("Employee id must be greater than 0 ");
+                    }
+                    await _employeeService.UpdateStatus(id);
+                    var responseData = new ApiResponseModel
+                    {
+                        Data = null,
+                        Message = "Status employee is updated",
+                        Success = true,
+                    };
+                    return Ok(responseData);
                 }
+                else
+                {
+                    var errorMessages = new List<string>();
+                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        errorMessages.Add(modelError.ErrorMessage);
+                    }
 
-                await _employeeService.DeleteEmployee(existingArea);
-                response.Message = "Employee is deleted";
-                response.Success = true;
-                return Ok(response);
+                    response.Message = "Invalid liveStock data: " + string.Join(" ", errorMessages);
+                    return BadRequest(response);
+                }
             }
             catch (Exception e)
             {
                 return BadRequest(e.Message);
             }
+
         }
     }
 }

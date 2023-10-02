@@ -36,9 +36,11 @@ namespace SomoTaskManagement.Data
         Repository<ZoneType> repositoryZoneType;
         Repository<MemberToken> repositoryUserToken;
         Repository<Employee_TaskType> repositoryEmployee_TaskType;
+        Repository<Employee_Task> repositoryEmployee_Task;
 
 
         public Repository<Member> RepositoryMember { get { return repositoryMemeber ??= new Repository<Member>(_context);} }
+        public Repository<Employee_Task> RepositoryEmployee_Task { get { return repositoryEmployee_Task ??= new Repository<Employee_Task>(_context);} }
         public Repository<Employee_TaskType> RepositoryEmployee_TaskType { get { return repositoryEmployee_TaskType ??= new Repository<Employee_TaskType>(_context);} }
         public Repository<FarmTask> RepositoryFarmTask { get { return repositoryFarmTask ??= new Repository<FarmTask>(_context);} }
         public Repository<Area> RepositoryArea { get { return repositoryArea ??= new Repository<Area>(_context);} }

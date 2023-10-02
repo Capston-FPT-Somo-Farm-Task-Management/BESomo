@@ -28,5 +28,6 @@ namespace SomoTaskManagement.Data.Abtract
         Repository<Plant> RepositoryPlant { get; }
         Repository<LiveStock> RepositoryLiveStock { get; }
         Repository<Employee_TaskType> RepositoryEmployee_TaskType { get; }
+        Repository<Employee_Task> RepositoryEmployee_Task { get; }
     }
 }
