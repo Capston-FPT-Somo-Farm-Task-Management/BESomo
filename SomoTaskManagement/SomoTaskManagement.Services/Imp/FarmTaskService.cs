@@ -328,7 +328,21 @@ namespace SomoTaskManagement.Services.Imp
 
             return map.Values;
         }
+        public async Task<IEnumerable<FarmTaskModel>> GetListActiveByMemberId(int id)
+        {
+            var includes = new Expression<Func<FarmTask, object>>[]
+            {
+                t =>t.Member,
+                t => t.Plant,
+                t => t.LiveStrock,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area,
+                t => t.Field,
+                t=>t.Other,
+                t=>t.TaskType,
+            };
 
+<<<<<<< HEAD
         public async Task<IEnumerable<FarmTaskModel>> GetTaskByTotalDay(DateTime date, int id)
         {
 
@@ -496,6 +510,12 @@ namespace SomoTaskManagement.Services.Imp
             }
 
             return map.Values;
+=======
+            var farmTasks = await _unitOfWork.RepositoryFarmTask
+                .GetData(expression: t => t.MemberId == id && t.Status == 0 || t.Status == 1 || t.Status == 2 || t.Status == 3, includes: includes);
+
+            return _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
+>>>>>>> 7a93940b85afba652faec6c88f755c840d3612ed
         }
         public async Task Add(int memberId, TaskCreateUpdateModel farmTaskmodel, List<int> employeeIds, List<int> materialIds)
         {
