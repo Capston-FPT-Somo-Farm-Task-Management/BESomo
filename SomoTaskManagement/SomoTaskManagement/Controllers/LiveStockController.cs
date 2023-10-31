@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Livestock;
+using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Services.Interface;
 
 namespace SomoTaskManagement.Api.Controllers
@@ -22,7 +24,13 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                return Ok(await _liveStockService.GetList());
+                var area = await _liveStockService.GetList();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy danh sách",
+                    Success = true,
+                });
             }
             catch (Exception e)
             {
@@ -35,21 +43,22 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                if (id <= 0)
-                {
-                    return BadRequest("Livestock id must be greater than 0");
-                }
                 var area = await _liveStockService.Get(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Habitant is found",
+                    Message = "Tìm thấy danh sách",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
         [HttpGet("Farm({id})")]
@@ -65,16 +74,47 @@ namespace SomoTaskManagement.Api.Controllers
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Habitant is found",
+                    Message = "Tìm thấy danh sách",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
-
+        [HttpGet("Active/Farm({id})")]
+        public async Task<IActionResult> GetLiveStockActiveFarm(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return BadRequest("Livestock id must be greater than 0");
+                }
+                var area = await _liveStockService.GetLiveStockActiveFarm(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy danh sách",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
         [HttpGet("Active")]
         public async Task<IActionResult> GetListActive()
         {
@@ -84,7 +124,7 @@ namespace SomoTaskManagement.Api.Controllers
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Habitant is found",
+                    Message = "Tìm thấy danh sách",
                     Success = true,
                 });
             }
@@ -112,7 +152,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 
@@ -129,7 +174,7 @@ namespace SomoTaskManagement.Api.Controllers
                     var responseData = new ApiResponseModel
                     {
                         Data = liveStock,
-                        Message = "LiveStock is added",
+                        Message = "Thêm thành công",
                         Success = true,
                     };
                     return Ok(responseData);
@@ -148,54 +193,38 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] LiveStock liveStock)
+        public async Task<IActionResult> Update(int id, [FromBody] LivestockCreateModel liveStock)
         {
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _liveStockService.Update(id, liveStock);
+                var responseData = new ApiResponseModel
                 {
+                    Data = liveStock,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
 
-                    if (id <= 0)
-                    {
-                        return BadRequest("Livestock id must be greater than 0");
-                    }
-
-                    var existing = await _liveStockService.Get(id);
-                    if (existing == null)
-                    {
-                        response.Message = "Livestock not found";
-                        return NotFound(response);
-                    }
-                    await _liveStockService.Update(liveStock);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = liveStock,
-                        Message = "LiveStock is updated",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
-
-                    response.Message = "Invalid livestock data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = liveStock,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
 
         }
@@ -209,37 +238,23 @@ namespace SomoTaskManagement.Api.Controllers
             //}
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _liveStockService.UpdateStatus(id);
+                var responseData = new ApiResponseModel
                 {
-                    if (id <= 0)
-                    {
-                        return NotFound("Livestock id must be greater than 0 ");
-                    }
-                    await _liveStockService.UpdateStatus(id);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = null,
-                        Message = "Status livestock is updated",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
-
-                    response.Message = "Invalid liveStock data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                    Data = null,
+                    Message = "Đã xóa",
+                    Success = true,
+                };
+                return Ok(responseData);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
 
         }

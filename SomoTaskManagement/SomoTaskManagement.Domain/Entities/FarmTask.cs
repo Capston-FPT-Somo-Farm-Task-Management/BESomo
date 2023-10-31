@@ -28,21 +28,17 @@ namespace SomoTaskManagement.Domain.Entities
         [Required(ErrorMessage = "EndDate is required.")]
         public DateTime EndDate { set; get; }
 
-        //[Required(ErrorMessage = "Description is required.")]
         public string? Description { set; get; }
-
 
         [Required(ErrorMessage = "Priority is required.")]
         public int Priority { set; get; }
-        public string Repeat { get; set; }
-        public int Iterations { get; set; }
+        public bool IsRepeat { get; set; }
         public int Remind { get; set; }
 
-        public int ReceiverId { set; get; }
+        public int SuppervisorId { set; get; }
         public int? FieldId { set; get; }
         public int TaskTypeId { set; get; }
-        public int MemberId { set; get; }
-        public int? OtherId { set; get; }
+        public int? ManagerId { set; get; }
         public int? PlantId { set; get; }
         public int? LiveStockId { set; get; }
 
@@ -57,8 +53,6 @@ namespace SomoTaskManagement.Domain.Entities
         [JsonIgnore]
         public virtual Field? Field { set; get; }
         [JsonIgnore]
-        public virtual Other? Other { set; get; }
-        [JsonIgnore]
         public virtual TaskType? TaskType { set; get; }
 
         [JsonIgnore]
@@ -68,5 +62,6 @@ namespace SomoTaskManagement.Domain.Entities
 
         [JsonIgnore]
         public virtual ICollection<Employee_Task> Employee_Tasks { set; get; }
+
     }
 }

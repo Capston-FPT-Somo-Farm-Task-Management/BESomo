@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Member;
+using SomoTaskManagement.Domain.Model.Reponse;
+using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
 namespace SomoTaskManagement.Api.Controllers
@@ -32,8 +35,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
-
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 
@@ -42,27 +49,22 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                if (id <= 0)
-                {
-                    return BadRequest("Member id must be greater than 0");
-                }
-
-                var task = await _memberService.GetById(id);
-                if (task == null)
-                {
-                    return BadRequest("Not found");
-                }
+                var member = await _memberService.GetById(id);
                 return Ok(new ApiResponseModel
                 {
-                    Data = task,
+                    Data = member,
                     Message = "Member is founded",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
-
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 
@@ -71,16 +73,7 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                if (id <= 0)
-                {
-                    return BadRequest("Farm id must be greater than 0");
-                }
-
                 var supervisor = await _memberService.ListSupervisor(id);
-                if (supervisor == null)
-                {
-                    return BadRequest("Supervisor found");
-                }
                 return Ok(new ApiResponseModel
                 {
                     Data = supervisor,
@@ -90,45 +83,90 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
-
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+        [HttpGet("Active/Supervisor/Farm({id})")]
+        public async Task<IActionResult> ListSupervisorActive(int id)
+        {
+            try
+            {
+                var supervisor = await _memberService.ListSupervisorActive(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = supervisor,
+                    Message = "Supervisor is founded",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Member member)
+        public async Task<IActionResult> Create([FromBody] MemberCreateUpdateModel member)
         {
             try
             {
-                var response = new ApiResponseModel();
 
-                if (ModelState.IsValid)
+                await _memberService.CreateMember(member);
+                var responseData = new ApiResponseModel
                 {
-                    await _memberService.CreateMember(member);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = member,
-                        Message = "Member is added",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
+                    Data = member,
+                    Message = "Người dùng tạo thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
 
-                    response.Message = "Invalid member data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] MemberCreateUpdateModel liveStock)
+        {
+            try
+            {
+                await _memberService.UdateMember(id, liveStock);
+                var responseData = new ApiResponseModel
+                {
+                    Data = liveStock,
+                    Message = "Người dùng đã cập nhật thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = liveStock,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+
         }
     }
 }

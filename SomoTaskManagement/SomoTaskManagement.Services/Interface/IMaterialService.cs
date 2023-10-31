@@ -1,5 +1,5 @@
 ﻿using SomoTaskManagement.Domain.Entities;
-using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Material;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +16,6 @@ namespace SomoTaskManagement.Services.Interface
         Task<Material> GetMaterial(int id);
         Task<IEnumerable<MaterialModel>> ListMaterial();
         Task<IEnumerable<MaterialModel>> ListMaterialActive();
-        Task UpdateMaterial(Material material);
+        Task UpdateMaterial(int id, Material material);
     }
 }

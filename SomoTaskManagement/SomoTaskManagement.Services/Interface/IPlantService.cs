@@ -1,5 +1,6 @@
 ﻿using SomoTaskManagement.Domain.Entities;
-using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.HabitantType;
+using SomoTaskManagement.Domain.Model.Plant;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,8 +17,9 @@ namespace SomoTaskManagement.Services.Interface
         Task<IEnumerable<ExternalIdModel>> GetExternalIds(int id);
         Task<IEnumerable<PlantModel>> GetList();
         Task<IEnumerable<PlantModel>> GetListActive();
+        Task<IEnumerable<PlantModel>> GetPlantActiveFarm(int farmId);
         Task<IEnumerable<PlantModel>> GetPlantFarm(int farmId);
-        Task Update(Plant plant);
+        Task Update(int id, PlantCreateModel plant);
         Task UpdateStatus(int id);
     }
 }

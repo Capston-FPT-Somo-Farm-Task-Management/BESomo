@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using SomoTaskManagement.Domain.Entities;
-using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Member;
 
 namespace SomoTaskManagement.Authentication
 {

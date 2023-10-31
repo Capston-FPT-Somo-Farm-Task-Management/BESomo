@@ -55,6 +55,11 @@ E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Rel
 E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\refint\SomoTaskManagement.Notify.dll
 E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\SomoTaskManagement.Notify.pdb
 E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\ref\SomoTaskManagement.Notify.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\SomoTaskManagement.Notify.csproj.AssemblyReference.cache
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\SomoTaskManagement.Notify.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\SomoTaskManagement.Notify.AssemblyInfoInputs.cache
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\SomoTaskManagement.Notify.AssemblyInfo.cs
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\SomoTaskManagement.Notify.csproj.CoreCompileInputs.cache
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\bin\Release\net6.0\SomoTaskManagement.Notify.deps.json
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\bin\Release\net6.0\SomoTaskManagement.Notify.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\bin\Release\net6.0\SomoTaskManagement.Notify.pdb
@@ -64,11 +69,6 @@ C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskMan
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\bin\Release\net6.0\SomoTaskManagement.Data.pdb
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\bin\Release\net6.0\SomoTaskManagement.Services.pdb
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\bin\Release\net6.0\SomoTaskManagement.Domain.pdb
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\SomoTaskManagement.Notify.csproj.AssemblyReference.cache
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\SomoTaskManagement.Notify.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\SomoTaskManagement.Notify.AssemblyInfoInputs.cache
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\SomoTaskManagement.Notify.AssemblyInfo.cs
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\SomoTaskManagement.Notify.csproj.CoreCompileInputs.cache
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\SomoTaskManagement.Notify.csproj.CopyComplete
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\SomoTaskManagement.Notify.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Notification\obj\Release\net6.0\refint\SomoTaskManagement.Notify.dll

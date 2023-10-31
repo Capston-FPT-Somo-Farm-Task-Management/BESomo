@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using SomoTaskManagement.Domain.Entities;
+using SomoTaskManagement.Domain.Model.EvidenceImage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,6 @@ namespace SomoTaskManagement.Services.Interface
         Task<EvidenceImage> GetEvidenceImage(int id);
         Task<IEnumerable<EvidenceImage>> ListEvidenceImage();
         Task UpdateEvidenceImage(EvidenceImage evidenceImage);
+        Task<EvidenceImage> UploadEvidenceImage(EvidenceImageModel evidenceImageModel);
     }
 }

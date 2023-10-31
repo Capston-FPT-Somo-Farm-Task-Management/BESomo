@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
-using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.TaskType;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;

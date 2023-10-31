@@ -36,6 +36,7 @@ E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\n
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\bin\Release\net6.0\SomoTaskManagement.Domain.deps.json
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\bin\Release\net6.0\SomoTaskManagement.Domain.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\bin\Release\net6.0\SomoTaskManagement.Domain.pdb
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\SomoTaskManagement.Domain.csproj.AssemblyReference.cache
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\SomoTaskManagement.Domain.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\SomoTaskManagement.Domain.AssemblyInfoInputs.cache
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\SomoTaskManagement.Domain.AssemblyInfo.cs
@@ -44,4 +45,3 @@ C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskMan
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\refint\SomoTaskManagement.Domain.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\SomoTaskManagement.Domain.pdb
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\ref\SomoTaskManagement.Domain.dll
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Domain\obj\Release\net6.0\SomoTaskManagement.Domain.csproj.AssemblyReference.cache

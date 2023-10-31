@@ -9,6 +9,7 @@ using SomoTaskManagement.Notify.HubSignalR;
 using SomoTaskManagement.Notify.SubscribeTableDependencies;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
+using SomoTaskManagement.Services.Repo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,10 +52,12 @@ namespace SomoTaskManagement.Infrastructure.Configuration
             services.AddScoped<ITaskEvidenceService, TaskEvidenceService>();
             services.AddScoped<IFarmTaskService, FarmTaskService>();
             services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<ISubTaskService,SubTaskService>();
+            services.AddScoped<IHubConnection, HubConnectionService>();
+            services.AddScoped<INotificationService, NotificationService>();
 
-            //services.AddScoped<TaskHub>();
+            services.AddScoped<NotifyHub>();
             //services.AddScoped<ISubscribeTableDependency,SubscribeNotificationTableDependency>();
-
         }
     }
     

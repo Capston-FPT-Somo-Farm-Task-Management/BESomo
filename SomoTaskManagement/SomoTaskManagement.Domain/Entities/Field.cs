@@ -19,12 +19,15 @@ namespace SomoTaskManagement.Domain.Entities
             Tasks = new HashSet<FarmTask>();
             LiveStocks = new HashSet<LiveStock>();
         }
+        public string Code { get; set; }
 
         [Required(ErrorMessage = "Area is required.")]
         //[Range(0.01, double.MaxValue, ErrorMessage = "FarmArea must be greater than 0.")]
         public double Area { set; get; }
-
+                                                                                                
         public int ZoneId { set; get; }
+
+        public bool IsDelete { set; get; }
 
         [JsonIgnore]
         public virtual Zone? Zone { set; get; }

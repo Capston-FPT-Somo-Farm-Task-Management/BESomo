@@ -1,4 +1,6 @@
 ﻿using SomoTaskManagement.Domain.Entities;
+using SomoTaskManagement.Domain.Model.EvidenceImage;
+using SomoTaskManagement.Domain.Model.TaskEvidence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +12,12 @@ namespace SomoTaskManagement.Services.Interface
     public interface ITaskEvidenceService
     {
         Task AddTaskEvidencee(TaskEvidence taskEvidence);
-        Task DeleteTaskEvidence(TaskEvidence taskEvidence);
-        Task<TaskEvidence> GetTaskEvidence(int id);
+        Task AddTaskEvidenceeWithImage(EvidenceCreateUpdateModel evidenceCreateUpdateModel);
+        Task CreateDisagreeTask(int id, string description);
+        Task DeleteTaskEvidence(int id);
+        Task<IEnumerable<TaskEvidenceModel>> GetEvidenceByTask(int taskId);
+        Task<TaskEvidenceModel> GetTaskEvidence(int id);
         Task<IEnumerable<TaskEvidence>> ListTaskEvidence();
-        Task UpdateTaskEvidence(TaskEvidence taskEvidence);
+        Task UpdateTaskEvidence(int id, EvidenceCreateUpdateModel taskEvidence, List<string> oldUrlImages);
     }
 }

@@ -26,6 +26,9 @@ namespace SomoTaskManagement.Domain.Entities
         [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters.")]
         public string Address { get; set; }
 
+        public string UrlImage {  get; set; }
+        public string Description {  get; set; }
+
         [JsonIgnore]
         public ICollection<Area> Areas { get; set; }
 

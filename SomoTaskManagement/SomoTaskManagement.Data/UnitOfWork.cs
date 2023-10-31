@@ -37,10 +37,18 @@ namespace SomoTaskManagement.Data
         Repository<MemberToken> repositoryUserToken;
         Repository<Employee_TaskType> repositoryEmployee_TaskType;
         Repository<Employee_Task> repositoryEmployee_Task;
+        Repository<Material_Task> repositoryMaterial_Task;
+        Repository<HubConnection> repositoryHubConnection;
+        Repository<Notification> repositoryNotifycation;
+        Repository<Notification_Member> repositoryNotifycation_Member;
 
 
         public Repository<Member> RepositoryMember { get { return repositoryMemeber ??= new Repository<Member>(_context);} }
+        public Repository<Notification_Member> RepositoryNotifycation_Member { get { return repositoryNotifycation_Member ??= new Repository<Notification_Member>(_context);} }
+        public Repository<Notification> RepositoryNotifycation { get { return repositoryNotifycation ??= new Repository<Notification>(_context);} }
+        public Repository<HubConnection> RepositoryHubConnection { get { return repositoryHubConnection ??= new Repository<HubConnection>(_context);} }
         public Repository<Employee_Task> RepositoryEmployee_Task { get { return repositoryEmployee_Task ??= new Repository<Employee_Task>(_context);} }
+        public Repository<Material_Task> RepositoryMaterial_Task { get { return repositoryMaterial_Task ??= new Repository<Material_Task>(_context);} }
         public Repository<Employee_TaskType> RepositoryEmployee_TaskType { get { return repositoryEmployee_TaskType ??= new Repository<Employee_TaskType>(_context);} }
         public Repository<FarmTask> RepositoryFarmTask { get { return repositoryFarmTask ??= new Repository<FarmTask>(_context);} }
         public Repository<Area> RepositoryArea { get { return repositoryArea ??= new Repository<Area>(_context);} }
@@ -60,6 +68,29 @@ namespace SomoTaskManagement.Data
         public Repository<ZoneType> RepositoryZoneType { get { return repositoryZoneType ??= new Repository<ZoneType>(_context);} }
         public Repository<MemberToken> RepositoryUserToken { get { return repositoryUserToken ??= new Repository<MemberToken>(_context);} }
 
+        public async Task BeginTransactionAsync()
+        {
+            if (_context.Database.CurrentTransaction == null)
+            {
+                await _context.Database.BeginTransactionAsync();
+            }
+        }
+
+        public void CommitTransaction()
+        {
+            if (_context.Database.CurrentTransaction != null)
+            {
+                _context.Database.CurrentTransaction.Commit();
+            }
+        }
+
+        public void RollbackTransaction()
+        {
+            if (_context.Database.CurrentTransaction != null)
+            {
+                _context.Database.CurrentTransaction.Rollback();
+            }
+        }
 
         public async Task Commit()
         {

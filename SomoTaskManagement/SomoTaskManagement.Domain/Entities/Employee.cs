@@ -18,13 +18,16 @@ namespace SomoTaskManagement.Domain.Entities
             Employee_Tasks = new HashSet<Employee_Task>();
             Employee_TaskTypes = new HashSet<Employee_TaskType>();
         }
-
+        [Required]
+        public string Code { get; set; }
         [StringLength(10, ErrorMessage = "Phone number must be exactly 10 digits.", MinimumLength = 10)]
         [RegularExpression("^[0-9]*$", ErrorMessage = "Phone number must contain only digits.")]
         public string PhoneNumber { get; set; }
 
         [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters.")]
         public string Address { get; set; }
+        [Required]
+        public bool Gender { get; set; }
 
         public int FarmId { get; set; }
 
@@ -34,6 +37,5 @@ namespace SomoTaskManagement.Domain.Entities
         public virtual ICollection<Employee_Task> Employee_Tasks { set; get; }
         [JsonIgnore]
         public virtual ICollection<Employee_TaskType> Employee_TaskTypes { set; get; }
-
     }
 }

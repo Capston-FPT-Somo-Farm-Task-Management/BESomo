@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Employee;
+using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
@@ -47,10 +49,6 @@ namespace SomoTaskManagement.Api.Controllers
                 //{
                 //    return Unauthorized("You do not have access to this method.");
                 //}
-                if (id == 0)
-                {
-                    return NotFound("Employee is not found");
-                }
                 var area = await _employeeService.GetEmployee(id);
                 return Ok(new ApiResponseModel
                 {
@@ -61,8 +59,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
-
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
             }
         }
 
@@ -75,7 +77,7 @@ namespace SomoTaskManagement.Api.Controllers
                 //{
                 //    return Unauthorized("You do not have access to this method.");
                 //}
-               
+
                 var area = await _employeeService.ListEmployeeActive();
                 return Ok(new ApiResponseModel
                 {
@@ -100,9 +102,9 @@ namespace SomoTaskManagement.Api.Controllers
                 //{
                 //    return Unauthorized("You do not have access to this method.");
                 //}
-                
+
                 var employee = await _employeeService.ListByTaskTypeFarm(taskTypeId, farmId);
-                if(employee == null)
+                if (employee == null)
                 {
                     return NotFound("Employee not found");
                 }
@@ -115,7 +117,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
 
             }
         }
@@ -143,8 +150,42 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
 
+            }
+        }
+
+        [HttpGet("Active/Farm({id})")]
+        public async Task<IActionResult> ListEmployeeActiveByFarm(int id)
+        {
+            try
+            {
+                //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+                //{
+                //    return Unauthorized("You do not have access to this method.");
+                //}
+                
+                var area = await _employeeService.ListEmployeeActiveByFarm(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Employee is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 
@@ -157,25 +198,24 @@ namespace SomoTaskManagement.Api.Controllers
                 //{
                 //    return Unauthorized("You do not have access to this method.");
                 //}
-                if (id <= 0)
-                {
-                    return NotFound("Employee id must be greater than 0");
-                }
-                var area = await _employeeService.GetByTaskType(id);
-                if(area == null)
-                {
-                    return NotFound("Employee is not foundesd");
-                }
+                
+                var employees = await _employeeService.GetByTaskType(id);
+               
                 return Ok(new ApiResponseModel
                 {
-                    Data = area,
+                    Data = employees,
                     Message = "Employee is found",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
 
             }
         }
@@ -188,10 +228,7 @@ namespace SomoTaskManagement.Api.Controllers
                 //{
                 //    return Unauthorized("You do not have access to this method.");
                 //}
-                if (id <= 0)
-                {
-                    return NotFound("Employee id must be greater than 0");
-                }
+                
                 var area = await _employeeService.ListTaskEmployee(id);
                 return Ok(new ApiResponseModel
                 {
@@ -202,7 +239,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
 
             }
         }
@@ -216,39 +258,30 @@ namespace SomoTaskManagement.Api.Controllers
                 //{
                 //    return Unauthorized("You do not have access to this method.");
                 //}
-                var response = new ApiResponseModel();
 
-                if (ModelState.IsValid)
+                await _employeeService.AddEmployee(employee.TaskTypeId, employee.Employee);
+                var responseData = new ApiResponseModel
                 {
-                    await _employeeService.AddEmployee(employee.TaskTypeId,employee.Employee);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = employee,
-                        Message = "Employee is added",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
+                    Data = employee,
+                    Message = "Employee is added",
+                    Success = true,
+                };
+                return Ok(responseData);
 
-                    response.Message = "Invalid Employee data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Employee employee)
+        public async Task<IActionResult> Update(int id, EmployeeRequestModel employeeUpdateRequest)
         {
             try
             {
@@ -256,39 +289,24 @@ namespace SomoTaskManagement.Api.Controllers
                 //{
                 //    return Unauthorized("You do not have access to this method.");
                 //}
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _employeeService.UpdateEmployee(id, employeeUpdateRequest.Employee, employeeUpdateRequest.TaskTypeId);
+                var responseData = new ApiResponseModel
                 {
-                    var existingArea = await _employeeService.GetEmployee(id);
-                    if (existingArea == null)
-                    {
-                        response.Message = "Employee not found";
-                        return NotFound(response);
-                    }
-                    await _employeeService.UpdateEmployee(employee);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = employee,
-                        Message = "Employee is updated",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
+                    Data = employeeUpdateRequest,
+                    Message = "Employee is updated",
+                    Success = true,
+                };
+                return Ok(responseData);
 
-                    response.Message = "Invalid Employee data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
 
         }
@@ -330,37 +348,23 @@ namespace SomoTaskManagement.Api.Controllers
             //}
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _employeeService.UpdateStatus(id);
+                var responseData = new ApiResponseModel
                 {
-                    if (id <= 0)
-                    {
-                        return NotFound("Employee id must be greater than 0 ");
-                    }
-                    await _employeeService.UpdateStatus(id);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = null,
-                        Message = "Status employee is updated",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
-
-                    response.Message = "Invalid liveStock data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                    Data = null,
+                    Message = "Status employee is updated",
+                    Success = true,
+                };
+                return Ok(responseData);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
 
         }

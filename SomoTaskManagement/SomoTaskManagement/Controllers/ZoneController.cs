@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Reponse;
+using SomoTaskManagement.Domain.Model.Zone;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
@@ -23,20 +25,7 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                return Ok(await _zoneService.ListZone());
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
-        [HttpGet("Active")]
-        public async Task<IActionResult> ListZoneActive()
-        {
-            try
-            {
-                var zones =  Ok(await _zoneService.ListZoneActive());
+                var zones = await _zoneService.ListZone();
                 return Ok(new ApiResponseModel
                 {
                     Data = zones,
@@ -46,9 +35,39 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
             }
         }
+
+        [HttpGet("Active")]
+        public async Task<IActionResult> ListZoneActive()
+        {
+            try
+            {
+                var zones = await _zoneService.ListActiveZone();
+                return Ok(new ApiResponseModel
+                {
+                    Data = zones,
+                    Message = "Zone is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -68,8 +87,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
-
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
             }
         }
 
@@ -92,8 +115,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
-
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
             }
         }
         [HttpGet("Area({id})")]
@@ -115,8 +142,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
-
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
             }
         }
         [HttpGet("Farm({id})")]
@@ -138,8 +169,39 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
-
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
+            }
+        }
+        [HttpGet("Active/Farm({id})")]
+        public async Task<IActionResult> GetActiveByFarm(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return NotFound("Zone id must be greater than 0");
+                }
+                var area = await _zoneService.GetActiveByFarmId(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Zone is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
             }
         }
 
@@ -162,8 +224,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
-
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
             }
         }
 
@@ -186,7 +252,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
             }
         }
 
@@ -209,111 +280,92 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateArea([FromBody] Zone zone)
+        public async Task<IActionResult> CreateArea([FromBody] ZoneCreateUpdateModel zone)
         {
             try
             {
-                var response = new ApiResponseModel();
-
-                if (ModelState.IsValid)
+                await _zoneService.AddZone(zone);
+                var responseData = new ApiResponseModel
                 {
-                    await _zoneService.AddZone(zone);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = zone,
-                        Message = "Zone is added",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
+                    Data = zone,
+                    Message = "Thêm vùng thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
 
-                    response.Message = "Invalid zone data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Zone zone)
+        public async Task<IActionResult> Update(int id, [FromBody] ZoneCreateUpdateModel zone)
         {
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _zoneService.UpdateZone(id, zone);
+                var responseData = new ApiResponseModel
                 {
-                    var existingArea = await _zoneService.GetZone(id);
-                    if (existingArea == null)
-                    {
-                        response.Message = "Zone not found";
-                        return NotFound(response);
-                    }
-                    await _zoneService.UpdateZone(zone);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = zone,
-                        Message = "Zone is updated",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
+                    Data = zone,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
 
-                    response.Message = "Invalid Zone data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
             }
 
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            try
-            {
-                var response = new ApiResponseModel();
-                var existingArea = await _zoneService.GetZone(id);
-                if (existingArea == null)
-                {
-                    response.Message = "Zone not found";
-                    return NotFound(response);
-                }
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> Delete(int id)
+        //{
+        //    try
+        //    {
+        //        var response = new ApiResponseModel();
+        //        var existingArea = await _zoneService.GetZone(id);
+        //        if (existingArea == null)
+        //        {
+        //            response.Message = "Zone not found";
+        //            return NotFound(response);
+        //        }
 
-                await _zoneService.DeleteZone(existingArea);
-                response.Message = "Zone is deleted";
-                response.Success = true;
-                return Ok(response);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
+        //        await _zoneService.DeleteZone(existingArea);
+        //        response.Message = "Zone is deleted";
+        //        response.Success = true;
+        //        return Ok(response);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
 
         [HttpPut("Delete/{id}")]
         public async Task<IActionResult> UpdateStatus(int id)
@@ -324,37 +376,23 @@ namespace SomoTaskManagement.Api.Controllers
             //}
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _zoneService.UpdateStatus(id);
+                var responseData = new ApiResponseModel
                 {
-                    if (id <= 0)
-                    {
-                        return NotFound("Zone id must be greater than 0 ");
-                    }
-                    await _zoneService.UpdateStatus(id);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = null,
-                        Message = "Delete success",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
-
-                    response.Message = "Invalid area data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                    Data = null,
+                    Message = "Delete success",
+                    Success = true,
+                };
+                return Ok(responseData);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
             }
 
         }

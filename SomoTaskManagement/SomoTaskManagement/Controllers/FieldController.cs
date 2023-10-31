@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Field;
+using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
@@ -23,11 +25,22 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                return Ok(await _fieldService.ListField());
+                var field = await _fieldService.ListField();
+                return Ok(new ApiResponseModel
+                {
+                    Data = field,
+                    Message = "Tìm thấy",
+                    Success = true,
+                });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 
@@ -36,22 +49,21 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                if (id <= 0)
-                {
-                    return NotFound("Field id nmust be greater than 0");
-                }
                 var field = await _fieldService.GetZoneField(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = field,
-                    Message = "Field is found",
+                    Message = "Tìm thấy",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
-
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Error deleting record: " + e.Message,
+                    Success = false
+                });
             }
         }
         [HttpGet("Plant/Farm({id})")]
@@ -59,22 +71,21 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                if (id <= 0)
-                {
-                    return NotFound("Farm id nmust be greater than 0");
-                }
                 var field = await _fieldService.GetPlantFieldByFarm(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = field,
-                    Message = "Field is found",
+                    Message = "Tìm thấy",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
-
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Error deleting record: " + e.Message,
+                    Success = false
+                });
             }
         }
         [HttpGet("Livestock/Farm({id})")]
@@ -82,25 +93,47 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                if (id <= 0)
-                {
-                    return NotFound("Farm id nmust be greater than 0");
-                }
                 var field = await _fieldService.GetLivestockFieldByFarm(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = field,
-                    Message = "Field is found",
+                    Message = "Tìm thấy",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Error deleting record: " + e.Message,
+                    Success = false
+                });
 
             }
         }
+        [HttpGet("Code({code})")]
+        public async Task<IActionResult> GetByCode(string code)
+        {
+            try
+            {
+                var field = await _fieldService.GetByCode(code);
+                return Ok(new ApiResponseModel
+                {
+                    Data = field,
+                    Message = "Tìm thấy",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Error deleting record: " + e.Message,
+                    Success = false
+                });
 
+            }
+        }
         [HttpGet("Active")]
         public async Task<IActionResult> GetActive()
         {
@@ -110,13 +143,17 @@ namespace SomoTaskManagement.Api.Controllers
                 return Ok(new ApiResponseModel
                 {
                     Data = field,
-                    Message = "Field is found",
+                    Message = "Tìm thấy",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Error deleting record: " + e.Message,
+                    Success = false
+                });
 
             }
         }
@@ -129,37 +166,22 @@ namespace SomoTaskManagement.Api.Controllers
             //}
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _fieldService.DeleteFieldByStatus(id);
+                var responseData = new ApiResponseModel
                 {
-                    if (id <= 0)
-                    {
-                        return NotFound("Field id must be greater than 0 ");
-                    }
-                    await _fieldService.DeleteFieldByStatus(id);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = null,
-                        Message = "Delete success",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
-
-                    response.Message = "Invalid Field data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                    Data = null,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Error deleting record: " + e.Message,
+                    Success = false
+                });
             }
 
         }
@@ -169,22 +191,21 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                if (id <= 0)
-                {
-                    return NotFound("Zone id nmust be greater than 0");
-                }
                 var area = await _fieldService.GetByZone(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Field is found",
+                    Message = "Tìm thấy",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
-
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Error deleting record: " + e.Message,
+                    Success = false
+                });
             }
         }
 
@@ -193,21 +214,21 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                if (id <= 0)
-                {
-                    return NotFound("Zone id nmust be greater than 0");
-                }
                 var area = await _fieldService.GetAllByZone(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Field is found",
+                    Message = "Tìm thấy",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Lỗi" + e.Message,
+                    Success = false
+                });
 
             }
         }
@@ -220,14 +241,17 @@ namespace SomoTaskManagement.Api.Controllers
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Field is found",
+                    Message = "Tìm thấy",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
-
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Lỗi" + e.Message,
+                    Success = false
+                });
             }
         }
 
@@ -240,115 +264,140 @@ namespace SomoTaskManagement.Api.Controllers
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Field is found",
+                    Message = "Tìm thấy",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Lỗi" + e.Message,
+                    Success = false
+                });
 
             }
         }
+
+        [HttpGet("Plant/Active")]
+        public async Task<IActionResult> ListFieldPlantActive()
+        {
+            try
+            {
+                var area = await _fieldService.ListFieldPlantActive();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Lỗi" + e.Message,
+                    Success = false
+                });
+            }
+        }
+
+        [HttpGet("Livestock/Active")]
+        public async Task<IActionResult> ListFieldLivestockActive()
+        {
+            try
+            {
+                var area = await _fieldService.ListFieldLivestockActive();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Lỗi" + e.Message,
+                    Success = false
+                });
+
+            }
+        }
+
 
         [HttpGet("AreaZoneByField({id})")]
         public async Task<IActionResult> GetAreaZoneByField(int id)
         {
             try
             {
-                if (id <= 0)
-                {
-                    return NotFound("Field id must be greater than 0");
-                }
                 var area = await _fieldService.GetAreaZoneByField(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Field is found",
+                    Message = "Tìm thấy",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Lỗi" + e.Message,
+                    Success = false
+                });
 
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateArea([FromBody]  Field field)
+        public async Task<IActionResult> Create([FromBody] FieldCreateUpdateModel field)
         {
             try
             {
-                var response = new ApiResponseModel();
 
-                if (ModelState.IsValid)
+                await _fieldService.AddField(field);
+                var responseData = new ApiResponseModel
                 {
-                    await _fieldService.AddField(field);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = field,
-                        Message = "Field is added",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
+                    Data = field,
+                    Message = "Thêm thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
 
-                    response.Message = "Invalid Field data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Lỗi" + e.Message,
+                    Success = false
+                });
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Field field)
+        public async Task<IActionResult> Update(int id, [FromBody] FieldCreateUpdateModel field)
         {
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _fieldService.UpdateField(id, field);
+                var responseData = new ApiResponseModel
                 {
-                    var existingArea = await _fieldService.GetZoneField(id);
-                    if (existingArea == null)
-                    {
-                        response.Message = "Field not found";
-                        return NotFound(response);
-                    }
-                    await _fieldService.UpdateField(field);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = field,
-                        Message = "Field is updated",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
-
-                    response.Message = "Invalid Field data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                    Data = field,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Lỗi" + e.Message,
+                    Success = false
+                });
             }
 
         }

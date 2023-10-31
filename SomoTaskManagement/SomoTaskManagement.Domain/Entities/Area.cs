@@ -16,7 +16,8 @@ namespace SomoTaskManagement.Domain.Entities
         {
             Zones = new HashSet<Zone>();
         }
-
+        public string Code { set; get; }
+        
         [Required(ErrorMessage = "Area is required.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "FarmArea must be greater than 0.")]
         public double FArea { get; set; }

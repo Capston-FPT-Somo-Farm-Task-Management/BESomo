@@ -1,4 +1,5 @@
-﻿using SomoTaskManagement.Data;
+﻿using Google;
+using SomoTaskManagement.Data;
 using SomoTaskManagement.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -8,25 +9,26 @@ using System.Threading.Tasks;
 
 namespace SomoTaskManagement.Services.Repo
 {
-    public class TaskRepository
+    public class TaskRepository 
     {
-        private readonly string connectionString;
         private readonly SomoTaskManagemnetContext dbContext;
+        private readonly string connectionString;
 
-        public TaskRepository(string connectionString, SomoTaskManagemnetContext _dbContext)
+        public TaskRepository(string connectionString,SomoTaskManagemnetContext _dbContext)
         {
-            this.connectionString = connectionString;
             this.dbContext = _dbContext;
+            this.connectionString = connectionString;
         }
+       
 
-        public List<FarmTask> GetTasks()
+        public List<Notification> GetNotification()
         {
-            var taskList = dbContext.FarmTask.ToList();
-            foreach (var task in taskList)
+            var prodList = dbContext.Notification.ToList();
+            foreach (var emp in prodList)
             {
-                dbContext.Entry(task).Reload();
+                dbContext.Entry(emp).Reload();
             }
-            return taskList;
+            return prodList;
         }
     }
 }

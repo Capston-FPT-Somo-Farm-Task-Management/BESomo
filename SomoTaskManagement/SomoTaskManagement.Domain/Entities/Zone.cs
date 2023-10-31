@@ -16,7 +16,8 @@ namespace SomoTaskManagement.Domain.Entities
         {
             Fields = new HashSet<Field>();
         }
-
+        [Required]
+        public string Code {  get; set; }
         [Required(ErrorMessage = "Area is required.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "FarmArea must be greater than 0.")]
         public double FarmArea { get; set; }
@@ -24,6 +25,7 @@ namespace SomoTaskManagement.Domain.Entities
         public int ZoneTypeId { get; set; }
 
         public int AreaId { get; set; }
+
 
 
         [System.Text.Json.Serialization.JsonIgnore]

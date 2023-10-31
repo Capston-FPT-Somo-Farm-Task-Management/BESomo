@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
+using FirebaseAdmin.Messaging;
 using Microsoft.EntityFrameworkCore;
 using SomoTaskManagement.Data;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Enum;
-using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Reponse;
+using SomoTaskManagement.Domain.Model.SubTask;
+using SomoTaskManagement.Domain.Model.Task;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;
@@ -14,6 +17,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
+using UnidecodeSharpFork;
+using Notification = SomoTaskManagement.Domain.Entities.Notification;
 
 namespace SomoTaskManagement.Services.Imp
 {
@@ -27,6 +33,56 @@ namespace SomoTaskManagement.Services.Imp
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
+        private async Task<Dictionary<FarmTask, FarmTaskModel>> MapFarmTasks(IEnumerable<FarmTask> farmTasks)
+        {
+            var map = new Dictionary<FarmTask, FarmTaskModel>();
+            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
+
+            foreach (var pair in farmTasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
+            {
+                map.Add(pair.ft, pair.ftModel);
+            }
+
+            foreach (var farmTask in farmTasks)
+            {
+                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.SuppervisorId);
+
+                if (member != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].SupervisorName = member.Name;
+                }
+
+                var employeeNames = await ListTaskEmployee(farmTask.Id);
+
+                if (employeeNames != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].EmployeeName = string.Join(", ", employeeNames);
+                }
+
+                var employeeIds = await ListTaskEmployeeId(farmTask.Id);
+
+                if (employeeIds != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].EmployeeId = employeeIds;
+                }
+
+                var materialName = await ListMaterial(farmTask.Id);
+
+                if (materialName != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].MaterialName = string.Join(", ", materialName);
+                }
+
+                var materialId = await ListMaterialId(farmTask.Id);
+
+                if (materialId != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].MaterialId = materialId;
+                }
+            }
+
+            return map;
+        }
 
         public async Task<IEnumerable<FarmTaskModel>> GetList()
         {
@@ -38,182 +94,59 @@ namespace SomoTaskManagement.Services.Imp
                 t => t.Field.Zone,
                 t => t.Field.Zone.Area,
                 t => t.Field,
-                t => t.Other,
                 t => t.TaskType,
             };
 
             var farmTasks = await _unitOfWork.RepositoryFarmTask
                                         .GetData(expression: null, includes: includes);
 
-            var map = new Dictionary<FarmTask, FarmTaskModel>();
-
-            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
-
-            foreach (var pair in farmTasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
-            {
-                map.Add(pair.ft, pair.ftModel);
-            }
-
-            foreach (var farmTask in farmTasks)
-            {
-                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
-
-                if (member != null && map.ContainsKey(farmTask))
-                {
-                    map[farmTask].ReceiverName = member.Name;
-                }
-
-                var employeeNames = await ListTaskEmployee(farmTask.Id);
-
-                if (employeeNames != null && map.ContainsKey(farmTask))
-                {
-                    map[farmTask].EmployeeName = string.Join(", ", employeeNames);
-                }
-            }
+            var map = await MapFarmTasks(farmTasks);
 
             return map.Values;
         }
 
-        public async Task<IEnumerable<string>> ListTaskEmployee(int taskId)
+
+        public List<object> GetStatusDescriptions()
         {
-            var task = await _unitOfWork.RepositoryFarmTask.GetById(taskId);
-            if (task == null)
-            {
-                throw new Exception("Task not found");
-            }
-            var employee_task = await _unitOfWork.RepositoryEmployee_Task.GetData(expression: e => e.TaskId == task.Id, includes: null);
-            var employeeIds = employee_task.Select(x => x.EmployeeId).ToList();
-            if (employee_task != null)
-            {
-                var employees = await _unitOfWork.RepositoryEmployee.GetData(expression: e => employeeIds.Contains(e.Id));
+            var results = new List<object>();
 
-                return employees.Select(e => e.Name);
+            foreach (TaskStatusEnum status in Enum.GetValues(typeof(TaskStatusEnum)))
+            {
+                results.Add(new
+                {
+                    Status = (int)status,
+                    Description = GetTaskStatusDescription(status)
+                });
             }
 
-            return null;
+            return results;
+        }
+        public static string GetTaskStatusDescription(TaskStatusEnum status)
+        {
+            var fieldInfo = status.GetType().GetField(status.ToString());
+
+            if (fieldInfo == null) return string.Empty;
+
+            var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+
+            return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : status.ToString();
         }
 
-        public async Task<IEnumerable<FarmTaskModel>> GetListActiveWithPagging(int pageIndex, int pageSize)
-        {
-            var includes = new Expression<Func<FarmTask, object>>[]
-            {
-                t => t.Member,
-                t => t.Plant,
-                t => t.LiveStrock,
-                t => t.Field.Zone,
-                t => t.Field.Zone.Area,
-                t => t.Field,
-                t => t.Other,
-                t => t.TaskType,
-            };
-
-            int skipCount = (pageIndex - 1) * pageSize;
-
-            var farmTasks = await _unitOfWork.RepositoryFarmTask.GetData(
-                expression: t => t.Status == 0 || t.Status == 1 || t.Status == 2 || t.Status == 3,
-                includes: includes
-            );
-
-            farmTasks = farmTasks.OrderByDescending(t => t.CreateDate)
-                                 .Skip(skipCount)
-                                 .Take(pageSize)
-                                 .ToList();
-
-            var map = new Dictionary<FarmTask, FarmTaskModel>();
-
-            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
-
-            foreach (var pair in farmTasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
-            {
-                map.Add(pair.ft, pair.ftModel);
-            }
-
-            foreach (var farmTask in farmTasks)
-            {
-                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
-
-                if (member != null && map.ContainsKey(farmTask))
-                {
-                    map[farmTask].ReceiverName = member.Name;
-                }
-
-                var employeeNames = await ListTaskEmployee(farmTask.Id);
-
-                if (employeeNames != null && map.ContainsKey(farmTask))
-                {
-                    map[farmTask].EmployeeName = string.Join(", ", employeeNames);
-                }
-            }
-
-            return map.Values;
-        }
-        public async Task<IEnumerable<FarmTaskModel>> GetListActive()
-        {
-            var includes = new Expression<Func<FarmTask, object>>[]
-            {
-                t => t.Member,
-                t => t.Plant,
-                t => t.LiveStrock,
-                t => t.Field.Zone,
-                t => t.Field.Zone.Area,
-                t => t.Field,
-                t => t.Other,
-                t => t.TaskType,
-            };
-
-
-            var farmTasks = await _unitOfWork.RepositoryFarmTask.GetData(
-                expression: t => t.Status == 0 || t.Status == 1 || t.Status == 2 || t.Status == 3,
-                includes: includes
-            );
-
-            farmTasks = farmTasks.OrderByDescending(t => t.CreateDate).ToList();
-
-            var map = new Dictionary<FarmTask, FarmTaskModel>();
-
-            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
-
-            foreach (var pair in farmTasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
-            {
-                map.Add(pair.ft, pair.ftModel);
-            }
-
-            foreach (var farmTask in farmTasks)
-            {
-                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
-
-                if (member != null && map.ContainsKey(farmTask))
-                {
-                    map[farmTask].ReceiverName = member.Name;
-                }
-
-                var employeeNames = await ListTaskEmployee(farmTask.Id);
-
-                if (employeeNames != null && map.ContainsKey(farmTask))
-                {
-                    map[farmTask].EmployeeName = string.Join(", ", employeeNames);
-                }
-            }
-
-            return map.Values;
-        }
-
-        public async Task<FarmTaskModel> Get(int id)
+        public async Task<GetFarmTaskModel> Get(int id)
         {
             var farmTask = await _unitOfWork.RepositoryFarmTask.GetById(id);
 
             if (farmTask == null)
             {
-                throw new Exception("Not found task");
+                throw new Exception("Không tìm thấy nhiệm vụ");
             }
 
-            var member = await _unitOfWork.RepositoryMember.GetById(farmTask.MemberId);
-            var receiver = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
+            var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ManagerId);
+            var receiver = await _unitOfWork.RepositoryMember.GetById(farmTask.SuppervisorId);
             var plant = await _unitOfWork.RepositoryPlant.GetById(farmTask.PlantId);
             var liveStock = await _unitOfWork.RepositoryLiveStock.GetById(farmTask.LiveStockId);
             var field = await _unitOfWork.RepositoryField.GetById(farmTask.FieldId);
             var taskType = await _unitOfWork.RepositoryTaskTaskType.GetById(farmTask.TaskTypeId);
-            var other = await _unitOfWork.RepositoryOther.GetById(farmTask.OtherId);
 
             var zone = await _unitOfWork.RepositoryZone.GetSingleByCondition(h => h.Id == field.ZoneId);
             var area = await _unitOfWork.RepositoryArea.GetById(zone.AreaId);
@@ -221,13 +154,31 @@ namespace SomoTaskManagement.Services.Imp
             var status = (TaskStatusEnum)farmTask.Status;
             var statusString = GetTaskStatusDescription(status);
 
+            var statusField = (HabitantTypeStatus)field.Status;
+            var statusFieldString = GetHabitantTypeDescription(statusField);
+
             var priority = (PriorityEnum)farmTask.Priority;
             var priorityString = GetPriorityDescription(priority);
 
             var employeeNames = await ListTaskEmployee(farmTask.Id);
 
             var employeeNamesString = String.Join(", ", employeeNames);
-            var farmTaskModel = new FarmTaskModel
+
+            var employeeIds = await ListTaskEmployeeId(farmTask.Id);
+
+            var materialNames = await ListMaterial(farmTask.Id);
+
+            var materialNamesString = String.Join(", ", materialNames);
+
+            var materialIds = await ListMaterialId(farmTask.Id);
+
+            var employeeNameCodes = await ListTaskEmployeeNameCode(farmTask.Id);
+
+            var employeeNameCodesString = string.Join(Environment.NewLine, employeeNameCodes); ;
+
+
+            var supervisorName = $"{receiver.Code} - {receiver.Name}";
+            var farmTaskModel = new GetFarmTaskModel
             {
                 Id = farmTask.Id,
                 CreateDate = farmTask.CreateDate,
@@ -235,28 +186,36 @@ namespace SomoTaskManagement.Services.Imp
                 EndDate = farmTask.EndDate,
                 Description = farmTask.Description,
                 Priority = priorityString,
-                Repeat = farmTask.Repeat,
-                Iterations = farmTask.Iterations,
-                ReceiverName = receiver != null ? receiver.Name : null,
-                MemberName = member != null ? member.Name : null,
+                IsRepeat = farmTask.IsRepeat,
+                SupervisorName = supervisorName,
+                SuppervisorId = receiver.Id,
+                ManagerName = member != null ? member.Name : null,
                 PlantName = plant != null ? plant.Name : null,
                 liveStockName = liveStock != null ? liveStock.Name : null,
-                FieldName = field != null ? field.Name : null,
-                OtherName = other != null ? other.Name : null,
+                FieldName = field != null ? $"{field.Code} - {field.Name}" : null,
                 TaskTypeName = taskType != null ? taskType.Name : null,
+                TaskTypeId = taskType != null ? taskType.Id : 0,
                 Remind = farmTask.Remind,
                 Name = farmTask.Name,
                 Status = statusString,
-                ZoneName = zone.Name,
-                AreaName = area.Name,
-                ExternalId = liveStock != null ? liveStock.ExternalId : null,
-                EmployeeName = employeeNamesString
+                ZoneName = $"{zone.Code} - {zone.Name}",
+                AreaName = $"{area.Code} - {area.Name}",
+                ExternalId = liveStock != null ? liveStock.ExternalId : (plant != null ? plant.ExternalId : null),
+                EmployeeName = employeeNamesString,
+                FieldId = field != null ? field.Id : 0,
+                ZoneId = zone.Id,
+                AreaId = area.Id,
+                FieldStatus = field != null ? statusFieldString : null,
+                EmployeeId = employeeIds,
+                MaterialId = materialIds,
+                MaterialName = materialNamesString,
+                EmployeeNameCode = employeeNameCodesString
             };
 
             return farmTaskModel;
         }
 
-        public static string GetTaskStatusDescription(TaskStatusEnum status)
+        public static string GetHabitantTypeDescription(HabitantTypeStatus status)
         {
             var fieldInfo = status.GetType().GetField(status.ToString());
 
@@ -287,7 +246,6 @@ namespace SomoTaskManagement.Services.Imp
                 t => t.Field.Zone,
                 t => t.Field.Zone.Area,
                 t => t.Field,
-                t => t.Other,
                 t => t.TaskType,
             };
 
@@ -300,6 +258,10 @@ namespace SomoTaskManagement.Services.Imp
                      .ThenByDescending(t => t.Priority)
                      .ToList();
 
+            if (farmTasks == null)
+            {
+                throw new Exception("Không tìm thấy nhiệm vụ");
+            }
             var map = new Dictionary<FarmTask, FarmTaskModel>();
 
             var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
@@ -311,11 +273,11 @@ namespace SomoTaskManagement.Services.Imp
 
             foreach (var farmTask in farmTasks)
             {
-                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
+                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.SuppervisorId);
 
                 if (member != null && map.ContainsKey(farmTask))
                 {
-                    map[farmTask].ReceiverName = member.Name;
+                    map[farmTask].SupervisorName = member.Name;
                 }
 
                 var employeeNames = await ListTaskEmployee(farmTask.Id);
@@ -324,26 +286,91 @@ namespace SomoTaskManagement.Services.Imp
                 {
                     map[farmTask].EmployeeName = string.Join(", ", employeeNames);
                 }
+
+                var employeeIds = await ListTaskEmployeeId(farmTask.Id);
+
+                if (employeeIds != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].EmployeeId = employeeIds;
+                }
+                var materialName = await ListMaterial(farmTask.Id);
+
+                if (materialName != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].MaterialName = string.Join(", ", materialName);
+                }
+                var materialId = await ListMaterialId(farmTask.Id);
+
+                if (materialId != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].MaterialId = materialId;
+                }
             }
 
             return map.Values;
         }
-        public async Task<IEnumerable<FarmTaskModel>> GetListActiveByMemberId(int id)
+
+        // get task theo manager
+
+        public async Task<FarmTaskPageResult> GetTaskByStatusMemberDate(int id, int status, DateTime? date, int pageIndex, int pageSize, string? taskName)
         {
             var includes = new Expression<Func<FarmTask, object>>[]
             {
-                t =>t.Member,
+                t => t.Member,
                 t => t.Plant,
                 t => t.LiveStrock,
                 t => t.Field.Zone,
                 t => t.Field.Zone.Area,
                 t => t.Field,
-                t=>t.Other,
-                t=>t.TaskType,
+                t => t.TaskType
             };
+            int skipCount = (pageIndex - 1) * pageSize;
+            var farmTasks = await _unitOfWork.RepositoryFarmTask.GetData(
+                expression: t => (t.ManagerId == id || t.ManagerId == null) &&
+                                 t.Status == status &&
+                                 (!date.HasValue || (
+                                    date.Value.Year >= t.StartDate.Year &&
+                                    date.Value.Year <= t.EndDate.Year &&
+                                    date.Value.Month >= t.StartDate.Month &&
+                                    date.Value.Month <= t.EndDate.Month &&
+                                    date.Value.Day >= t.StartDate.Day &&
+                                    date.Value.Day <= t.EndDate.Day
+                                 )),
+                includes: includes);
 
-<<<<<<< HEAD
-        public async Task<IEnumerable<FarmTaskModel>> GetTaskByTotalDay(DateTime date, int id)
+            if (!string.IsNullOrEmpty(taskName))
+            {
+                farmTasks = farmTasks.Where(t => t.Name.Unidecode().IndexOf(taskName.Unidecode(), StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+
+
+            var totalTaskCount = farmTasks.Count();
+
+            var totalPages = (int)Math.Ceiling((double)totalTaskCount / pageSize);
+
+
+            if (farmTasks == null)
+            {
+                throw new Exception("Không tìm thấy nhiệm vụ");
+            }
+
+            farmTasks = farmTasks.OrderByDescending(t => t.Priority).ThenByDescending(t => t.StartDate)
+                .Skip(skipCount)
+                .Take(pageSize)
+                .ToList();
+
+
+            var map = await MapFarmTasks(farmTasks);
+
+            return new FarmTaskPageResult
+            {
+                FarmTasks = map.Values,
+                TotalPages = totalPages
+            };
+        }
+
+
+        public async Task<FarmTaskPageResult> GetTaskByStatusSupervisorDate(int id, int status, DateTime? date, int pageIndex, int pageSize, string? taskName)
         {
 
             var includes = new Expression<Func<FarmTask, object>>[]
@@ -354,78 +381,51 @@ namespace SomoTaskManagement.Services.Imp
                 t => t.Field.Zone,
                 t => t.Field.Zone.Area,
                 t => t.Field,
-                t => t.Other,
-                t => t.TaskType,
+                t => t.TaskType
             };
+            int skipCount = (pageIndex - 1) * pageSize;
 
             var farmTasks = await _unitOfWork.RepositoryFarmTask.GetData(
-                   expression:
-                     t =>
-                          date.Year >= t.StartDate.Year &&
-                          date.Year <= t.EndDate.Year &&
+              expression: t => t.SuppervisorId == id &&
+                             t.Status == status &&
+                             (!date.HasValue || (
+                               date.Value.Year >= t.StartDate.Year &&
+                               date.Value.Year <= t.EndDate.Year &&
+                               date.Value.Month >= t.StartDate.Month &&
+                               date.Value.Month <= t.EndDate.Month &&
+                               date.Value.Day >= t.StartDate.Day &&
+                               date.Value.Day <= t.EndDate.Day
+                             )),
+              includes: includes);
 
-                          date.Month >= t.StartDate.Month &&
-                          date.Month <= t.EndDate.Month &&
-
-                          date.Day >= t.StartDate.Day &&
-                          date.Day <= t.EndDate.Day &&
-
-                          t.MemberId == id &&
-                          (t.Status == 0 ||
-                           t.Status == 1 ||
-                           t.Status == 2 ||
-                           t.Status == 3),
-
-                   includes: includes
-
-                 );
-            farmTasks = farmTasks.OrderByDescending(t => t.Status)
-                     .ThenByDescending(t => t.Priority)
-                     .ToList();
-
-            var map = new Dictionary<FarmTask, FarmTaskModel>();
-
-            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
-
-            foreach (var pair in farmTasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
+            if (!string.IsNullOrEmpty(taskName))
             {
-                map.Add(pair.ft, pair.ftModel);
+                farmTasks = farmTasks.Where(t => t.Name.Unidecode().IndexOf(taskName.Unidecode(), StringComparison.OrdinalIgnoreCase) >= 0);
             }
 
-            foreach (var farmTask in farmTasks)
+            var totalTaskCount = farmTasks.Count();
+
+            var totalPages = (int)Math.Ceiling((double)totalTaskCount / pageSize);
+
+            if (farmTasks == null)
             {
-                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
-
-                if (member != null && map.ContainsKey(farmTask))
-                {
-                    map[farmTask].ReceiverName = member.Name;
-                }
-
-                var employeeNames = await ListTaskEmployee(farmTask.Id);
-
-                if (employeeNames != null && map.ContainsKey(farmTask))
-                {
-                    map[farmTask].EmployeeName = string.Join(", ", employeeNames);
-                }
+                throw new Exception("Không tìm thấy nhiệm vụ");
             }
 
-            return map.Values;
-        }
-        public async Task<IEnumerable<FarmTaskModel>> GetListActiveByMemberId(int id)
-        {
-            var includes = new Expression<Func<FarmTask, object>>[]
+            farmTasks = farmTasks.OrderByDescending(t => t.Priority).ThenByDescending(t => t.StartDate)
+                .Skip(skipCount)
+                .Take(pageSize)
+                .ToList();
+
+            var map = await MapFarmTasks(farmTasks);
+
+            return new FarmTaskPageResult
             {
-                t =>t.Member,
-                t => t.Plant,
-                t => t.LiveStrock,
-                t => t.Field.Zone,
-                t => t.Field.Zone.Area,
-                t => t.Field,
-                t=>t.Other,
-                t=>t.TaskType,
+                FarmTasks = map.Values,
+                TotalPages = totalPages
             };
 
-<<<<<<< HEAD
+        }
 
         public async Task<IEnumerable<FarmTaskModel>> GetTaskByMemberId(int id)
         {
@@ -437,211 +437,253 @@ namespace SomoTaskManagement.Services.Imp
                 t => t.Field.Zone,
                 t => t.Field.Zone.Area,
                 t => t.Field,
-                t => t.Other,
                 t => t.TaskType,
            };
 
             var farmTasks = await _unitOfWork.RepositoryFarmTask
-                    .GetData(expression: t => t.MemberId == id, includes: includes);
+                    .GetData(expression: t => t.ManagerId == id, includes: includes);
             farmTasks = farmTasks.OrderByDescending(t => t.Status)
                      .ThenByDescending(t => t.Priority)
                      .ToList();
-
-            var map = new Dictionary<FarmTask, FarmTaskModel>();
-
-            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
-
-            foreach (var pair in farmTasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
+            if (farmTasks == null)
             {
-                map.Add(pair.ft, pair.ftModel);
+                throw new Exception("Không tìm thấy nhiệm vụ");
             }
-
-            foreach (var farmTask in farmTasks)
-            {
-                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
-
-                if (member != null && map.ContainsKey(farmTask))
-                {
-                    map[farmTask].ReceiverName = member.Name;
-                }
-
-                var employeeNames = await ListTaskEmployee(farmTask.Id);
-
-                if (employeeNames != null && map.ContainsKey(farmTask))
-                {
-                    map[farmTask].EmployeeName = string.Join(", ", employeeNames);
-                }
-            }
+            var map = await MapFarmTasks(farmTasks);
 
             return map.Values;
+
         }
-
-
-        public async Task<IEnumerable<FarmTaskModel>> GetListActiveByMemberId(int id)
+        public async Task<List<int>> GetManagerId()
         {
-            var includes = new Expression<Func<FarmTask, object>>[]
-           {
-                t => t.Member,
-                t => t.Plant,
-                t => t.LiveStrock,
-                t => t.Field.Zone,
-                t => t.Field.Zone.Area,
-                t => t.Field,
-                t => t.Other,
-                t => t.TaskType,
-           };
+            var manager = await _unitOfWork.RepositoryMember.GetData(m => m.RoleId == 1);
+            var managerId = manager.Select(m => m.Id).ToList();
+            return managerId;
+        }
+        public async Task<List<string>> GetTokenByMemberId(int id)
+        {
+            var hubConnections = await _unitOfWork.RepositoryHubConnection.GetData(h => h.MemberId == id);
 
-            var farmTasks = await _unitOfWork.RepositoryFarmTask
-                .GetData(expression: t => t.MemberId == id && t.Status == 0 || t.Status == 1 || t.Status == 2 || t.Status == 3, includes: includes);
-            farmTasks = farmTasks.OrderByDescending(t => t.Status)
-                     .ThenByDescending(t => t.Priority)
-                     .ToList();
-
-            var map = new Dictionary<FarmTask, FarmTaskModel>();
-
-            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
-
-            foreach (var pair in farmTasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
+            if (hubConnections == null)
             {
-                map.Add(pair.ft, pair.ftModel);
+                throw new Exception("Không tìm thấy kết nối");
             }
 
-            foreach (var farmTask in farmTasks)
-            {
-                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.ReceiverId);
-
-                if (member != null && map.ContainsKey(farmTask))
-                {
-                    map[farmTask].ReceiverName = member.Name;
-                }
-
-                var employeeNames = await ListTaskEmployee(farmTask.Id);
-
-                if (employeeNames != null && map.ContainsKey(farmTask))
-                {
-                    map[farmTask].EmployeeName = string.Join(", ", employeeNames);
-                }
-            }
-
-            return map.Values;
-=======
-=======
->>>>>>> 7a93940b85afba652faec6c88f755c840d3612ed
-            var farmTasks = await _unitOfWork.RepositoryFarmTask
-                .GetData(expression: t => t.MemberId == id && t.Status == 0 || t.Status == 1 || t.Status == 2 || t.Status == 3, includes: includes);
-
-            return _mapper.Map<IEnumerable<FarmTask>, IEnumerable<FarmTaskModel>>(farmTasks);
-<<<<<<< HEAD
->>>>>>> 7a93940b85afba652faec6c88f755c840d3612ed
-=======
->>>>>>> 7a93940b85afba652faec6c88f755c840d3612ed
+            var connectionIds = hubConnections.Select(h => h.ConnectionId).ToList();
+            return connectionIds;
         }
-        public async Task Add(int memberId, TaskCreateUpdateModel farmTaskmodel, List<int> employeeIds, List<int> materialIds)
+
+        public async Task ProcessTaskCreation(int memberId, TaskRequestModel taskModel)
         {
-            var member = await _unitOfWork.RepositoryMember.GetById(memberId) ?? throw new Exception("Member not found");
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
-            int totalDays = (farmTaskmodel.EndDate - farmTaskmodel.StartDate).Days;
-
-            int currentDayIndex = 0;
-            //while (currentDayIndex <= totalDays)
-            //{
-            var currentDay = farmTaskmodel.StartDate.AddDays(currentDayIndex);
-
-            //    switch (farmTaskmodel.Repeat)
-            //    {
-            //        case "Hằng tuần":
-            //            DateTime nextWeek = farmTaskmodel.StartDate.AddDays(7 * farmTaskmodel.Iterations);
-            //            currentDay = currentDay >= nextWeek ? nextWeek : currentDay;
-            //            break;
-
-            //        case "Hằng tháng":
-            //            DateTime nextMonth = farmTaskmodel.StartDate.AddMonths(1 * farmTaskmodel.Iterations);
-            //            currentDay = currentDay >= nextMonth ? nextMonth : currentDay;
-            //            break;
-
-            //        case "Hằng ngày":
-            //            currentDay = currentDay.AddDays(1 * farmTaskmodel.Iterations);
-            //            break;
-            //        case "Không":
-            //            currentDay = farmTaskmodel.StartDate;
-            //            break;
-            //        default:
-            //            break;
-            //    }
-
-
-
-            var farmTaskNew = new FarmTask
+                DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+                var member = await _unitOfWork.RepositoryMember.GetById(memberId) ?? throw new Exception("Không tìm thấy người dùng");
+                var startDate = taskModel.FarmTask.StartDate;
+                var endDate = taskModel.FarmTask.EndDate;
+                int taskId = 0;
+                foreach (var date in new List<DateTime> { startDate }.Concat(taskModel.Dates))
                 {
-                    CreateDate = DateTime.Now,
-                    StartDate = currentDay,
-                    EndDate = farmTaskmodel.EndDate,
-                    Description = farmTaskmodel.Description,
-                    Priority = (int)ParsePriorityFromString(farmTaskmodel.Priority),
-                    ReceiverId = farmTaskmodel.ReceiverId,
-                    FieldId = farmTaskmodel.FieldId,
-                    TaskTypeId = farmTaskmodel.TaskTypeId,
-                    MemberId = member.Id,
-                    OtherId = farmTaskmodel.OtherId == 0 ? (int?)null : farmTaskmodel.OtherId,
-                    PlantId = farmTaskmodel.PlantId == 0 ? (int?)null : farmTaskmodel.PlantId,
-                    LiveStockId = farmTaskmodel.LiveStockId == 0 ? (int?)null : farmTaskmodel.LiveStockId,
-                    Name = farmTaskmodel.Name,
-                    Status = 1,
-                    Repeat = farmTaskmodel.Repeat,
-                    Iterations = farmTaskmodel.Iterations,
-                    Remind = farmTaskmodel.Remind
+                    var farmTaskNew = new FarmTask
+                    {
+                        CreateDate = vietnamTime,
+                        StartDate = new DateTime(date.Year, date.Month, date.Day, startDate.Hour, startDate.Minute, startDate.Second),
+                        EndDate = new DateTime(date.Year, date.Month, date.Day, endDate.Hour, endDate.Minute, endDate.Second).AddDays((endDate - startDate).Days),
+                        Description = taskModel.FarmTask.Description,
+                        Priority = (int)ParsePriorityFromString(taskModel.FarmTask.Priority),
+                        SuppervisorId = taskModel.FarmTask.SuppervisorId,
+                        FieldId = taskModel.FarmTask.FieldId == 0 ? (int?)null : taskModel.FarmTask.FieldId,
+                        TaskTypeId = taskModel.FarmTask.TaskTypeId,
+                        IsRepeat = taskModel.FarmTask.IsRepeat,
+                        ManagerId = taskModel.FarmTask.ManagerId == 0 ? (int?)null : taskModel.FarmTask.ManagerId,
+                        PlantId = taskModel.FarmTask.PlantId == 0 ? (int?)null : taskModel.FarmTask.PlantId,
+                        LiveStockId = taskModel.FarmTask.LiveStockId == 0 ? (int?)null : taskModel.FarmTask.LiveStockId,
+                        Name = taskModel.FarmTask.Name,
+                        Status = 0,
+                        Remind = taskModel.FarmTask.Remind
+                    };
+                    var suppervisor = await _unitOfWork.RepositoryMember.GetById(taskModel.FarmTask.SuppervisorId);
+
+                    if (suppervisor == null)
+                    {
+                        throw new Exception("Không tìm thấy người dám sát");
+                    }
+
+                    var hubConnections = await _unitOfWork.RepositoryHubConnection.GetData(h => h.MemberId == taskModel.FarmTask.SuppervisorId);
+
+                    var supervisorTokens = await GetTokenByMemberId(taskModel.FarmTask.SuppervisorId);
+
+                    if (supervisorTokens.Count > 0)
+                    {
+                        var remindMessage = new Message
+                        {
+                            Notification = new FirebaseAdmin.Messaging.Notification
+                            {
+                                Title = "Nhắc nhở",
+                                Body = $"Còn {farmTaskNew.Remind} phút tới nhiệm vụ của bạn"
+                            },
+                            Data = new Dictionary<string, string>
+                        {
+                            { "taskId", taskId.ToString() }
+                        }
+                        };
+
+                        var remindTime = farmTaskNew.StartDate.AddMinutes(-farmTaskNew.Remind);
+                        var currentTime = vietnamTime;
+
+                        if (remindTime > currentTime)
+                        {
+                            var delayMilliseconds = (int)(remindTime - currentTime).TotalMilliseconds;
+                            var timer = new System.Timers.Timer(delayMilliseconds);
+                            timer.Elapsed += async (sender, e) =>
+                            {
+                                await SendNotificationToDevices(supervisorTokens, remindMessage);
+                                timer.Dispose();
+                            };
+                            timer.AutoReset = false;
+                            timer.Start();
+                        }
+                    }
+
+                    await CreateTaskForDate(farmTaskNew, taskModel.EmployeeIds, taskModel.MaterialIds);
+                    taskId = farmTaskNew.Id;
+                }
+
+                var roleMember = await CheckRoleMember(memberId);
+
+                List<string> deviceTokens = new List<string>();
+
+                var listManager = await GetManagerId();
+
+                List<int> listMemberNotify = new List<int>();
+
+                if (roleMember == 3)
+                {
+                    foreach (var manager in listManager)
+                    {
+                        var managerTokens = await GetTokenByMemberId(manager);
+                        deviceTokens.AddRange(managerTokens);
+                        listMemberNotify.Add(manager);
+                    }
+                }
+                else if (roleMember == 1)
+                {
+                    var supervisorTokens = await GetTokenByMemberId(taskModel.FarmTask.SuppervisorId);
+                    deviceTokens.AddRange(supervisorTokens);
+
+                    listMemberNotify.Add(taskModel.FarmTask.SuppervisorId);
+                }
+
+                var deviceMessages = deviceTokens.Select(token => new Message
+                {
+                    Token = token,
+                    Notification = new FirebaseAdmin.Messaging.Notification
+                    {
+                        Title = $"{taskModel.FarmTask.Name}",
+                        Body = $"Bạn đã nhận một nhiệm vụ '{taskModel.FarmTask.Name}'"
+                    },
+                    Data = new Dictionary<string, string>
+                {
+                    { "taskId", taskId.ToString() }
+                }
+                }).ToList();
+
+                foreach (var deviceMessage in deviceMessages)
+                {
+                    await SendNotificationToDevices(new List<string> { deviceMessage.Token }, deviceMessage);
+                }
+
+                var individualNotification = new Notification
+                {
+                    Message = $"Bạn đã nhận một nhiệm vụ '{taskModel.FarmTask.Name}'",
+                    MessageType = "Individual",
+                    NotificationDateTime = vietnamTime,
+                    IsRead = false,
+                    IsNew = true,
+                    TaskId = taskId
+                };
+                await _unitOfWork.RepositoryNotifycation.Add(individualNotification);
+                await _unitOfWork.RepositoryNotifycation.Commit();
+
+                var member_notify = new Notification_Member
+                {
+                    NotificationId = individualNotification.Id
                 };
 
-
-
-                for (int i = 0; i < employeeIds.Count; i++)
+                foreach (var memberNotify in listMemberNotify)
                 {
-                    var employeeId = employeeIds[i];
+                    member_notify.MemberId = memberNotify;
+                    await _unitOfWork.RepositoryNotifycation_Member.Add(member_notify);
+                    await _unitOfWork.RepositoryNotifycation_Member.Commit();
+                }
+                _unitOfWork.CommitTransaction();
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.RollbackTransaction();
+                throw new Exception(ex.Message);
+            }
 
-                    var employee = await _unitOfWork.RepositoryEmployee.GetById(employeeId);
+        }
 
-                    if (employee == null)
-                    {
-                        throw new Exception($"Employee with ID '{employeeId}' not found.");
-                    }
+        public async Task SendNotificationToDevices(List<string> deviceTokens, Message message)
+        {
+            foreach (var deviceToken in deviceTokens)
+            {
+                message.Token = deviceToken;
 
-                    var employee_Task = new Employee_Task
-                    {
-                        EmployeeId = employee.Id,
-                        TaskId = farmTaskNew.Id,
-                        Status = true,
-                    };
+                var messaging = FirebaseMessaging.DefaultInstance;
+                await messaging.SendAsync(message);
+            }
+        }
+        private async Task CreateTaskForDate(FarmTask farmTask, List<int> employeeIds, List<int> materialIds)
+        {
+            for (int i = 0; i < employeeIds.Count; i++)
+            {
+                var employeeId = employeeIds[i];
+                var employee = await _unitOfWork.RepositoryEmployee.GetById(employeeId);
 
-                    farmTaskNew.Employee_Tasks.Add(employee_Task);
+                if (employee == null)
+                {
+                    throw new Exception($"Không tìm thấy nhân viên");
                 }
 
-
-                for (int i = 0; i < materialIds.Count; i++)
+                var employee_Task = new Employee_Task
                 {
-                    var materialId = materialIds[i];
+                    EmployeeId = employee.Id,
+                    TaskId = farmTask.Id,
+                    ActualEffort = 0,
+                    Status = false,
+                };
 
-                    var material = await _unitOfWork.RepositoryMaterial.GetById(materialId);
+                farmTask.Employee_Tasks.Add(employee_Task);
+            }
 
-                    if (material == null)
-                    {
-                        throw new Exception($"Employee with ID '{materialId}' not found.");
-                    }
+            for (int i = 0; i < materialIds.Count; i++)
+            {
+                var materialId = materialIds[i];
+                var material = await _unitOfWork.RepositoryMaterial.GetById(materialId);
 
-                    var material_Task = new Material_Task
-                    {
-                        MaterialId = material.Id,
-                        TaskId = farmTaskNew.Id,
-                        Status = true,
-                    };
-
-                    farmTaskNew.Material_Tasks.Add(material_Task);
+                if (material == null)
+                {
+                    continue;
                 }
 
-                currentDayIndex++;
+                var material_Task = new Material_Task
+                {
+                    MaterialId = material.Id,
+                    TaskId = farmTask.Id,
+                    Status = true,
+                };
 
-                await _unitOfWork.RepositoryFarmTask.Add(farmTaskNew);
-                await _unitOfWork.RepositoryFarmTask.Commit();
-            //}
+                farmTask.Material_Tasks.Add(material_Task);
+            }
+
+            await _unitOfWork.RepositoryFarmTask.Add(farmTask);
+            await _unitOfWork.RepositoryFarmTask.Commit();
         }
 
         public PriorityEnum ParsePriorityFromString(string priorityString)
@@ -665,38 +707,34 @@ namespace SomoTaskManagement.Services.Imp
                     throw new ArgumentException("Invalid priority string.");
             }
         }
-
-
         public async Task Update(int farmTaskId, int memberId, FarmTask farmTaskUpdate, List<int> employeeIds, List<int> materialIds)
         {
-            var taskOfMember = await _unitOfWork.RepositoryFarmTask.GetSingleByCondition(t => t.MemberId == memberId);
+            var taskOfMember = await _unitOfWork.RepositoryFarmTask.GetSingleByCondition(t => t.ManagerId == memberId);
             if (taskOfMember == null)
             {
-                throw new Exception("Task of member not found");
+                throw new Exception("Không tìm thấy nhiệm vụ");
             }
 
             var farmTask = await _unitOfWork.RepositoryFarmTask.GetById(taskOfMember.Id);
 
             if (farmTask == null)
             {
-                throw new Exception($"Farm task with ID '{farmTaskId}' not found.");
+                throw new Exception($"Không tìm thấy nhiệm vụ ");
             }
 
             farmTask.Name = farmTaskUpdate.Name;
             farmTask.Description = farmTaskUpdate.Description;
             farmTask.Priority = farmTaskUpdate.Priority;
-            farmTask.ReceiverId = farmTaskUpdate.ReceiverId;
+            farmTask.SuppervisorId = farmTaskUpdate.SuppervisorId;
             farmTask.FieldId = farmTaskUpdate.FieldId;
             farmTask.TaskTypeId = farmTaskUpdate.TaskTypeId;
-            farmTask.OtherId = farmTaskUpdate.OtherId;
             farmTask.PlantId = farmTaskUpdate.PlantId;
             farmTask.LiveStockId = farmTaskUpdate.LiveStockId;
             farmTask.StartDate = farmTaskUpdate.StartDate;
             farmTask.EndDate = farmTaskUpdate.EndDate;
             farmTask.Status = farmTaskUpdate.Status;
-            farmTask.Repeat = farmTaskUpdate.Repeat;
-            farmTask.Iterations = farmTaskUpdate.Iterations;
             farmTask.Remind = farmTaskUpdate.Remind;
+
             farmTask.Employee_Tasks.Clear();
 
             foreach (var employeeId in employeeIds)
@@ -705,14 +743,13 @@ namespace SomoTaskManagement.Services.Imp
 
                 if (employee == null)
                 {
-                    throw new Exception($"Employee with ID {employeeId} not found");
+                    throw new Exception($"Không tìm thấy nhân viên");
                 }
 
                 var employeeTask = new Employee_Task
                 {
                     EmployeeId = employee.Id,
                     TaskId = farmTask.Id,
-                    Status = true
                 };
 
                 farmTask.Employee_Tasks.Add(employeeTask);
@@ -726,7 +763,7 @@ namespace SomoTaskManagement.Services.Imp
 
                 if (material == null)
                 {
-                    throw new Exception($"Material with ID {materialId} not found");
+                    throw new Exception($"Không tìm thấy dụng cụ");
                 }
 
                 var materialTask = new Material_Task
@@ -745,17 +782,12 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task UpdateStatus(int id, int status)
         {
-            var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
-            if (task == null)
+            var task = await _unitOfWork.RepositoryFarmTask.GetSingleByCondition(f => f.Id == id);
+            if (task != null)
             {
-                throw new Exception("Task not found");
+                task.Status = status;
+                await _unitOfWork.RepositoryFarmTask.Commit();
             }
-            if (status < 0 || status > 4)
-            {
-                throw new Exception("Status must be between 0 - 4");
-            }
-            task.Status = status;
-            await _unitOfWork.RepositoryFarmTask.Commit();
         }
 
         public async Task Delete(FarmTask farmTask)
@@ -764,5 +796,365 @@ namespace SomoTaskManagement.Services.Imp
             await _unitOfWork.RepositoryFarmTask.Commit();
         }
 
+        public async Task<IEnumerable<FarmTaskModel>> GetListActive()
+        {
+            var includes = new Expression<Func<FarmTask, object>>[]
+           {
+                t => t.Member,
+                t => t.Plant,
+                t => t.LiveStrock,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area,
+                t => t.Field,
+                t => t.TaskType,
+           };
+
+
+            var farmTasks = await _unitOfWork.RepositoryFarmTask.GetData(
+                expression: t => t.Status == 0 || t.Status == 1 || t.Status == 2 || t.Status == 3,
+                includes: includes
+            );
+
+            farmTasks = farmTasks.OrderByDescending(t => t.CreateDate).ToList();
+            var map = await MapFarmTasks(farmTasks);
+
+            return map.Values;
+        }
+        public async Task<IEnumerable<string>> ListTaskEmployee(int taskId)
+        {
+            var task = await _unitOfWork.RepositoryFarmTask.GetById(taskId);
+            if (task == null)
+            {
+                throw new Exception("Task not found");
+            }
+            var employee_task = await _unitOfWork.RepositoryEmployee_Task.GetData(expression: e => e.TaskId == task.Id, includes: null);
+            var employeeIds = employee_task.Select(x => x.EmployeeId).ToList();
+            if (employee_task != null)
+            {
+                var employees = await _unitOfWork.RepositoryEmployee.GetData(expression: e => employeeIds.Contains(e.Id));
+
+                return employees.Select(e => e.Name);
+            }
+
+            return null;
+        }
+
+        public async Task<IEnumerable<string>> ListTaskEmployeeNameCode(int taskId)
+        {
+            var task = await _unitOfWork.RepositoryFarmTask.GetById(taskId);
+            if (task == null)
+            {
+                throw new Exception("Task not found");
+            }
+
+            var employee_task = await _unitOfWork.RepositoryEmployee_Task.GetData(expression: e => e.TaskId == task.Id, includes: null);
+            var employeeIds = employee_task.Select(x => x.EmployeeId).ToList();
+
+            if (employee_task != null)
+            {
+                var employees = await _unitOfWork.RepositoryEmployee.GetData(expression: e => employeeIds.Contains(e.Id));
+
+                var employeeNameCodes = employees.Select(e => $"{e.Code} - {e.Name}");
+
+                return employeeNameCodes;
+            }
+
+            return null;
+        }
+
+
+        public async Task<List<int>> ListTaskEmployeeId(int taskId)
+        {
+            var task = await _unitOfWork.RepositoryFarmTask.GetById(taskId);
+            if (task == null)
+            {
+                throw new Exception("Task not found");
+            }
+            var employee_task = await _unitOfWork.RepositoryEmployee_Task.GetData(expression: e => e.TaskId == task.Id, includes: null);
+            var employeeIds = employee_task.Select(x => x.EmployeeId).ToList();
+            if (employee_task != null)
+            {
+                var employees = await _unitOfWork.RepositoryEmployee.GetData(expression: e => employeeIds.Contains(e.Id));
+
+                return employees.Select(e => e.Id).ToList();
+            }
+
+            return null;
+        }
+        public async Task<IEnumerable<string>> ListMaterial(int taskId)
+        {
+            var task = await _unitOfWork.RepositoryFarmTask.GetById(taskId);
+            if (task == null)
+            {
+                throw new Exception("Task not found");
+            }
+            var material_task = await _unitOfWork.RepositoryMaterial_Task.GetData(expression: e => e.TaskId == task.Id, includes: null);
+            var materialIds = material_task.Select(x => x.MaterialId).ToList();
+            if (material_task != null)
+            {
+                var employees = await _unitOfWork.RepositoryMaterial.GetData(expression: e => materialIds.Contains(e.Id));
+
+                return employees.Select(e => e.Name);
+            }
+
+            return null;
+        }
+
+        public async Task<List<int>> ListMaterialId(int taskId)
+        {
+            var task = await _unitOfWork.RepositoryFarmTask.GetById(taskId);
+            if (task == null)
+            {
+                throw new Exception("Task not found");
+            }
+            var material_task = await _unitOfWork.RepositoryMaterial_Task.GetData(expression: e => e.TaskId == task.Id, includes: null);
+            var materialIds = material_task.Select(x => x.MaterialId).ToList();
+            if (material_task != null)
+            {
+                var employees = await _unitOfWork.RepositoryMaterial.GetData(expression: e => materialIds.Contains(e.Id));
+
+                return employees.Select(e => e.Id).ToList();
+            }
+
+            return null;
+        }
+
+        public async Task<IEnumerable<FarmTaskModel>> GetListActiveByMemberId(int id)
+        {
+            var includes = new Expression<Func<FarmTask, object>>[]
+           {
+                t => t.Member,
+                t => t.Plant,
+                t => t.LiveStrock,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area,
+                t => t.Field,
+                t => t.TaskType,
+           };
+
+            var farmTasks = await _unitOfWork.RepositoryFarmTask
+                .GetData(expression: t => t.ManagerId == id && t.Status == 0 || t.Status == 1 || t.Status == 2 || t.Status == 3, includes: includes);
+            farmTasks = farmTasks.OrderByDescending(t => t.Status)
+                     .ThenByDescending(t => t.Priority)
+                     .ToList();
+            var map = await MapFarmTasks(farmTasks);
+
+            return map.Values;
+
+        }
+
+        public async Task<IEnumerable<FarmTaskModel>> GetTaskByTotalDay(DateTime date, int id)
+        {
+            var includes = new Expression<Func<FarmTask, object>>[]
+           {
+                t => t.Member,
+                t => t.Plant,
+                t => t.LiveStrock,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area,
+                t => t.Field,
+                t => t.TaskType,
+           };
+
+            var farmTasks = await _unitOfWork.RepositoryFarmTask.GetData(
+                   expression:
+                     t =>
+                          date.Year >= t.StartDate.Year &&
+                          date.Year <= t.EndDate.Year &&
+
+                          date.Month >= t.StartDate.Month &&
+                          date.Month <= t.EndDate.Month &&
+
+                          date.Day >= t.StartDate.Day &&
+                          date.Day <= t.EndDate.Day &&
+
+                          t.ManagerId == id &&
+                          (t.Status == 0 ||
+                           t.Status == 1 ||
+                           t.Status == 2 ||
+                           t.Status == 3),
+
+                   includes: includes
+
+                 );
+            if (farmTasks == null)
+            {
+                throw new Exception("Không tìm thấy nhiệm vụ");
+            }
+            farmTasks = farmTasks.OrderByDescending(t => t.Status)
+                     .ThenByDescending(t => t.Priority)
+                     .ToList();
+
+            var map = await MapFarmTasks(farmTasks);
+
+            return map.Values;
+        }
+
+        public async Task<IEnumerable<FarmTaskModel>> GetListActiveWithPagging(int pageIndex, int pageSize)
+        {
+            var includes = new Expression<Func<FarmTask, object>>[]
+            {
+                t => t.Member,
+                t => t.Plant,
+                t => t.LiveStrock,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area,
+                t => t.Field,
+                t => t.TaskType,
+            };
+
+            int skipCount = (pageIndex - 1) * pageSize;
+
+            var farmTasks = await _unitOfWork.RepositoryFarmTask.GetData(
+                expression: t => t.Status == 0 || t.Status == 1 || t.Status == 2 || t.Status == 3,
+                includes: includes
+            );
+            var map = await MapFarmTasks(farmTasks);
+
+            return map.Values;
+        }
+
+        public async Task<int> CheckRoleMember(int id)
+        {
+            var member = await _unitOfWork.RepositoryMember.GetById(id);
+            return member.RoleId;
+        }
+
+        public async Task CreateDisagreeTask(int id, string description)
+        {
+            var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
+            if (task != null)
+            {
+                TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
+                DateTime currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+                DateTime taskCreationTime = task.StartDate;
+
+                TimeSpan timeElapsed = taskCreationTime - currentTime;
+
+                if (timeElapsed.TotalMinutes >= 30)
+                {
+                    task.Status = 5;
+                    _unitOfWork.RepositoryFarmTask.Update(task);
+                    await _unitOfWork.RepositoryFarmTask.Commit();
+
+                    var taskEvidence = new TaskEvidence
+                    {
+                        Status = 1,
+                        SubmitDate = DateTime.Now,
+                        Description = description,
+                        TaskId = id,
+                    };
+
+                    await _unitOfWork.RepositoryTaskEvidence.Add(taskEvidence);
+                    await _unitOfWork.RepositoryTaskEvidence.Commit();
+                }
+                else
+                {
+                    throw new Exception("Không thể từ chối nhiệm vụ chuẩn bị bắt đầu trong 30 phút nữa.");
+                }
+            }
+            else
+            {
+                throw new Exception("Không tìm thấy nhiệm vụ");
+            }
+        }
+
+
+        public async Task DisDisagreeTask(int id)
+        {
+            var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
+            if (task != null)
+            {
+                task.Status = 0;
+                _unitOfWork.RepositoryFarmTask.Update(task);
+                await _unitOfWork.RepositoryFarmTask.Commit();
+            }
+            else
+            {
+                throw new Exception("Không tìm thấy nhiệm vụ ");
+            }
+            var evidences = await _unitOfWork.RepositoryTaskEvidence.GetData(e => e.TaskId == id);
+            foreach (var evidence in evidences)
+            {
+                _unitOfWork.RepositoryTaskEvidence.Delete(evidence);
+                await _unitOfWork.RepositoryTaskEvidence.Commit();
+            }
+        }
+
+        public async Task<TaskByEmployeeDatesEffort> GetTaskByEmployeeDates(int employeeId, DateTime? startDay, DateTime? endDay, int pageIndex, int pageSize, int? status)
+        {
+            var includes = new Expression<Func<FarmTask, object>>[]
+            {
+                t => t.Member,
+                t => t.Plant,
+                t => t.LiveStrock,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area,
+                t => t.Field,
+                t => t.TaskType,
+            };
+            var employee = await _unitOfWork.RepositoryEmployee.GetById(employeeId);
+            if (employee == null)
+            {
+                throw new Exception("Không tìm thấy nhân viên");
+            }
+            var subtask = await _unitOfWork.RepositoryEmployee_Task.GetData(expression: s => s.EmployeeId == employeeId);
+            var taskIds = subtask.Select(s => s.TaskId);
+            var task = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id) &&
+                                                                        (!startDay.HasValue || !endDay.HasValue || (
+                                                                           startDay.Value.Year >= t.StartDate.Year &&
+                                                                           endDay.Value.Year <= t.EndDate.Year &&
+                                                                           startDay.Value.Month >= t.StartDate.Month &&
+                                                                           endDay.Value.Month <= t.EndDate.Month &&
+                                                                           startDay.Value.Day >= t.StartDate.Day &&
+                                                                           endDay.Value.Day <= t.EndDate.Day
+                                                                        )), includes: includes);
+
+            if (status.HasValue)
+            {
+                task = task.Where(t => t.Status == status.Value);
+            }
+
+            var totalTaskCount = task.Count();
+
+            var totalPages = (int)Math.Ceiling((double)totalTaskCount / pageSize);
+
+
+
+            var map = new Dictionary<FarmTask, TaskByEmployeeDates>();
+
+            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<TaskByEmployeeDates>>(task);
+
+            foreach (var pair in task.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
+            {
+                map.Add(pair.ft, pair.ftModel);
+            }
+
+            foreach (var farmTask in task)
+            {
+                var member = await _unitOfWork.RepositoryMember.GetById(farmTask.SuppervisorId);
+
+                if (member != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].SupervisorName = member.Name;
+                }
+
+                var subtaskEffort = await _unitOfWork.RepositoryEmployee_Task.GetSingleByCondition(s => s.TaskId == farmTask.Id && s.EmployeeId == employeeId);
+                var effort = subtaskEffort.ActualEffort;
+
+                if (effort != null && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].Effort = effort;
+                }
+            }
+
+            return new TaskByEmployeeDatesEffort
+            {
+                TaskByEmployeeDates = map.Values,
+                TotalPage = totalPages
+            };
+        }
     }
 }

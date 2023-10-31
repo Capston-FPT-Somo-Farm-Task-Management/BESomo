@@ -18,11 +18,11 @@ namespace SomoTaskManagement.Domain.Entities
             Plants = new HashSet<Plant>();
             LiveStocks = new HashSet<LiveStock>();
         }
+        public string? Origin {  get; set; }
+        public string? Environment {  get; set; }
+        public string? Description {  get; set; }
 
-        [Range(0, int.MaxValue, ErrorMessage = "Quantity must be greater than 0.")]
-        [Required(ErrorMessage = "Quantity is required.")]
-        public int Quantity { set; get; }
-
+        public bool? IsActive {  get; set; }
         [JsonIgnore]
         public virtual ICollection<Plant> Plants { get; set; }
 

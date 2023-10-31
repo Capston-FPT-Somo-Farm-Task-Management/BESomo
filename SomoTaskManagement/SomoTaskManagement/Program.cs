@@ -3,6 +3,12 @@ using SomoTaskManagement.Data.Mapper;
 using SomoTaskManagement.Infrastructure.Configuration;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using SomoTaskManagement.Notify.HubSignalR;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using SomoTaskManagement.Data;
+using SomoTaskManagement.Data.Abtract;
+using Google.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +18,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -42,18 +50,28 @@ builder.Services.AddAuthorization();
 builder.Services.AddSignalR();
 
 string policyName = "Policy";
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: policyName,
-        builder =>
-        {
-            builder.WithOrigins("http://localhost:3000", "https://localhost:7095")
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-        });
-});
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy(name: policyName,
+//        builder =>
+//        {
+//            builder.WithOrigins("http://localhost:3000", "https://localhost:7095")
+//                .AllowAnyHeader()
+//                .AllowAnyMethod()
+//                .AllowCredentials();
+//        });
+//});
+
+builder.Services.AddCors();
 builder.Services.AddAutoMapper(typeof(MapperApplication));
+
+string filePath = "SecretKey/somotaskmanagement-firebase-adminsdk-z13iv-aa59ff5b48.json";
+
+FirebaseApp appFirebase = FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile(filePath)
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -61,11 +79,29 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 }
+;
+
+app.UseWebSockets();
+
+app.Use(async (context, next) =>
+{
+    var unitOfWork = context.RequestServices.GetRequiredService<IUnitOfWork>();
+    var webSocketMiddleware = new WebSocketMiddleware(next);
+    await webSocketMiddleware.Invoke(context, unitOfWork);
+});
+
+
 app.UseSwaggerUI();
 
 app.UseSwagger();
 
-app.UseCors(policyName);
+//app.UseCors(policyName);
+
+app.UseCors(options => options
+        .AllowAnyOrigin()
+        .AllowAnyMethod()
+        .AllowAnyHeader());
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

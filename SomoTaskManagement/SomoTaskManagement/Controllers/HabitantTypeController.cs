@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.HabitantType;
+using SomoTaskManagement.Domain.Model.Reponse;
+using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
 namespace SomoTaskManagement.Api.Controllers
@@ -49,12 +52,72 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+        [HttpGet("PlantType/Active")]
+        public async Task<IActionResult> ListPlantTypeActive()
+        {
+            try
+            {
+                var area = await _hanbitantTypeService.ListPlantTypeActive();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "List plant type success",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+
+        [HttpGet("Active")]
+        public async Task<IActionResult> ListHabitantTypeActive()
+        {
+            try
+            {
+                var area = await _hanbitantTypeService.ListHabitantTypeActive();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "List plant type success",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+
         [HttpGet("LivestockType")]
         public async Task<IActionResult> ListLiveStock()
         {
             try
             {
                 var area = await _hanbitantTypeService.ListLiveStock();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "List livestokc type success",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+
+        [HttpGet("LivestockType/Active")]
+        public async Task<IActionResult> ListLiveStockActive()
+        {
+            try
+            {
+                var area = await _hanbitantTypeService.ListLiveStockActive();
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
@@ -90,7 +153,6 @@ namespace SomoTaskManagement.Api.Controllers
             catch (Exception e)
             {
                 return BadRequest(e.Message);
-
             }
         }
 
@@ -99,15 +161,48 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
+                await _hanbitantTypeService.AddHabitantType(habitant);
+                var responseData = new ApiResponseModel
+                {
+                    Data = habitant,
+                    Message = "HabitantType is added",
+                    Success = true,
+                };
+                return Ok(new ApiResponseModel
+                {
+                    Data = habitant,
+                    Message = "Habitant is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+        [HttpPut("Delete/{id}")]
+        public async Task<IActionResult> UpdateStatus(int id)
+        {
+            //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+            //{
+            //    return Unauthorized("You do not have access to this method.");
+            //}
+            try
+            {
                 var response = new ApiResponseModel();
-
                 if (ModelState.IsValid)
                 {
-                    await _hanbitantTypeService.AddHabitantType(habitant);
+
+                    await _hanbitantTypeService.UpdateStatus(id);
                     var responseData = new ApiResponseModel
                     {
-                        Data = habitant,
-                        Message = "HabitantType is added",
+                        Data = null,
+                        Message = "Status is updated",
                         Success = true,
                     };
                     return Ok(responseData);
@@ -120,80 +215,70 @@ namespace SomoTaskManagement.Api.Controllers
                         errorMessages.Add(modelError.ErrorMessage);
                     }
 
-                    response.Message = "Invalid HabitantType data: " + string.Join(" ", errorMessages);
+                    response.Message = "Invalid  data: " + string.Join(" ", errorMessages);
                     return BadRequest(response);
                 }
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
-        }
 
+        }
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] HabitantType habitant)
+        public async Task<IActionResult> Update(int id, [FromBody] HabitantTypeCUModel habitant)
         {
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _hanbitantTypeService.UpdateHabitantType(id, habitant);
+                var responseData = new ApiResponseModel
                 {
-                    var existingArea = await _hanbitantTypeService.GetHabitant(id);
-                    if (existingArea == null)
-                    {
-                        response.Message = "HabitantType not found";
-                        return NotFound(response);
-                    }
-                    await _hanbitantTypeService.UpdateHabitantType(habitant);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = habitant,
-                        Message = "HabitantType is updated",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
+                    Data = habitant,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
 
-                    response.Message = "Invalid Zone data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
 
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            try
-            {
-                var response = new ApiResponseModel();
-                var existingArea = await _hanbitantTypeService.GetHabitant(id);
-                if (existingArea == null)
-                {
-                    response.Message = "Zone not found";
-                    return NotFound(response);
-                }
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> Delete(int id)
+        //{
+        //    try
+        //    {
+        //        var response = new ApiResponseModel();
+        //        var existingArea = await _hanbitantTypeService.GetHabitant(id);
+        //        if (existingArea == null)
+        //        {
+        //            response.Message = "Zone not found";
+        //            return NotFound(response);
+        //        }
 
-                await _hanbitantTypeService.DeleteHabitantType(existingArea);
-                response.Message = "Zone is deleted";
-                response.Success = true;
-                return Ok(response);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
+        //        await _hanbitantTypeService.DeleteHabitantType(existingArea);
+        //        response.Message = "Zone is deleted";
+        //        response.Success = true;
+        //        return Ok(response);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
     }
 }

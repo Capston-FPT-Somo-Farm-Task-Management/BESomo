@@ -10,16 +10,21 @@ using System.Threading.Tasks;
 namespace SomoTaskManagement.Domain.Entities
 {
     [Table("TaskEvidence")]
-    public class TaskEvidence:BaseEntity
+    public class TaskEvidence
     {
         public TaskEvidence()
         {
             EvidenceImages = new HashSet<EvidenceImage>();
         }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        public int Status { set; get; }
 
         [Required(ErrorMessage = "SubmitDate is required.")]
         public DateTime SubmitDate { get; set; }
-
 
         [Required(ErrorMessage = "Description is required.")]
         public string Description { get; set; }

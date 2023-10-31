@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using SomoTaskManagement.Data;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
-using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Enum;
+using SomoTaskManagement.Domain.Model.Zone;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;
@@ -16,11 +19,13 @@ namespace SomoTaskManagement.Services.Imp
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly SomoTaskManagemnetContext _db;
 
-        public ZoneService(IUnitOfWork unitOfWork, IMapper mapper)
+        public ZoneService(IUnitOfWork unitOfWork, IMapper mapper, SomoTaskManagemnetContext db)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _db = db;
         }
         public async Task<IEnumerable<ZoneModel>> ListZone()
         {
@@ -29,25 +34,44 @@ namespace SomoTaskManagement.Services.Imp
                 t => t.Area,
                 t =>t.ZoneType
             };
-            var zone = await _unitOfWork.RepositoryZone.GetData(expression: null, includes: includes);
-            zone = zone.OrderBy(x => x.Name).ToList();
-            return _mapper.Map<IEnumerable<Zone>, IEnumerable<ZoneModel>>(zone);
+            var zones = await _unitOfWork.RepositoryZone.GetData(expression: null, includes: includes);
+            zones = zones.OrderBy(x => x.Name).ToList();
+            return _mapper.Map<IEnumerable<Zone>, IEnumerable<ZoneModel>>(zones); 
         }
-        public async Task<IEnumerable<ZoneModel>> ListZoneActive()
+        public async Task<IEnumerable<ZoneModel>> ListActiveZone()
         {
             var includes = new Expression<Func<Zone, object>>[]
             {
                 t => t.Area,
                 t =>t.ZoneType
             };
-            var zone = await _unitOfWork.RepositoryZone.GetData(expression: z => z.Status == 1, includes: includes);
-            zone = zone.OrderBy(x => x.Name).ToList();
-            return _mapper.Map<IEnumerable<Zone>, IEnumerable<ZoneModel>>(zone);
+            var zones = await _unitOfWork.RepositoryZone.GetData(expression: z => z.Status == 1, includes: includes);
+            zones = zones.OrderBy(x => x.Name).ToList();
+
+            return _mapper.Map<IEnumerable<Zone>, IEnumerable<ZoneModel>>(zones);
         }
 
-        public Task<Zone> GetZone(int id)
+        public async Task<ZoneModel> GetZone(int id)
         {
-            return _unitOfWork.RepositoryZone.GetById(id);
+            var  zone = await _unitOfWork.RepositoryZone.GetById(id);
+            if(zone == null)
+            {
+                throw new Exception("Zone not found");
+            }
+            var zoneType = await _unitOfWork.RepositoryZoneType.GetById(zone.ZoneTypeId);
+            var area = await _unitOfWork.RepositoryArea.GetById(zone.AreaId);
+            string name = $"{zone.Code} -" + $" {zone.Name}";
+            var status = (EnumStatus)area.Status;
+            var statusString = status == EnumStatus.Active ? "Active" : "Inactive";
+            var zoneModel = new ZoneModel
+            {
+                Id = zone.Id,
+                Name = name,
+                ZoneTypeName = zoneType.Name,
+                Status = statusString,
+                AreaName = area.Name
+            };
+            return zoneModel;
         }
         public async Task<string> GetZoneNameById(int id)
         {
@@ -55,24 +79,55 @@ namespace SomoTaskManagement.Services.Imp
 
             return zone.Name;
         }
-        public async Task AddZone(Zone zone)
+        public async Task AddZone(ZoneCreateUpdateModel zone)
         {
-            zone.Status = 1;
-            await _unitOfWork.RepositoryZone.Add(zone);
+            var areaNew = new Zone
+            {
+                Name = zone.Name,
+                Code = zone.Code,
+                FarmArea = zone.FarmArea,
+                AreaId = zone.AreaId,
+                ZoneTypeId = zone.ZoneTypeId,
+                Status = 1,
+            };
+            var existCode = await _unitOfWork.RepositoryZone.GetSingleByCondition(a => a.Code == zone.Code);
+            if (existCode != null)
+            {
+                throw new Exception("Mã khu vực không thể trùng");
+
+            }
+            await _unitOfWork.RepositoryZone.Add(areaNew);
             await _unitOfWork.RepositoryZone.Commit();
         }
-        public async Task UpdateZone(Zone zone)
+        public async Task UpdateZone(int id ,ZoneCreateUpdateModel zone)
         {
-            var zoneUpdate = await _unitOfWork.RepositoryZone.GetSingleByCondition(z => z.Id == zone.Id);
+            var zoneUpdate = await _unitOfWork.RepositoryZone.GetById(id);
             if (zoneUpdate != null)
             {
+                var initialCode = zoneUpdate.Code;
+
+                zoneUpdate.Id = id;
                 zoneUpdate.FarmArea = zone.FarmArea;
                 zoneUpdate.ZoneTypeId = zone.ZoneTypeId;
+                zoneUpdate.Code = zone.Code;
+                zoneUpdate.FarmArea = zone.FarmArea;
                 zoneUpdate.AreaId = zone.AreaId;
                 zoneUpdate.Name = zone.Name;
-                zoneUpdate.Status = zone.Status;
+                zoneUpdate.Status = 1;
 
+                if (zoneUpdate.Code != initialCode)
+                {
+                    var existCode = await _unitOfWork.RepositoryZone.GetSingleByCondition(a => a.Code == zone.Code);
+                    if (existCode != null)
+                    {
+                        throw new Exception("Mã không thể trùng");
+                    }
+                }
                 await _unitOfWork.RepositoryZone.Commit();
+            }
+            else
+            {
+                throw new Exception("Không tìm thấy vùng");
             }
         }
 
@@ -163,8 +218,30 @@ namespace SomoTaskManagement.Services.Imp
             };
 
             var zones = await _unitOfWork.RepositoryZone
-                .GetData(expression: z => areaIds.Contains(z.AreaId) && z.Status == 1, includes: includes);
+                .GetData(expression: z => areaIds.Contains(z.AreaId), includes: includes);
+            if(zones == null)
+            {
+                throw new Exception("Không tìm thấy");
+            }
+            return _mapper.Map<IEnumerable<Zone>, IEnumerable<ZoneModel>>(zones);
+        }
 
+        public async Task<IEnumerable<ZoneModel>> GetActiveByFarmId(int id)
+        {
+            var areas = await _unitOfWork.RepositoryArea.GetData(expression: a => a.FarmId == id);
+            var areaIds = areas.Select(a => a.Id).ToList();
+            var includes = new Expression<Func<Zone, object>>[]
+            {
+                t => t.Area,
+                t =>t.ZoneType
+            };
+
+            var zones = await _unitOfWork.RepositoryZone
+                .GetData(expression: z => areaIds.Contains(z.AreaId) && z.Status == 1, includes: includes);
+            if (zones == null)
+            {
+                throw new Exception("Không tìm thấy");
+            }
             return _mapper.Map<IEnumerable<Zone>, IEnumerable<ZoneModel>>(zones);
         }
 

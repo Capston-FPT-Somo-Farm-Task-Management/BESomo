@@ -2,7 +2,8 @@
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Enum;
-using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.HabitantType;
+using SomoTaskManagement.Domain.Model.Livestock;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;
@@ -57,12 +58,23 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task<IEnumerable<LiveStockModel>> GetLiveStockFarm(int farmId)
         {
+            var farm = await _unitOfWork.RepositoryFarm.GetById(farmId);
+            if(farm == null)
+            {
+                throw new Exception("Không tìm tháy trang trại");
+            }
             var areas = await _unitOfWork.RepositoryArea.GetData(expression: a => a.FarmId == farmId);
-            var zonesId = areas.Select(z => z.Id).ToList();
 
-            var field = await _unitOfWork.RepositoryField.GetData(expression: a => zonesId.Contains(a.ZoneId));
+            var areaId = areas.Select(z => z.Id).ToList();
 
-            var fieldId = field.Select(f=> f.Id);
+            var zones = await _unitOfWork.RepositoryZone.GetData(expression: a => areaId.Contains(a.AreaId));
+
+            var zoneId = zones.Select(f=> f.Id).ToList();
+
+            var fields = await _unitOfWork.RepositoryField.GetData(expression: a => zoneId.Contains(a.ZoneId));
+
+            var fieldId = fields.Select(f => f.Id).ToList();
+
             var includes = new Expression<Func<LiveStock, object>>[]
             {
                 t => t.Field,
@@ -73,8 +85,49 @@ namespace SomoTaskManagement.Services.Imp
 
             var liveStocks = await _unitOfWork.RepositoryLiveStock
                 .GetData(expression: l => fieldId.ToList().Contains(l.FieldId), includes: includes);
+            if ( liveStocks == null)
+            {
+                throw new Exception("Không tìm thấy động vật");
+            }
             liveStocks = liveStocks.OrderBy(ls => ls.CreateDate).ToList();
 
+            return _mapper.Map<IEnumerable<LiveStock>, IEnumerable<LiveStockModel>>(liveStocks);
+        }
+
+        public async Task<IEnumerable<LiveStockModel>> GetLiveStockActiveFarm(int farmId)
+        {
+            var farm = await _unitOfWork.RepositoryFarm.GetById(farmId);
+            if (farm == null)
+            {
+                throw new Exception("Không tìm thấy trang trại");
+            }
+            var areas = await _unitOfWork.RepositoryArea.GetData(expression: a => a.FarmId == farmId);
+
+            var areaId = areas.Select(z => z.Id).ToList();
+
+            var zones = await _unitOfWork.RepositoryZone.GetData(expression: a => areaId.Contains(a.AreaId));
+
+            var zoneId = zones.Select(f => f.Id).ToList();
+
+            var fields = await _unitOfWork.RepositoryField.GetData(expression: a => zoneId.Contains(a.ZoneId));
+
+            var fieldId = fields.Select(f => f.Id).ToList();
+
+            var includes = new Expression<Func<LiveStock, object>>[]
+            {
+                t => t.Field,
+                t => t.HabitantType,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area
+            };
+
+            var liveStocks = await _unitOfWork.RepositoryLiveStock
+                .GetData(expression: l => fieldId.ToList().Contains(l.FieldId) && l.Status == 1, includes: includes);
+            //liveStocks = liveStocks.OrderBy(ls => ls.CreateDate).ToList();
+            if (liveStocks == null)
+            {
+                throw new Exception("Không tìm thấy động vật");
+            }
             return _mapper.Map<IEnumerable<LiveStock>, IEnumerable<LiveStockModel>>(liveStocks);
         }
 
@@ -85,7 +138,7 @@ namespace SomoTaskManagement.Services.Imp
 
             if (liveStock == null)
             {
-                throw new Exception("Not found live stock");
+                throw new Exception("Không tìm thấy động vật");
             }
 
             var habitantType = await _unitOfWork.RepositoryHabitantType.GetSingleByCondition(h => h.Id == liveStock.HabitantTypeId);
@@ -107,12 +160,15 @@ namespace SomoTaskManagement.Services.Imp
                 ExternalId = liveStock.ExternalId,
                 CreateDate = liveStock.CreateDate,
                 Weight = liveStock.Weight,
-                DateOfBirth = liveStock.DateOfBirth,
                 Gender = genderString,
                 HabitantTypeName = habitantType.Name,
                 FieldName = field.Name,
                 ZoneName = zone.Name,
                 AreaName = area.Name,
+                AreaId = area.Id,
+                FieldId = field.Id,
+                ZoneId = zone.Id,
+                HabitantTypeId = habitantType.Id,
             };
 
             return liveStockModel;
@@ -142,36 +198,58 @@ namespace SomoTaskManagement.Services.Imp
             {
                 Name = liveStock.Name,
                 Status = 1,
+                IsActive = true,
                 ExternalId = liveStock.ExternalId,
                 CreateDate = DateTime.Now,
                 Weight = liveStock.Weight,
-                DateOfBirth = liveStock.DateOfBirth,
                 Gender = liveStock.Gender,
                 HabitantTypeId = liveStock.HabitantTypeId,
                 FieldId = liveStock.FieldId
             };
+
+            var existCode = await _unitOfWork.RepositoryLiveStock.GetSingleByCondition(a => a.ExternalId == liveStock.ExternalId);
+            if (existCode != null)
+            {
+                throw new Exception("Mã động vật không thể trùng");
+            }
+
             await _unitOfWork.RepositoryLiveStock.Add(livestockNew);
             await _unitOfWork.RepositoryLiveStock.Commit();
         }
-        public async Task Update(LiveStock liveStock)
+        public async Task Update(int id, LivestockCreateModel liveStock)
         {
-            var liveStockUpdate = await _unitOfWork.RepositoryLiveStock.GetSingleByCondition(p => p.Id == liveStock.Id);
+            var liveStockUpdate = await _unitOfWork.RepositoryLiveStock.GetSingleByCondition(p => p.Id == id);
             if (liveStockUpdate != null)
             {
+                var initialExternalId = liveStockUpdate.ExternalId;
+
+                liveStockUpdate.Id = id;
                 liveStockUpdate.ExternalId = liveStock.ExternalId;
-                liveStockUpdate.CreateDate = liveStock.CreateDate;
                 liveStockUpdate.Weight = liveStock.Weight;
                 liveStockUpdate.HabitantTypeId = liveStock.HabitantTypeId;
                 liveStockUpdate.FieldId = liveStock.FieldId;
                 liveStockUpdate.Name = liveStock.Name;
-                liveStockUpdate.Status = liveStock.Status;
+                liveStockUpdate.Status = 1;
                 liveStockUpdate.Gender = liveStock.Gender;
-                liveStockUpdate.DateOfBirth = liveStock.DateOfBirth;
+                liveStockUpdate.IsActive = true;
+
+                if (liveStockUpdate.ExternalId != initialExternalId)
+                {
+                    var existCode = await _unitOfWork.RepositoryLiveStock.GetSingleByCondition(a => a.ExternalId == liveStock.ExternalId);
+                    if (existCode != null)
+                    {
+                        throw new Exception("Mã động vật không thể trùng");
+                    }
+                }
 
                 await _unitOfWork.RepositoryLiveStock.Commit();
             }
-
+            else
+            {
+                throw new Exception("Không tìm thấy động vật");
+            }
         }
+
 
         public async Task UpdateStatus(int id)
         {

@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Plant;
+using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
@@ -23,7 +25,13 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                return Ok(await _plantService.GetList());
+                var area = await _plantService.GetList();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy danh sách",
+                    Success = true,
+                });
             }
             catch (Exception e)
             {
@@ -36,24 +44,52 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                if (id == 0)
-                {
-                    return NotFound("Habitant is not found");
-                }
                 var area = await _plantService.Get(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Habitant is found",
+                    Message = "Tìm thấy danh sách",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 
+        [HttpGet("Active/Farm({id})")]
+        public async Task<IActionResult> GetPlantActiveFarm(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return BadRequest("Livestock id must be greater than 0");
+                }
+                var area = await _plantService.GetPlantActiveFarm(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy danh sách",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
         [HttpGet("Farm({id})")]
         public async Task<IActionResult> GetPlantFarm(int id)
         {
@@ -61,19 +97,24 @@ namespace SomoTaskManagement.Api.Controllers
             {
                 if (id <= 0)
                 {
-                    return BadRequest("Plant id must be greater than 0");
+                    return BadRequest("Livestock id must be greater than 0");
                 }
                 var area = await _plantService.GetPlantFarm(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Plant is found",
+                    Message = "Tìm thấy danh sách",
                     Success = true,
                 });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 
@@ -86,7 +127,7 @@ namespace SomoTaskManagement.Api.Controllers
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Plant is found",
+                    Message = "Tìm thấy danh sách",
                     Success = true,
                 });
             }
@@ -100,34 +141,23 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                var response = new ApiResponseModel();
-
-                if (ModelState.IsValid)
+                await _plantService.Add(plant);
+                var responseData = new ApiResponseModel
                 {
-                    await _plantService.Add(plant);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = plant,
-                        Message = "Plant is added",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
-
-                    response.Message = "Invalid Plant data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                    Data = plant,
+                    Message = "Tìm thấy danh sách",
+                    Success = true,
+                };
+                return Ok(responseData);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 
@@ -150,48 +180,38 @@ namespace SomoTaskManagement.Api.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Plant plant)
+        public async Task<IActionResult> Update(int id, [FromBody] PlantCreateModel plant)
         {
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _plantService.Update(id, plant);
+                var responseData = new ApiResponseModel
                 {
-                    var existingArea = await _plantService.Get(id);
-                    if (existingArea == null)
-                    {
-                        response.Message = "Habitant not found";
-                        return NotFound(response);
-                    }
-                    await _plantService.Update(plant);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = plant,
-                        Message = "Plant is updated",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
+                    Data = plant,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
 
-                    response.Message = "Invalid Plant data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
 
         }
@@ -205,37 +225,23 @@ namespace SomoTaskManagement.Api.Controllers
             //}
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _plantService.UpdateStatus(id);
+                var responseData = new ApiResponseModel
                 {
-                    if (id <= 0)
-                    {
-                        return NotFound("Plant id must be greater than 0 ");
-                    }
-                    await _plantService.UpdateStatus(id);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = null,
-                        Message = "Status plant is updated",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
-
-                    response.Message = "Invalid FarmTask data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                    Data = null,
+                    Message = "Xóa thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 

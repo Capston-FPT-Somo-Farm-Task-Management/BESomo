@@ -24,5 +24,9 @@ namespace SomoTaskManagement.Domain.Enum
 
         [Description("Đã xóa")]
         IsDelete = 4,
+
+        [Description("Từ chối")]
+        Disaggree = 5,
     }
+
 }

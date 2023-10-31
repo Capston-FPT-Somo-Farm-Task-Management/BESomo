@@ -1,5 +1,6 @@
 ﻿using SomoTaskManagement.Domain.Entities;
-using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.HabitantType;
+using SomoTaskManagement.Domain.Model.Livestock;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,8 +17,9 @@ namespace SomoTaskManagement.Services.Interface
         Task<IEnumerable<ExternalIdModel>> GetExternalIds(int id);
         Task<IEnumerable<LiveStockModel>> GetList();
         Task<IEnumerable<LiveStockModel>> GetListActive();
+        Task<IEnumerable<LiveStockModel>> GetLiveStockActiveFarm(int farmId);
         Task<IEnumerable<LiveStockModel>> GetLiveStockFarm(int farmId);
-        Task Update(LiveStock liveStock);
+        Task Update(int id, LivestockCreateModel liveStock);
         Task UpdateStatus(int id);
     }
 }

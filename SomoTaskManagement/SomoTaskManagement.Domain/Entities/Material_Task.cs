@@ -17,6 +17,7 @@ namespace SomoTaskManagement.Domain.Entities
 
         [Key]
         public int TaskId { get; set; }
+
         public bool Status { get; set; }
 
         public virtual FarmTask Task { set; get; }

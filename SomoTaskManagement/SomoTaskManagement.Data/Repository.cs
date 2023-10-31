@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage;
 using SomoTaskManagement.Data.Abtract;
 using System;
 using System.Collections.Generic;
@@ -13,20 +14,12 @@ namespace SomoTaskManagement.Data
     public class Repository<T> : IRepository<T> where T : class
     {
         private readonly SomoTaskManagemnetContext _context;
-
+        private IDbContextTransaction _transaction;
         public Repository(SomoTaskManagemnetContext context)
         {
             _context = context;
         }
 
-        //public async Task<IEnumerable<T>> GetData(Expression<Func<T, bool>> expression )
-        //{
-        //    if (expression == null)
-        //    {
-        //        return await _context.Set<T>().ToListAsync();
-        //    }
-        //    return await _context.Set<T>().Where(expression).ToListAsync();
-        //}
 
         public async Task<IEnumerable<T>> GetData(Expression<Func<T, bool>> expression, params Expression<Func<T, object>>[] includes)
         {
@@ -61,9 +54,9 @@ namespace SomoTaskManagement.Data
             await _context.Set<T>().AddRangeAsync(entities);
         }
 
-        public async Task<T> GetSingleByCondition(Expression<Func<T,bool>> expression)
+        public async Task<T> GetSingleByCondition(Expression<Func<T, bool>> expression)
         {
-            return await _context.Set<T>().FirstOrDefaultAsync();
+            return await _context.Set<T>().Where(expression).SingleOrDefaultAsync();
         }
 
         public void Delete(T entity)
@@ -84,9 +77,9 @@ namespace SomoTaskManagement.Data
         public void Update(T entity)
         {
             EntityEntry entityEntry = _context.Entry<T>(entity);
+            
             entityEntry.State = Microsoft.EntityFrameworkCore.EntityState.Modified;
         }
-
 
         public async Task Commit()
         {

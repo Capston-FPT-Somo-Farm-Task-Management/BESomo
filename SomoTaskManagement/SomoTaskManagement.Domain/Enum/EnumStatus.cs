@@ -11,4 +11,6 @@ namespace SomoTaskManagement.Domain.Enum
         Inactive = 0,
         Active = 1
     }
+
+
 }

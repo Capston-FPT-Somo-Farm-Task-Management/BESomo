@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Area;
+using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
@@ -27,7 +29,25 @@ namespace SomoTaskManagement.Api.Controllers
             //{
             //    return Unauthorized("You do not have access to this method.");
             //}
-            return Ok(await _areaService.ListArea());
+            try
+            {
+                var area = await _areaService.ListArea();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = e.Message,
+                    Success = false
+                });
+            }
+
         }
 
         [HttpGet("{id}")]
@@ -37,17 +57,25 @@ namespace SomoTaskManagement.Api.Controllers
             //{
             //    return Unauthorized("You do not have access to this method.");
             //}
-            if (id == 0)
+            try
             {
-                return NotFound("Area is not found");
+                var area = await _areaService.GetArea(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thành công",
+                    Success = true,
+                });
             }
-            var area = await _areaService.GetArea(id);
-            return Ok(new ApiResponseModel
+            catch (Exception e)
             {
-                Data = area,
-                Message = "Area is found",
-                Success = true,
-            });
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = e.Message,
+                    Success = false
+                });
+            }
+            
         }
         [HttpPut("Delete/{id}")]
         public async Task<IActionResult> UpdateStatus(int id)
@@ -58,37 +86,21 @@ namespace SomoTaskManagement.Api.Controllers
             //}
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _areaService.DeleteByStatus(id);
+                return Ok(new ApiResponseModel
                 {
-                    if (id <= 0)
-                    {
-                        return NotFound("Area id must be greater than 0 ");
-                    }
-                    await _areaService.DeleteByStatus(id);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = null,
-                        Message = "Delete success",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
-
-                    response.Message = "Invalid area data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                    Data = null,
+                    Message = "Xóa thành công",
+                    Success = true,
+                });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = e.Message,
+                    Success = false
+                });
             }
 
         }
@@ -99,17 +111,26 @@ namespace SomoTaskManagement.Api.Controllers
             //{
             //    return Unauthorized("You do not have access to this method.");
             //}
-            if (id <= 0)
+            try
             {
-                return NotFound("Farm id must be greater than 0");
+                var area = await _areaService.GetAreaByFarmId(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thành công",
+                    Success = true,
+                });
             }
-            var area = await _areaService.GetAreaByFarmId(id);
-            return Ok(new ApiResponseModel
+            catch (Exception e)
             {
-                Data = area,
-                Message = "Area is found",
-                Success = true,
-            });
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+
         }
 
         [HttpGet("Farm({id})")]
@@ -119,17 +140,25 @@ namespace SomoTaskManagement.Api.Controllers
             //{
             //    return Unauthorized("You do not have access to this method.");
             //}
-            if (id <= 0)
+            try
             {
-                return NotFound("Farm id must be greater than 0");
+                var area = await _areaService.GetAllAreaByFarmId(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thành công",
+                    Success = true,
+                });
             }
-            var area = await _areaService.GetAllAreaByFarmId(id);
-            return Ok(new ApiResponseModel
+            catch (Exception e)
             {
-                Data = area,
-                Message = "Area is found",
-                Success = true,
-            });
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
+            }
         }
         [HttpGet("Active")]
         public async Task<IActionResult> GetAreaActive()
@@ -138,103 +167,105 @@ namespace SomoTaskManagement.Api.Controllers
             //{
             //    return Unauthorized("You do not have access to this method.");
             //}
-            var area = await _areaService.ListAreaActive();
-            return Ok(new ApiResponseModel
+            try
             {
-                Data = area,
-                Message = "Area is found",
-                Success = true,
-            });
+                var area = await _areaService.ListAreaActive();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = e.Message,
+                    Success = false
+                });
+            }
+
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateArea([FromBody] Area area)
+        public async Task<IActionResult> CreateArea([FromBody] AreaCreateUpdateModel area)
         {
             //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
             //{
             //    return Unauthorized("You do not have access to this method.");
             //}
-            var response = new ApiResponseModel();
-            if (ModelState.IsValid)
+            try
             {
+                var response = new ApiResponseModel();
+
                 await _areaService.AddArea(area);
                 var responseData = new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Area is added",
+                    Message = "Thêm thành công",
                     Success = true,
                 };
                 return Ok(responseData);
             }
-            else
+            catch (Exception e)
             {
-                var errorMessages = new List<string>();
-                foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
+                return BadRequest(new ApiResponseModel
                 {
-                    errorMessages.Add(modelError.ErrorMessage);
-                }
-
-                response.Message = "Invalid Zone data: " + string.Join(" ", errorMessages);
-                return BadRequest(response);
+                    Message = e.Message,
+                    Success = false
+                });
             }
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateArea(int id, [FromBody] Area area)
+        public async Task<IActionResult> UpdateArea(int id, [FromBody] AreaCreateUpdateModel area)
         {
             //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
             //{
             //    return Unauthorized("You do not have access to this method.");
             //}
-            var response = new ApiResponseModel();
-            if (ModelState.IsValid)
+            try
             {
-                var existingArea = await _areaService.GetArea(id);
-                if (existingArea == null)
-                {
-                    response.Message = "Area not found";
-                    return NotFound(response);
-                }
-                await _areaService.UpdateArea(area);
+                await _areaService.UpdateArea(id, area);
                 var responseData = new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Area is updated",
+                    Message = "Cập nhật thành công",
                     Success = true,
                 };
                 return Ok(responseData);
             }
-            else
+            catch (Exception e)
             {
-                var errorMessages = new List<string>();
-                foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
+                return BadRequest(new ApiResponseModel
                 {
-                    errorMessages.Add(modelError.ErrorMessage);
-                }
-
-                response.Message = "Invalid Zone data: " + string.Join(" ", errorMessages);
-                return BadRequest(response);
-            }
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteArea(int id)
-        {
-            //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
-            //{
-            //    return Unauthorized("You do not have access to this method.");
-            //}
-            var response = new ApiResponseModel();
-            var existingArea = await _areaService.GetArea(id);
-            if (existingArea == null)
-            {
-                response.Message = "Area not found";
-                return NotFound(response);
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
             }
 
-            await _areaService.DeleteArea(existingArea);
-            response.Message = "Area is deleted";
-            response.Success = true;
-            return Ok(response);
         }
+
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteArea(int id)
+        //{
+        //    //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+        //    //{
+        //    //    return Unauthorized("You do not have access to this method.");
+        //    //}
+        //    var response = new ApiResponseModel();
+        //    var existingArea = await _areaService.GetArea(id);
+        //    if (existingArea == null)
+        //    {
+        //        response.Message = "Area not found";
+        //        return NotFound(response);
+        //    }
+
+        //    await _areaService.DeleteArea(existingArea);
+        //    response.Message = "Area is deleted";
+        //    response.Success = true;
+        //    return Ok(response);
+        //}
     }
 }

@@ -1,4 +1,4 @@
-﻿
+﻿using Microsoft.Extensions.Configuration;
 using SomoTaskManagement.Data;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Notify.HubSignalR;
@@ -9,48 +9,35 @@ namespace SomoTaskManagement.Notify.SubscribeTableDependencies
     public class SubscribeNotificationTableDependency : ISubscribeTableDependency
     {
 
-        SqlTableDependency<FarmTask> tableDependency;
-        TaskHub taskHub;
+        SqlTableDependency<Notification> tableDependency;
+        NotifyHub taskHub;
         SomoTaskManagemnetContext context;
 
-        public SubscribeNotificationTableDependency(TaskHub taskhub, SomoTaskManagemnetContext context)
+        public SubscribeNotificationTableDependency(NotifyHub taskhub, SomoTaskManagemnetContext context)
         {
             this.taskHub = taskhub;
             this.context = context;
         }
 
-        public void SubscribeTableDependency(string connectionString)
+        public void SubscribeTableDependency(string connectString)
         {
-            tableDependency = new SqlTableDependency<FarmTask>(connectionString);
+            tableDependency = new SqlTableDependency<Notification>(connectString);
             tableDependency.OnChanged += TableDependency_OnChanged;
             tableDependency.OnError += TableDependency_OnError;
             tableDependency.Start();
         }
 
-        private async void TableDependency_OnChanged(object sender, TableDependency.SqlClient.Base.EventArgs.RecordChangedEventArgs<FarmTask> e)
+        private async void TableDependency_OnChanged(object sender, TableDependency.SqlClient.Base.EventArgs.RecordChangedEventArgs<Notification> e)
         {
             if (e.ChangeType != TableDependency.SqlClient.Base.Enums.ChangeType.None)
             {
-                await taskHub.SendTasks();
-
-                var farmTask = e.Entity;
-                var notification = new Notification
-                {
-                    Message = "There is a change in your task",
-                    NotificationDateTime = DateTime.Now,
-                    MessageType = "Personal"
-                };
-                context.Notification.Add(notification);
-                context.SaveChanges();
-
-                var message = notification.Message;
-                await taskHub.SendNotificationToClient(message, farmTask.MemberId);
+                await taskHub.SendNotifys(); 
             }
         }
-
+        
         private void TableDependency_OnError(object sender, TableDependency.SqlClient.Base.EventArgs.ErrorEventArgs e)
         {
-            Console.WriteLine($"{nameof(FarmTask)} SqlTableDependency error: {e.Error.Message}");
+            Console.WriteLine($"{nameof(Notification)} SqlTableDependency error: {e.Error.Message}");
         }
 
 

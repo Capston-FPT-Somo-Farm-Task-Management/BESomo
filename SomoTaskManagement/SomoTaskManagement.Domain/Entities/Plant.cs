@@ -27,6 +27,7 @@ namespace SomoTaskManagement.Domain.Entities
         [Required(ErrorMessage = "Height is required.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Height must be greater than 0.")]
         public int Height { set; get; }
+        public bool IsActive { set; get; }
 
         public int HabitantTypeId {set;get;}
         

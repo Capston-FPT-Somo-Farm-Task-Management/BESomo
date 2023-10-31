@@ -45,7 +45,7 @@ namespace SomoTaskManagement.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Server=tcp:somodb.database.windows.net,1433;Initial Catalog=SomoTaskManagement;Persist Security Info=False;User ID=hoangvu;Password=somo123@;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False");
+                optionsBuilder.UseSqlServer("Server=tcp:somodb.database.windows.net,1433;Initial Catalog=TaskManagementSomoFarm;Persist Security Info=False;User ID=hoangvu;Password=somo123@;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False");
             }
         }
 
@@ -60,10 +60,18 @@ namespace SomoTaskManagement.Data
 
                 entity.Property(e => e.Message)
                     .HasMaxLength(1000)
-                    .IsUnicode(false);
+                    .IsUnicode(true);
 
                 entity.Property(e => e.MessageType)
                     .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.IsRead)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.IsNew)
+                    .IsUnicode(false);
+                entity.Property(e => e.TaskId)
                     .IsUnicode(false);
 
                 entity.Property(e => e.NotificationDateTime).HasColumnType("datetime");
@@ -74,8 +82,8 @@ namespace SomoTaskManagement.Data
                 entity.ToTable("HubConnection");
 
                 entity.Property(e => e.ConnectionId)
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
+                .HasMaxLength(2000)
+                .IsUnicode(false);
 
                 entity.Property(e => e.MemberId)
                     .HasMaxLength(50)
@@ -96,6 +104,8 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.Status).IsRequired();
                 entity.Property(e => e.FarmArea).IsRequired();
                 entity.Property(e => e.Address).IsRequired();
+                entity.Property(e => e.UrlImage).IsRequired();
+                entity.Property(e => e.Description).IsRequired();
 
             });
 
@@ -108,6 +118,7 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.Status).IsRequired();
                 entity.Property(e => e.FArea).IsRequired();
+                entity.Property(e => e.Code).IsRequired().IsUnicode();
 
                 entity.HasOne(d => d.Farm).WithMany(p => p.Areas).HasForeignKey(d => d.FarmId).HasConstraintName("FK_Farm_Area").OnDelete(DeleteBehavior.NoAction);
 
@@ -122,6 +133,7 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.Status).IsRequired();
                 entity.Property(e => e.FarmArea).IsRequired();
+                entity.Property(e => e.Code).IsRequired().IsUnicode();
 
                 entity.HasOne(d => d.Area).WithMany(p => p.Zones).HasForeignKey(d => d.AreaId).HasConstraintName("FK_Area_Zone").OnDelete(DeleteBehavior.NoAction);
                 entity.HasOne(d => d.ZoneType).WithMany(p => p.Zones).HasForeignKey(d => d.ZoneTypeId).HasConstraintName("FK_ZoneType_Zone").OnDelete(DeleteBehavior.NoAction);
@@ -148,6 +160,8 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.Status).IsRequired();
                 entity.Property(e => e.Area).IsRequired();
+                entity.Property(e => e.Code).IsRequired().IsUnicode();
+                entity.Property(e => e.IsDelete).IsRequired();
 
                 entity.HasOne(d => d.Zone).WithMany(p => p.Fields).HasForeignKey(d => d.ZoneId).HasConstraintName("FK_Zone_Field").OnDelete(DeleteBehavior.NoAction);
             });
@@ -163,20 +177,18 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.Status).IsRequired();
                 entity.Property(e => e.StartDate).IsRequired();
                 entity.Property(e => e.EndDate).IsRequired();
-                entity.Property(e => e.Description).IsRequired();
+                entity.Property(e => e.Description);
                 entity.Property(e => e.Priority).IsRequired();
-                entity.Property(e => e.ReceiverId).IsRequired();
-                entity.Property(e => e.Repeat).IsRequired();
-                entity.Property(e => e.Iterations).IsRequired();
+                entity.Property(e => e.SuppervisorId);
+                entity.Property(e => e.IsRepeat);
                 entity.Property(e => e.CreateDate).IsRequired();
                 entity.Property(e => e.Remind).IsRequired();
 
                 entity.HasOne(d => d.Plant).WithMany(p => p.Tasks).HasForeignKey(d => d.PlantId).HasConstraintName("FK_Plant_FarmTask").OnDelete(DeleteBehavior.NoAction);
                 entity.HasOne(d => d.LiveStrock).WithMany(p => p.Tasks).HasForeignKey(d => d.LiveStockId).HasConstraintName("FK_LiveStock_FarmTask").OnDelete(DeleteBehavior.NoAction);
                 entity.HasOne(d => d.Field).WithMany(p => p.Tasks).HasForeignKey(d => d.FieldId).HasConstraintName("FK_Field_Task").OnDelete(DeleteBehavior.NoAction);
-                entity.HasOne(d => d.Other).WithMany(p => p.Tasks).HasForeignKey(d => d.OtherId).HasConstraintName("FK_Other_Task").OnDelete(DeleteBehavior.NoAction);
                 entity.HasOne(d => d.TaskType).WithMany(p => p.Tasks).HasForeignKey(d => d.TaskTypeId).HasConstraintName("FK_TaskType_Task").OnDelete(DeleteBehavior.NoAction);
-                entity.HasOne(d => d.Member).WithMany(p => p.Tasks).HasForeignKey(d => d.MemberId).HasConstraintName("FK_Member_Task").OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(d => d.Member).WithMany(p => p.Tasks).HasForeignKey(d => d.ManagerId).HasConstraintName("FK_Member_Task").OnDelete(DeleteBehavior.NoAction);
             });
 
             //Plant
@@ -190,7 +202,7 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.ExternalId).IsRequired();
                 entity.Property(e => e.CreateDate).IsRequired();
                 entity.Property(e => e.Height).IsRequired();
-
+                entity.Property(e => e.IsActive).IsRequired();
 
                 entity.HasOne(d => d.HabitantType).WithMany(p => p.Plants).HasForeignKey(d => d.HabitantTypeId).HasConstraintName("FK_HabitantType_Plant");
                 entity.HasOne(d => d.Field).WithMany(p => p.Plants).HasForeignKey(d => d.FieldId).HasConstraintName("FK_Field_Plant");
@@ -207,8 +219,8 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.ExternalId).IsRequired();
                 entity.Property(e => e.CreateDate).IsRequired();
                 entity.Property(e => e.Weight).IsRequired();
-                entity.Property(e => e.DateOfBirth).IsRequired();
                 entity.Property(e => e.Gender).IsRequired();
+                entity.Property(e => e.IsActive).IsRequired();
 
 
                 entity.HasOne(d => d.HabitantType).WithMany(p => p.LiveStocks).HasForeignKey(d => d.HabitantTypeId).HasConstraintName("FK_HabitantType_LiveStock");
@@ -223,7 +235,10 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.Status).IsRequired();
-                entity.Property(e => e.Quantity).IsRequired();
+                entity.Property(e => e.Origin);
+                entity.Property(e => e.Environment);
+                entity.Property(e => e.Description);
+                entity.Property(e => e.IsActive);
             });
 
             //Employee
@@ -236,6 +251,8 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.Status).IsRequired();
                 entity.Property(e => e.PhoneNumber).IsRequired();
                 entity.Property(e => e.Address).IsRequired();
+                entity.Property(e => e.Gender).IsRequired();
+                entity.Property(e => e.Code).IsRequired().IsUnicode();
 
                 entity.HasOne(d => d.Farm).WithMany(p => p.Employees).HasForeignKey(d => d.FarmId).HasConstraintName("FK_Farm_Employee");
             });
@@ -243,10 +260,23 @@ namespace SomoTaskManagement.Data
             //Employee_Task
             modelBuilder.Entity<Employee_Task>(entity =>
             {
-                entity.ToTable("Employee_Task");
+                entity.ToTable("SubTask");
                 entity.HasKey(et => new { et.EmployeeId, et.TaskId });
+                entity.Property(e => e.ActualEffort);
+                entity.Property(e => e.Description);
+                entity.Property(e => e.Name);
+                entity.Property(e => e.Status);
                 entity.HasOne(d => d.Employee).WithMany(p => p.Employee_Tasks).HasForeignKey(d => d.EmployeeId).HasConstraintName("FK_Employee_Employee_Task");
                 entity.HasOne(d => d.Task).WithMany(p => p.Employee_Tasks).HasForeignKey(d => d.TaskId).HasConstraintName("FK_Task_Employee_Task");
+            });
+
+            //Notification_Member
+            modelBuilder.Entity<Notification_Member>(entity =>
+            {
+                entity.ToTable("Notification_Member");
+                entity.HasKey(et => new { et.NotificationId, et.MemberId });
+                entity.HasOne(d => d.Member).WithMany(p => p.Notification_Members).HasForeignKey(d => d.MemberId).HasConstraintName("FK_Notification_Member_Member");
+                entity.HasOne(d => d.Notification).WithMany(p => p.Notification_Members).HasForeignKey(d => d.NotificationId).HasConstraintName("FK_TNotification_Member_Notification");
             });
 
             //Employee_TaskType
@@ -314,11 +344,12 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.PhoneNumber).IsRequired();
                 entity.Property(e => e.Birthday).IsRequired();
                 entity.Property(e => e.Address).IsRequired();
+                entity.Property(e => e.Code);
 
                 entity.HasOne(d => d.Role).WithMany(p => p.Members).HasForeignKey(d => d.RoleId).HasConstraintName("FK_Role_Member");
                 entity.HasOne(d => d.Farm).WithMany(p => p.Members).HasForeignKey(d => d.FarmId).HasConstraintName("FK_Farms_Member");
 
-                entity.HasOne(d => d.Notification).WithMany(p => p.Members).HasForeignKey(d => d.NotificcationId).HasConstraintName("FK_Notification_Member");
+               
             });
 
             //MemberToken
@@ -355,7 +386,6 @@ namespace SomoTaskManagement.Data
                 entity.ToTable("TaskEvidence");
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
-                entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.Status).IsRequired();
                 entity.Property(e => e.SubmitDate).IsRequired();
                 entity.Property(e => e.Description).IsRequired();
@@ -369,10 +399,9 @@ namespace SomoTaskManagement.Data
                 entity.ToTable("EvidenceImage");
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
-                entity.Property(e => e.Name).IsRequired();
-                entity.Property(e => e.Status).IsRequired();
                 entity.Property(e => e.ImageUrl).IsRequired();
             });
+
         }
     }
 }

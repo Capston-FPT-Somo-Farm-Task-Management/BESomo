@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Authentication;
 using SomoTaskManagement.Domain.Entities;
-using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Member;
 using SomoTaskManagement.Services.Interface;
 
 namespace SomoTaskManagement.Api.Controllers

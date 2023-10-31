@@ -67,6 +67,11 @@ E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\R
 E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\refint\SomoTaskManagement.Infrastructure.dll
 E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.pdb
 E:\Capstone\BE\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\ref\SomoTaskManagement.Infrastructure.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.AssemblyInfo.cs
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.csproj.CoreCompileInputs.cache
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Infrastructure.deps.json
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Infrastructure.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Infrastructure.pdb
@@ -80,11 +85,6 @@ C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskMan
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Notify.pdb
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Domain.pdb
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Services.pdb
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.csproj.AssemblyReference.cache
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.AssemblyInfoInputs.cache
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.AssemblyInfo.cs
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.csproj.CoreCompileInputs.cache
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.csproj.CopyComplete
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\refint\SomoTaskManagement.Infrastructure.dll

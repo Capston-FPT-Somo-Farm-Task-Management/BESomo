@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
+using SomoTaskManagement.Domain.Model.EvidenceImage;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;
@@ -16,10 +17,12 @@ namespace SomoTaskManagement.Services.Imp
     public class EvidenceImageService : IEvidenceImageService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IConfiguration _configuration;
 
-        public EvidenceImageService(IUnitOfWork unitOfWork)
+        public EvidenceImageService(IUnitOfWork unitOfWork, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
+            _configuration = configuration;
         }
 
         public Task<IEnumerable<EvidenceImage>> ListEvidenceImage()
@@ -32,7 +35,6 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task AddEvidenceImage(EvidenceImage evidenceImage)
         {
-            evidenceImage.Status = 1;
             await _unitOfWork.RepositoryEvidenceImage.Add(evidenceImage);
             await _unitOfWork.RepositoryEvidenceImage.Commit();
         }
@@ -45,6 +47,37 @@ namespace SomoTaskManagement.Services.Imp
         {
             _unitOfWork.RepositoryEvidenceImage.Delete(a => a.Id == evidenceImage.Id);
             await _unitOfWork.RepositoryEvidenceImage.Commit();
+        }
+
+        public async Task<EvidenceImage> UploadEvidenceImage(EvidenceImageModel evidenceImageModel)
+        {
+            var imageEvidence = new EvidenceImage
+            {
+                TaskEvidenceId = evidenceImageModel.TaskEvidenceId,
+            };
+
+            if (evidenceImageModel.ImageFile != null && evidenceImageModel.ImageFile.Length > 0)
+            {
+                string fileName = Guid.NewGuid().ToString();
+                string fileExtension = Path.GetExtension(evidenceImageModel.ImageFile.FileName);
+
+                var options = new FirebaseStorageOptions
+                {
+                    AuthTokenAsyncFactory = () => Task.FromResult(_configuration["Firebase:apiKey"])
+                };
+
+                var firebaseStorage = new FirebaseStorage(_configuration["Firebase:Bucket"], options)
+                    .Child("images")
+                    .Child(fileName + fileExtension);
+
+                await firebaseStorage.PutAsync(evidenceImageModel.ImageFile.OpenReadStream());
+
+                string imageUrl = await firebaseStorage.GetDownloadUrlAsync();
+
+                imageEvidence.ImageUrl = imageUrl;
+            }
+
+            return imageEvidence;
         }
     }
 }

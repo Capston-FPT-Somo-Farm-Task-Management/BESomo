@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using SomoTaskManagement.Data;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Enum;
-using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Area;
+using SomoTaskManagement.Domain.Model.Field;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;
@@ -18,11 +21,13 @@ namespace SomoTaskManagement.Services.Imp
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly SomoTaskManagemnetContext _db;
 
-        public FieldService(IUnitOfWork unitOfWork, IMapper mapper)
+        public FieldService(IUnitOfWork unitOfWork, IMapper mapper, SomoTaskManagemnetContext db)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _db = db;
         }
             
         public async Task<IEnumerable<FieldModel>> ListFieldActive()
@@ -34,7 +39,7 @@ namespace SomoTaskManagement.Services.Imp
             };
 
             var fields = await _unitOfWork.RepositoryField
-                .GetData(expression: f => f.Status == 1 || f.Status == 0, includes: includes);
+                .GetData(expression: f => f.IsDelete == false, includes: includes);
 
             return _mapper.Map<IEnumerable<Field>, IEnumerable<FieldModel>>(fields);
         }
@@ -56,6 +61,7 @@ namespace SomoTaskManagement.Services.Imp
             var includes = new Expression<Func<Field, object>>[]
             {
                 t => t.Zone,
+                t => t.Zone.Area,
             };
 
             var fields = await _unitOfWork.RepositoryField
@@ -69,6 +75,7 @@ namespace SomoTaskManagement.Services.Imp
             var includes = new Expression<Func<Field, object>>[]
             {
                 t => t.Zone,
+                t => t.Zone.Area,
             };
 
             var fields = await _unitOfWork.RepositoryField
@@ -77,19 +84,52 @@ namespace SomoTaskManagement.Services.Imp
             return _mapper.Map<IEnumerable<Field>, IEnumerable<FieldModel>>(fields);
         }
 
+        public async Task<IEnumerable<FieldModel>> ListFieldPlantActive()
+        {
+            var includes = new Expression<Func<Field, object>>[]
+            {
+                t => t.Zone,
+                t => t.Zone.Area,
+            };
+
+            var fields = await _unitOfWork.RepositoryField
+                .GetData(expression: f => f.Status == 0 && f.IsDelete == false, includes: includes);
+
+            return _mapper.Map<IEnumerable<Field>, IEnumerable<FieldModel>>(fields);
+        }
+
+        public async Task<IEnumerable<FieldModel>> ListFieldLivestockActive()
+        {
+            var includes = new Expression<Func<Field, object>>[]
+            {
+                t => t.Zone,
+                t => t.Zone.Area,
+            };
+
+            var fields = await _unitOfWork.RepositoryField
+                .GetData(expression: f => f.Status == 1 && f.IsDelete == false, includes: includes);
+
+            return _mapper.Map<IEnumerable<Field>, IEnumerable<FieldModel>>(fields);
+        }
+
         public async Task<FieldModel> GetZoneField(int id)
         {
             var field = await _unitOfWork.RepositoryField.GetById(id);
             var zone = await _unitOfWork.RepositoryZone.GetById(field.ZoneId);
-
+            var area = await _unitOfWork.RepositoryArea.GetById(zone.AreaId);
             var status = (HabitantTypeStatus)field.Status;
             var statusString = GetHabitantDescription(status);
+
             var fieldModel = new FieldModel
             {
                 Id = id,
                 Name = field.Name,
                 Status = statusString,
                 ZoneName = zone != null ? zone.Name : null,
+                ZoneId = zone.Id,
+                Code = field.Code,
+                AreaId = area.Id,
+                AreaName = area.Name,
                 Area = field.Area,
             };
             return fieldModel;
@@ -107,7 +147,7 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task<IEnumerable<FieldModel>> GetByZone(int id)
         {
-            var field = await _unitOfWork.RepositoryField.GetSingleByCondition(f => f.ZoneId == id && f.Status == 1 || f.Status == 0);
+            //var field = await _unitOfWork.RepositoryField.GetSingleByCondition(f => f.ZoneId == id && f.Status == 1 || f.Status == 0);
             var includes = new Expression<Func<Field, object>>[]
             {
                 t => t.Zone,
@@ -115,19 +155,19 @@ namespace SomoTaskManagement.Services.Imp
 
             var fields = await _unitOfWork.RepositoryField
                    .GetData(
-                     expression: f => f.ZoneId == id && f.Status != 3,
+                     expression: f => f.ZoneId == id && f.IsDelete== false,
                      includes: new Expression<Func<Field, object>>[]
                      {
                          t => t.Zone,
                          t => t.Zone.Area,
                      });
 
-            return _mapper.Map<IEnumerable<Field>, IEnumerable<FieldModel>>(fields); ;
+            return _mapper.Map<IEnumerable<Field>, IEnumerable<FieldModel>>(fields);
         }
 
         public async Task<IEnumerable<FieldModel>> GetAllByZone(int id)
         {
-            var field = await _unitOfWork.RepositoryField.GetSingleByCondition(f => f.ZoneId == id);
+            //var field = await _unitOfWork.RepositoryField.GetSingleByCondition(f => f.ZoneId == id);
             var includes = new Expression<Func<Field, object>>[]
             {
                 t => t.Zone,
@@ -142,7 +182,7 @@ namespace SomoTaskManagement.Services.Imp
                          t => t.Zone.Area,
                      });
 
-            return _mapper.Map<IEnumerable<Field>, IEnumerable<FieldModel>>(fields); ;
+            return _mapper.Map<IEnumerable<Field>, IEnumerable<FieldModel>>(fields);
         }
 
         public async Task<IEnumerable<FieldModel>> GetPlantFieldByFarm(int id)
@@ -162,7 +202,8 @@ namespace SomoTaskManagement.Services.Imp
                    .GetData(
                      expression: f => zoneIds.Contains(f.ZoneId) && f.Status == 0,
                      includes: includes);
-            return _mapper.Map<IEnumerable<Field>, IEnumerable<FieldModel>>(fields); ;
+            fields = fields.OrderByDescending(e => e.Id).ToList();
+            return _mapper.Map<IEnumerable<Field>, IEnumerable<FieldModel>>(fields);
         }
 
         public async Task<IEnumerable<FieldModel>> GetLivestockFieldByFarm(int id)
@@ -182,7 +223,8 @@ namespace SomoTaskManagement.Services.Imp
                    .GetData(
                      expression: f => zoneIds.Contains(f.ZoneId) && f.Status == 1,
                      includes: includes);
-            return _mapper.Map<IEnumerable<Field>, IEnumerable<FieldModel>>(fields); ;
+            fields = fields.OrderByDescending(e => e.Id).ToList();
+            return _mapper.Map<IEnumerable<Field>, IEnumerable<FieldModel>>(fields);
         }
 
         public async Task<AreaZoneModel> GetAreaZoneByField(int id)
@@ -202,30 +244,69 @@ namespace SomoTaskManagement.Services.Imp
             };
             return areaZoneModel;
         }
+
         public async Task DeleteFieldByStatus(int id)
         {
             var field = await _unitOfWork.RepositoryField.GetById(id);
             if (field == null)
             {
-                throw new Exception("Livestock not found");
+                throw new Exception("Không tìm thấy field");
             }
-            field.Status = 3;
+            var livestock = await _unitOfWork.RepositoryLiveStock.GetData(expression:l => l.FieldId == field.Id);
+            var plant = await _unitOfWork.RepositoryPlant.GetData(expression:l => l.FieldId == field.Id);
+            var numberLivestock = livestock.Count();
+            var numberPlant = plant.Count();
+            if(numberLivestock != 0 || numberPlant != 0)
+            {
+                throw new Exception("Có một hoặc nhiều thực thể ở bên trong nên không thể xóa");
+            }
+            field.IsDelete = field.IsDelete == true ? false : true;
             await _unitOfWork.RepositoryLiveStock.Commit();
         }
 
-        public async Task AddField(Field field)
+        public async Task AddField(FieldCreateUpdateModel field)
         {
-            await _unitOfWork.RepositoryField.Add(field);
+            var fieldNew = new Field
+            {
+                Name = field.Name,
+                Status = field.Status,
+                Code = field.Code,
+                Area = field.Area,
+                ZoneId = field.ZoneId,
+                IsDelete = false,
+            };
+            var existCode = await _unitOfWork.RepositoryField.GetSingleByCondition(a => a.Code == field.Code);
+            if (existCode != null)
+            {
+                throw new Exception("Mã không thể trùng");
+            }
+            await _unitOfWork.RepositoryField.Add(fieldNew);
             await _unitOfWork.RepositoryField.Commit();
         }
-        public async Task UpdateField(Field field)
+        public async Task UpdateField(int id , FieldCreateUpdateModel field)
         {
-            var fieldUpdate = await _unitOfWork.RepositoryField.GetSingleByCondition(f => f.Id == field.Id);
+            var fieldUpdate = await _unitOfWork.RepositoryField.GetSingleByCondition(f => f.Id == id);
+            if(fieldUpdate == null)
+            {
+                throw new Exception("Không tìm thấy");
+            }
 
+            var initialCode = fieldUpdate.Code;
+
+            fieldUpdate.Code = field.Code;
             fieldUpdate.Status = field.Status;
             fieldUpdate.Name = field.Name;
             fieldUpdate.Area = field.Area;
             fieldUpdate.ZoneId = field.ZoneId;
+           
+            if (fieldUpdate.Code != initialCode)
+            {
+                var existCode = await _unitOfWork.RepositoryField.GetSingleByCondition(a => a.Code == field.Code);
+                if (existCode != null)
+                {
+                    throw new Exception("Mã không thể trùng");
+                }
+            }
 
             await _unitOfWork.RepositoryField.Commit();
         }
@@ -233,6 +314,11 @@ namespace SomoTaskManagement.Services.Imp
         {
             _unitOfWork.RepositoryField.Delete(a => a.Id == field.Id);
             await _unitOfWork.RepositoryField.Commit();
+        }
+
+        public async Task<Field>GetByCode (string code)
+        {
+            return await _unitOfWork.RepositoryField.GetSingleByCondition(f => f.Code == code);
         }
 
     }

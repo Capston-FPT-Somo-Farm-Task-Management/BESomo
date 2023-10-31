@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.EvidenceImage;
+using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Services.Interface;
 
 namespace SomoTaskManagement.Api.Controllers
@@ -57,65 +59,76 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+        //[HttpPost]
+        //public async Task<IActionResult> Create([FromForm] EvidenceImageModel evidenceImageModel)
+        //{
+        //    try
+        //    {
+        //        var response = new ApiResponseModel();
+        //        var imageEvidecne = new EvidenceImage
+        //        {
+        //            TaskEvidenceId = evidenceImageModel.TaskEvidenceId,
+        //        };
+
+        //        if (evidenceImageModel.ImageFile != null && evidenceImageModel.ImageFile.Length > 0)
+        //        {
+        //            string fileName = Guid.NewGuid().ToString();
+        //            string fileExtension = Path.GetExtension(evidenceImageModel.ImageFile.FileName);
+
+        //            var options = new FirebaseStorageOptions
+        //            {
+        //                AuthTokenAsyncFactory = () => Task.FromResult(_configuration["Firebase:apiKey"])
+        //            };
+
+        //            var firebaseStorage = new FirebaseStorage(_configuration["Firebase:Bucket"], options)
+        //                .Child("images")
+        //                .Child(fileName + fileExtension);
+
+        //            await firebaseStorage.PutAsync(evidenceImageModel.ImageFile.OpenReadStream());
+
+        //            string imageUrl = await firebaseStorage.GetDownloadUrlAsync();
+
+        //            imageEvidecne.ImageUrl = imageUrl;
+        //        }
+        //        await _evidenceImageService.AddEvidenceImage(imageEvidecne);
+        //        var responseData = new ApiResponseModel
+        //        {
+        //            Data = imageEvidecne,
+        //            Message = "EvidenceImage is added",
+        //            Success = true,
+        //        };
+        //        return Ok(responseData);
+
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] EvidenceImageModel evidenceImageModel)
         {
             try
             {
-                var response = new ApiResponseModel();
-                var imageEvidecne = new EvidenceImage
+                var imageEvidence = await _evidenceImageService.UploadEvidenceImage(evidenceImageModel);
+
+                await _evidenceImageService.AddEvidenceImage(imageEvidence);
+
+                var responseData = new ApiResponseModel
                 {
-                    Name = evidenceImageModel.Name,
-                    TaskEvidenceId = evidenceImageModel.TaskEvidenceId,
+                    Data = imageEvidence,
+                    Message = "EvidenceImage is added",
+                    Success = true,
                 };
-                if (ModelState.IsValid)
-                {
-                    if (evidenceImageModel.ImageFile != null && evidenceImageModel.ImageFile.Length > 0)
-                    {
-                        string fileName = Guid.NewGuid().ToString();
-                        string fileExtension = Path.GetExtension(evidenceImageModel.ImageFile.FileName);
-
-                        var options = new FirebaseStorageOptions
-                        {
-                            AuthTokenAsyncFactory = () => Task.FromResult(_configuration["Firebase:apiKey"])
-                        };
-
-                        var firebaseStorage = new FirebaseStorage(_configuration["Firebase:Bucket"], options)
-                            .Child("images")
-                            .Child(fileName + fileExtension);
-
-                        await firebaseStorage.PutAsync(evidenceImageModel.ImageFile.OpenReadStream());
-
-                        string imageUrl = await firebaseStorage.GetDownloadUrlAsync();
-
-                        imageEvidecne.ImageUrl = imageUrl;
-                    }
-                    await _evidenceImageService.AddEvidenceImage(imageEvidecne);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = imageEvidecne,
-                        Message = "EvidenceImage is added",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
-
-                    response.Message = "Invalid EvidenceImage data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                return Ok(responseData);
             }
             catch (Exception e)
             {
                 return BadRequest(e.Message);
             }
         }
+
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] EvidenceImage evidenceImage)

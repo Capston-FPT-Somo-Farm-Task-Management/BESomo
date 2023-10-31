@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
@@ -119,35 +120,14 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _materialService.UpdateMaterial(id, material);
+                var responseData = new ApiResponseModel
                 {
-                    var existingArea = await _materialService.GetMaterial(id);
-                    if (existingArea == null)
-                    {
-                        response.Message = "Material not found";
-                        return NotFound(response);
-                    }
-                    await _materialService.UpdateMaterial(material);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = material,
-                        Message = "Material is updated",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
-
-                    response.Message = "Invalid Material data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                    Data = material,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
             }
             catch (Exception e)
             {
@@ -164,33 +144,14 @@ namespace SomoTaskManagement.Api.Controllers
             //}
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _materialService.DeleteByStatus(id);
+                var responseData = new ApiResponseModel
                 {
-                    if (id <= 0)
-                    {
-                        return NotFound("Material id must be greater than 0 ");
-                    }
-                    await _materialService.DeleteByStatus(id);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = null,
-                        Message = "Delete success",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
-
-                    response.Message = "Invalid Material data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                    Data = null,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
             }
             catch (Exception e)
             {

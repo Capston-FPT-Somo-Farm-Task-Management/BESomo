@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
-using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Material;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;
@@ -46,10 +46,20 @@ namespace SomoTaskManagement.Services.Imp
             await _unitOfWork.RepositoryMaterial.Add(material);
             await _unitOfWork.RepositoryMaterial.Commit();
         }
-        public async Task UpdateMaterial(Material material)
+        public async Task UpdateMaterial(int id,Material material)
         {
-            _unitOfWork.RepositoryMaterial.Update(material);
-            await _unitOfWork.RepositoryMaterial.Commit();
+            var materialUpdate = await _unitOfWork.RepositoryMaterial.GetById(id);
+            if(materialUpdate != null)
+            {
+                materialUpdate.Status = 1;
+                materialUpdate.Id = id;
+                materialUpdate.Name = material.Name;
+                await _unitOfWork.RepositoryMaterial.Commit();
+            }
+            else
+            {
+                throw new Exception("Không tìm thấy vật dụng");
+            }
         }
         public async Task DeleteMaterial(Material material)
         {
@@ -63,7 +73,7 @@ namespace SomoTaskManagement.Services.Imp
             {
                 throw new Exception("Livestock not found");
             }
-            material.Status = 0;
+            material.Status = material.Status == 1 ? 0 : 1; ;
             await _unitOfWork.RepositoryLiveStock.Commit();
         }
     }

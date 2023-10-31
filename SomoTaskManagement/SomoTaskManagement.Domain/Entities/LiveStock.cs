@@ -27,11 +27,9 @@ namespace SomoTaskManagement.Domain.Entities
         [Range(0.01, double.MaxValue, ErrorMessage = "Weight must be greater than 0.")]
         public int Weight { set; get; }
 
-        [Required(ErrorMessage = "DateOfBirth is required.")]
-        public DateTime DateOfBirth { set; get; }
-
         [Required(ErrorMessage = "Gender is required.")]
         public bool Gender { set; get; }
+        public bool IsActive { set; get; }
 
         public int HabitantTypeId { set; get; }
 

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "SQwb7/w0h1q6JWjMVaecf+E6+iUd6cI4iYLKJFemqjo=",
+  "Hash": "5ntvFAsswiAXrS42rvg3iCElNsIzEtigoQxLtS6F3SA=",
   "Source": "TestClient",
   "BasePath": "_content/TestClient",
   "Mode": "Default",
@@ -83,40 +83,6 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\favicon.ico"
-    },
-    {
-      "Identity": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\TestClient\\wwwroot\\js\\notification.js",
-      "SourceId": "TestClient",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\TestClient\\wwwroot\\",
-      "BasePath": "_content/TestClient",
-      "RelativePath": "js/notification.js",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\js\\notification.js"
-    },
-    {
-      "Identity": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\TestClient\\wwwroot\\js\\site.js",
-      "SourceId": "TestClient",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\TestClient\\wwwroot\\",
-      "BasePath": "_content/TestClient",
-      "RelativePath": "js/site.js",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\js\\site.js"
     },
     {
       "Identity": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\TestClient\\wwwroot\\js\\task.js",

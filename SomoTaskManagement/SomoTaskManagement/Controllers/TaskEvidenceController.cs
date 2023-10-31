@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.EvidenceImage;
+using SomoTaskManagement.Domain.Model.Reponse;
+using SomoTaskManagement.Domain.Model.TaskEvidence;
 using SomoTaskManagement.Services.Interface;
 
 namespace SomoTaskManagement.Api.Controllers
@@ -27,6 +30,26 @@ namespace SomoTaskManagement.Api.Controllers
             catch (Exception e)
             {
                 return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("Task({taskId})")]
+        public async Task<IActionResult> GetEvidenceByTask(int taskId)
+        {
+            try
+            {
+                var area = await _taskEvidenceService.GetEvidenceByTask(taskId);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "TaskEvidence is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
             }
         }
 
@@ -61,28 +84,41 @@ namespace SomoTaskManagement.Api.Controllers
             {
                 var response = new ApiResponseModel();
 
-                if (ModelState.IsValid)
-                {
-                    await _taskEvidenceService.AddTaskEvidencee(taskEvidence);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = taskEvidence,
-                        Message = "TaskEvidence is added",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
 
-                    response.Message = "Invalid TaskEvidence data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                await _taskEvidenceService.AddTaskEvidencee(taskEvidence);
+                var responseData = new ApiResponseModel
+                {
+                    Data = taskEvidence,
+                    Message = "TaskEvidence is added",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+
+        [HttpPost("AddTaskEvidenceeWithImage")]
+        public async Task<IActionResult> AddTaskEvidenceeWithImage([FromForm] EvidenceCreateUpdateModel evidenceCreateUpdateModel)
+        {
+            try
+            {
+                var response = new ApiResponseModel();
+
+
+                await _taskEvidenceService.AddTaskEvidenceeWithImage(evidenceCreateUpdateModel);
+                var responseData = new ApiResponseModel
+                {
+                    Data = evidenceCreateUpdateModel,
+                    Message = "TaskEvidence is added",
+                    Success = true,
+                };
+                return Ok(responseData);
+
             }
             catch (Exception e)
             {
@@ -91,39 +127,20 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] TaskEvidence taskEvidence)
+        public async Task<IActionResult> Update(int id, [FromForm]TaskEvidenceUpdateModel taskEvidence)
         {
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
-                {
-                    var existingArea = await _taskEvidenceService.GetTaskEvidence(id);
-                    if (existingArea == null)
-                    {
-                        response.Message = "TaskEvidence not found";
-                        return NotFound(response);
-                    }
-                    await _taskEvidenceService.UpdateTaskEvidence(taskEvidence);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = taskEvidence,
-                        Message = "TaskEvidence is updated",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
 
-                    response.Message = "Invalid TaskEvidence data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                await _taskEvidenceService.UpdateTaskEvidence(id, taskEvidence.EvidenceCreateUpdateModel, taskEvidence.OldUrlImage);
+                var responseData = new ApiResponseModel
+                {
+                    Data = taskEvidence,
+                    Message = "TaskEvidence is updated",
+                    Success = true,
+                };
+                return Ok(responseData);
+
             }
             catch (Exception e)
             {
@@ -132,20 +149,34 @@ namespace SomoTaskManagement.Api.Controllers
 
         }
 
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
                 var response = new ApiResponseModel();
-                var existingArea = await _taskEvidenceService.GetTaskEvidence(id);
-                if (existingArea == null)
-                {
-                    response.Message = "TaskEvidence not found";
-                    return NotFound(response);
-                }
 
-                await _taskEvidenceService.DeleteTaskEvidence(existingArea);
+                await _taskEvidenceService.DeleteTaskEvidence(id);
+                response.Message = "TaskEvidence is deleted";
+                response.Success = true;
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+
+        [HttpPut("Disaggree/Task({id})")]
+        public async Task<IActionResult> CreateDisagreeTask(int id, string description)
+        {
+            try
+            {
+                var response = new ApiResponseModel();
+
+                await _taskEvidenceService.CreateDisagreeTask(id,description);
                 response.Message = "TaskEvidence is deleted";
                 response.Success = true;
                 return Ok(response);

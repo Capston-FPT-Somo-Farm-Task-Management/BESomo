@@ -15,6 +15,7 @@ namespace SomoTaskManagement.Domain.Entities
         {
             MaterialTasks = new HashSet<Material_Task>();
         }
+
         [JsonIgnore]
         public virtual ICollection<Material_Task> MaterialTasks { get; set; }
     }

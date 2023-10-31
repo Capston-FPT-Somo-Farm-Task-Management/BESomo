@@ -30,6 +30,11 @@ namespace SomoTaskManagement.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<double>("FArea")
                         .HasColumnType("float");
 
@@ -64,8 +69,16 @@ namespace SomoTaskManagement.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("FarmId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("Gender")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -95,14 +108,23 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<int>("TaskId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Status")
+                    b.Property<float?>("ActualEffort")
+                        .HasColumnType("real");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("Status")
                         .HasColumnType("bit");
 
                     b.HasKey("EmployeeId", "TaskId");
 
                     b.HasIndex("TaskId");
 
-                    b.ToTable("Employee_Task", (string)null);
+                    b.ToTable("SubTask", (string)null);
                 });
 
             modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Employee_TaskType", b =>
@@ -135,14 +157,6 @@ namespace SomoTaskManagement.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
                     b.Property<int>("TaskEvidenceId")
                         .HasColumnType("int");
 
@@ -166,6 +180,10 @@ namespace SomoTaskManagement.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<double>("FarmArea")
                         .HasColumnType("float");
 
@@ -176,6 +194,10 @@ namespace SomoTaskManagement.Data.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<string>("UrlImage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -194,7 +216,6 @@ namespace SomoTaskManagement.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EndDate")
@@ -203,13 +224,13 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<int?>("FieldId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Iterations")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsRepeat")
+                        .HasColumnType("bit");
 
                     b.Property<int?>("LiveStockId")
                         .HasColumnType("int");
 
-                    b.Property<int>("MemberId")
+                    b.Property<int?>("ManagerId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -226,20 +247,16 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<int>("Priority")
                         .HasColumnType("int");
 
-                    b.Property<int>("ReceiverId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Remind")
                         .HasColumnType("int");
-
-                    b.Property<string>("Repeat")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SuppervisorId")
                         .HasColumnType("int");
 
                     b.Property<int>("TaskTypeId")
@@ -251,7 +268,7 @@ namespace SomoTaskManagement.Data.Migrations
 
                     b.HasIndex("LiveStockId");
 
-                    b.HasIndex("MemberId");
+                    b.HasIndex("ManagerId");
 
                     b.HasIndex("OtherId");
 
@@ -272,6 +289,14 @@ namespace SomoTaskManagement.Data.Migrations
 
                     b.Property<double>("Area")
                         .HasColumnType("float");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -299,13 +324,22 @@ namespace SomoTaskManagement.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Environment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                    b.Property<string>("Origin")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -325,9 +359,9 @@ namespace SomoTaskManagement.Data.Migrations
 
                     b.Property<string>("ConnectionId")
                         .IsRequired()
-                        .HasMaxLength(50)
+                        .HasMaxLength(2000)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(2000)");
 
                     b.Property<int>("MemberId")
                         .HasMaxLength(50)
@@ -350,9 +384,6 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("ExternalId")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -366,6 +397,9 @@ namespace SomoTaskManagement.Data.Migrations
 
                     b.Property<int>("HabitantTypeId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -442,6 +476,9 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<DateTime>("Birthday")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -457,16 +494,13 @@ namespace SomoTaskManagement.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("NotificcationId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PhoneNumber")
-                        .HasMaxLength(10)
-                        .HasColumnType("int");
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
@@ -486,8 +520,6 @@ namespace SomoTaskManagement.Data.Migrations
                     b.HasIndex("HubConnectionId")
                         .IsUnique()
                         .HasFilter("[HubConnectionId] IS NOT NULL");
-
-                    b.HasIndex("NotificcationId");
 
                     b.HasIndex("RoleId");
 
@@ -549,11 +581,19 @@ namespace SomoTaskManagement.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<bool>("IsNew")
+                        .IsUnicode(false)
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .IsUnicode(false)
+                        .HasColumnType("bit");
+
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(1000)");
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("MessageType")
                         .IsRequired()
@@ -564,9 +604,31 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<DateTime>("NotificationDateTime")
                         .HasColumnType("datetime");
 
+                    b.Property<int>("TaskId")
+                        .IsUnicode(false)
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("Notification", (string)null);
+                });
+
+            modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Notification_Member", b =>
+                {
+                    b.Property<int>("NotificationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.HasKey("NotificationId", "MemberId");
+
+                    b.HasIndex("MemberId");
+
+                    b.ToTable("Notification_Member", (string)null);
                 });
 
             modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Other", b =>
@@ -614,6 +676,9 @@ namespace SomoTaskManagement.Data.Migrations
 
                     b.Property<int>("Height")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -664,11 +729,6 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -724,6 +784,11 @@ namespace SomoTaskManagement.Data.Migrations
 
                     b.Property<int>("AreaId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("FarmArea")
                         .HasColumnType("float");
@@ -862,16 +927,13 @@ namespace SomoTaskManagement.Data.Migrations
 
                     b.HasOne("SomoTaskManagement.Domain.Entities.Member", "Member")
                         .WithMany("Tasks")
-                        .HasForeignKey("MemberId")
+                        .HasForeignKey("ManagerId")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
                         .HasConstraintName("FK_Member_Task");
 
-                    b.HasOne("SomoTaskManagement.Domain.Entities.Other", "Other")
+                    b.HasOne("SomoTaskManagement.Domain.Entities.Other", null)
                         .WithMany("Tasks")
-                        .HasForeignKey("OtherId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_Other_Task");
+                        .HasForeignKey("OtherId");
 
                     b.HasOne("SomoTaskManagement.Domain.Entities.Plant", "Plant")
                         .WithMany("Tasks")
@@ -891,8 +953,6 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Navigation("LiveStrock");
 
                     b.Navigation("Member");
-
-                    b.Navigation("Other");
 
                     b.Navigation("Plant");
 
@@ -966,11 +1026,6 @@ namespace SomoTaskManagement.Data.Migrations
                         .WithOne("Member")
                         .HasForeignKey("SomoTaskManagement.Domain.Entities.Member", "HubConnectionId");
 
-                    b.HasOne("SomoTaskManagement.Domain.Entities.Notification", "Notification")
-                        .WithMany("Members")
-                        .HasForeignKey("NotificcationId")
-                        .HasConstraintName("FK_Notification_Member");
-
                     b.HasOne("SomoTaskManagement.Domain.Entities.Role", "Role")
                         .WithMany("Members")
                         .HasForeignKey("RoleId")
@@ -981,8 +1036,6 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Navigation("Farm");
 
                     b.Navigation("HubConnection");
-
-                    b.Navigation("Notification");
 
                     b.Navigation("Role");
                 });
@@ -997,6 +1050,27 @@ namespace SomoTaskManagement.Data.Migrations
                         .HasConstraintName("FK_Member_MemberToken");
 
                     b.Navigation("Member");
+                });
+
+            modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Notification_Member", b =>
+                {
+                    b.HasOne("SomoTaskManagement.Domain.Entities.Member", "Member")
+                        .WithMany("Notification_Members")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Notification_Member_Member");
+
+                    b.HasOne("SomoTaskManagement.Domain.Entities.Notification", "Notification")
+                        .WithMany("Notification_Members")
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_TNotification_Member_Notification");
+
+                    b.Navigation("Member");
+
+                    b.Navigation("Notification");
                 });
 
             modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Plant", b =>
@@ -1118,12 +1192,14 @@ namespace SomoTaskManagement.Data.Migrations
                 {
                     b.Navigation("MemberTokens");
 
+                    b.Navigation("Notification_Members");
+
                     b.Navigation("Tasks");
                 });
 
             modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Notification", b =>
                 {
-                    b.Navigation("Members");
+                    b.Navigation("Notification_Members");
                 });
 
             modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Other", b =>
