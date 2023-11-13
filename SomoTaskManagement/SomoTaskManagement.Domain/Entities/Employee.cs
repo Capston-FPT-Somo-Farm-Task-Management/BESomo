@@ -28,6 +28,8 @@ namespace SomoTaskManagement.Domain.Entities
         public string Address { get; set; }
         [Required]
         public bool Gender { get; set; }
+        public string Avatar { get; set; }
+        public DateTime DateOfBirth { get; set; }
 
         public int FarmId { get; set; }
 

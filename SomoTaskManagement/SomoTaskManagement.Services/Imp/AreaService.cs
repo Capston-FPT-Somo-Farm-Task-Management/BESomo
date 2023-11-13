@@ -19,13 +19,11 @@ namespace SomoTaskManagement.Services.Imp
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly SomoTaskManagemnetContext _db;
 
-        public AreaService(IUnitOfWork unitOfWork, IMapper mapper, SomoTaskManagemnetContext db)
+        public AreaService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _db = db;
         }
 
         public async Task<IEnumerable<AreaModel>> ListArea()
@@ -39,6 +37,7 @@ namespace SomoTaskManagement.Services.Imp
 
             return _mapper.Map<IEnumerable<Area>, IEnumerable<AreaModel>>(areas);
         }
+
         public async Task<IEnumerable<AreaModel>> ListAreaActive()
         {
             var includes = new Expression<Func<Area, object>>[]
@@ -78,6 +77,36 @@ namespace SomoTaskManagement.Services.Imp
                 throw new Exception("Không tìm thấy nông trại");
             }
             var areas = await _unitOfWork.RepositoryArea.GetData(expression: a => a.FarmId == id, includes: includes);
+            areas = areas.OrderBy(x => x.Name).ToList();
+
+            return _mapper.Map<IEnumerable<Area>, IEnumerable<AreaModel>>(areas);
+        }
+
+        public async Task<IEnumerable<AreaModel>> GetAreaWithZoneTypeLiveStock(int farmId)
+        {
+            var includes = new Expression<Func<Area, object>>[]
+            {
+                    t => t.Farm,
+            };
+            var zones = await _unitOfWork.RepositoryZone.GetData(z=>z.ZoneTypeId == 1);
+            var zoneIds = zones.Select(z=>z.AreaId).ToList();
+
+            var areas = await _unitOfWork.RepositoryArea.GetData(expression: a => zoneIds.Contains(a.Id) && a.FarmId == farmId && a.Status == 1, includes: includes);
+            areas = areas.OrderBy(x => x.Name).ToList();
+
+            return _mapper.Map<IEnumerable<Area>, IEnumerable<AreaModel>>(areas);
+        }
+
+        public async Task<IEnumerable<AreaModel>> GetAreaWithZoneTypePlant(int farmId)
+        {
+            var includes = new Expression<Func<Area, object>>[]
+            {
+                    t => t.Farm,
+            };
+            var zones = await _unitOfWork.RepositoryZone.GetData(z => z.ZoneTypeId == 2);
+            var zoneIds = zones.Select(z => z.AreaId).ToList();
+
+            var areas = await _unitOfWork.RepositoryArea.GetData(expression: a => zoneIds.Contains(a.Id) && a.FarmId == farmId && a.Status == 1, includes: includes);
             areas = areas.OrderBy(x => x.Name).ToList();
 
             return _mapper.Map<IEnumerable<Area>, IEnumerable<AreaModel>>(areas);
@@ -172,10 +201,19 @@ namespace SomoTaskManagement.Services.Imp
             }
             await _unitOfWork.RepositoryArea.Commit();
         }
-        public async Task DeleteArea(Area area)
+        public async Task DeleteArea(int areaId)
         {
-            _unitOfWork.RepositoryArea.Delete(a => a.Id == area.Id);
+            var area = await _unitOfWork.RepositoryArea.GetById(areaId) ?? throw new Exception("Không tìm thấy khu vực");
+
+            var zoneExists = await _unitOfWork.RepositoryZone.GetData(z => z.AreaId == areaId);
+            if (zoneExists.Count()>0)
+            {
+                throw new Exception("Không thể xóa khu vực khi còn thực thể bên trong");
+            }
+
+            _unitOfWork.RepositoryArea.Delete(a => a.Id == areaId);
             await _unitOfWork.RepositoryArea.Commit();
         }
+
     }
 }

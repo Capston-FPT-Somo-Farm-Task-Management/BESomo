@@ -1,4 +1,5 @@
 ﻿using AutoMapper.Execution;
+using DemoRedis.Attributes;
 using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,6 @@ using SomoTaskManagement.Domain.Model;
 using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Domain.Model.Task;
 using SomoTaskManagement.Notify.FirebaseNotify;
-using SomoTaskManagement.Notify.HubSignalR;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 using System.Threading.Tasks;
@@ -25,16 +25,13 @@ namespace SomoTaskManagement.Api.Controllers
         private readonly FcmNotificationService _fcmService;
         private readonly IHubConnection _hubConnection;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IHubContext<NotifyHub> _hubContext;
 
-        public FarmTaskController(IFarmTaskService farmTaskService, IHubConnection hubConnection, IUnitOfWork unitOfWork, IHubContext<NotifyHub> hubContext)
+        public FarmTaskController(IFarmTaskService farmTaskService, IHubConnection hubConnection, IUnitOfWork unitOfWork)
         {
             _farmTaskService = farmTaskService;
             _fcmService = new FcmNotificationService();
             _hubConnection = hubConnection;
             _unitOfWork = unitOfWork;
-            _hubContext = hubContext;
-
         }
         [HttpGet]
         public async Task<IActionResult> GetList()
@@ -42,6 +39,77 @@ namespace SomoTaskManagement.Api.Controllers
             try
             {
                 var area = await _farmTaskService.GetList();
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy danh sách nhiệm vụ ",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+        [HttpGet("GetTotalTaskOfWeekByMember({memberId})")]
+        public async Task<IActionResult> GetTotalTaskOfWeekByMember(int memberId)
+        {
+            try
+            {
+                var area = await _farmTaskService.GetTotalTaskOfWeekByMember(memberId);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy danh sách nhiệm vụ ",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+        [HttpGet("GetTotalTypeOfTaskInWeekByMember({memberId})")]
+        public async Task<IActionResult> GetTotalTypeOfTaskInWeekByMember(int memberId)
+        {
+            try
+            {
+                var area = await _farmTaskService.GetTotalTypeOfTaskInWeekByMember(memberId);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy danh sách nhiệm vụ ",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+        [HttpGet("GetTaskPrepareAndDoing/Member({id})")]
+        public async Task<IActionResult> GetTaskPrepareAndDoing(int id)
+        {
+            try
+            {
+                var area = await _farmTaskService.GetTaskPrepareAndDoing(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
@@ -136,11 +204,11 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpGet("PageIndex({pageIndex})/PageSize({pageSize})/Done/Employee({employeeId})")]
-        public async Task<IActionResult> GetTaskByEmployeeDates(int employeeId, DateTime? startDay, DateTime? endDay, int pageIndex, int pageSize,[FromQuery] int? status)
+        public async Task<IActionResult> GetTaskByEmployeeDates(int employeeId, DateTime? startDay, DateTime? endDay, int pageIndex, int pageSize, [FromQuery] int? status)
         {
             try
             {
-                var area = await _farmTaskService.GetTaskByEmployeeDates(employeeId, startDay, endDay, pageIndex, pageSize,status);
+                var area = await _farmTaskService.GetTaskByEmployeeDates(employeeId, startDay, endDay, pageIndex, pageSize, status);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
@@ -158,6 +226,8 @@ namespace SomoTaskManagement.Api.Controllers
                 });
             }
         }
+
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTask(int id)
@@ -288,12 +358,39 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpGet("PageIndex({pageIndex})/PageSize({pageSize})/Manager({id})/Status({status})/Date")]
-        public async Task<IActionResult> GetTaskByStatusMemberDate(int id, int status, [FromQuery] DateTime? date, int pageIndex, int pageSize, [FromQuery] string? taskName)
+        public async Task<IActionResult> GetTaskByStatusMemberDate(int id, int status, [FromQuery] DateTime? date, int pageIndex, int pageSize, [FromQuery] int? checkTaskParent, [FromQuery] string? taskName)
         {
             try
             {
 
-                var task = await _farmTaskService.GetTaskByStatusMemberDate(id, status, date, pageIndex, pageSize, taskName);
+                var task = await _farmTaskService.GetTaskByStatusMemberDate(id, status, date, pageIndex, pageSize, checkTaskParent, taskName);
+
+                return Ok(new ApiResponseModel
+                {
+                    Data = task,
+                    Message = "Tìm thấy danh sách nhiệm vụ ",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+
+            }
+        }
+
+        [HttpGet("PageIndex({pageIndex})/PageSize({pageSize})/Manager({id})/Date")]
+        public async Task<IActionResult> GetAllTaskByMemberDate(int id, [FromQuery] DateTime? date, int pageIndex, int pageSize, [FromQuery] int? checkTaskParent, [FromQuery] string? taskName)
+        {
+            try
+            {
+
+                var task = await _farmTaskService.GetAllTaskByMemberDate(id, date, pageIndex, pageSize, checkTaskParent, taskName);
 
                 return Ok(new ApiResponseModel
                 {
@@ -320,7 +417,7 @@ namespace SomoTaskManagement.Api.Controllers
             try
             {
 
-                var task = await _farmTaskService.GetTaskByStatusSupervisorDate(id, status, date,pageIndex,pageSize, taskName);
+                var task = await _farmTaskService.GetTaskByStatusSupervisorDate(id, status, date, pageIndex, pageSize, taskName);
 
                 return Ok(new ApiResponseModel
                 {
@@ -451,43 +548,37 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        //[HttpPut("Task({taskId})/Member({memberId})")]
-        //public async Task<IActionResult> UpdateArea(int taskId, int memberId, [FromBody] TaskRequestModel taskModel)
-        //{
-        //    if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
-        //    {
-        //        return Unauthorized("You do not have access to this method.");
-        //    }
-        //    var response = new ApiResponseModel();
-        //    if (ModelState.IsValid)
-        //    {
-        //        var existingArea = await _farmTaskService.Get(taskId);
-        //        if (existingArea == null)
-        //        {
-        //            response.Message = "FarmTask not found";
-        //            return NotFound(response);
-        //        }
-        //        await _farmTaskService.Update(taskId, memberId, taskModel.FarmTask, taskModel.EmployeeIds, taskModel.MaterialIds);
-        //        var responseData = new ApiResponseModel
-        //        {
-        //            Data = taskModel,
-        //            Message = "FarmTask is updated",
-        //            Success = true,
-        //        };
-        //        return Ok(responseData);
-        //    }
-        //    else
-        //    {
-        //        var errorMessages = new List<string>();
-        //        foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-        //        {
-        //            errorMessages.Add(modelError.ErrorMessage);
-        //        }
+        [HttpPut("{taskId}")]
+        public async Task<IActionResult> Update(int taskId, [FromBody] TaskRequestModel taskModel)
+        {
+            //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+            //{
+            //    return Unauthorized("You do not have access to this method.");
+            //}
 
-        //        response.Message = "Invalid FarmTask data: " + string.Join(" ", errorMessages);
-        //        return BadRequest(response);
-        //    }
-        //}
+            try
+            {
+                await _farmTaskService.Update(taskId, taskModel);
+                var responseData = new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Nhiệm vụ đã được cập nhật",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+
+        }
 
         [HttpPut("ChangeStatus/{id}")]
         public async Task<IActionResult> UpdateStatus(int id, int status)
@@ -506,6 +597,39 @@ namespace SomoTaskManagement.Api.Controllers
                 {
                     Data = null,
                     Message = "Nhiệm vụ đã được cập nhật",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+
+        }
+
+        [HttpPut("DeleteTask/{id}")]
+        public async Task<IActionResult> DeleteTask(int id)
+        {
+            //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+            //{
+            //    return Unauthorized("You do not have access to this method.");
+            //}
+            try
+            {
+
+                await _farmTaskService.DeleteTask(id);
+
+                var responseData = new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Nhiệm vụ đã được xóa",
                     Success = true,
                 };
                 return Ok(responseData);

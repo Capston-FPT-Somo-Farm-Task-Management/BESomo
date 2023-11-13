@@ -9,7 +9,7 @@ namespace SomoTaskManagement.Domain.Model.Task
 {
     public class TaskCreateUpdateModel
     {
-
+        //public string Code {  get; set; }
         [Required]
         //[RegularExpression("^[a-zA-Z ]*$", ErrorMessage = "Name must contain only letters.")]
         [StringLength(100, ErrorMessage = "Name must not exceed 100 characters.")]
@@ -33,9 +33,15 @@ namespace SomoTaskManagement.Domain.Model.Task
         public int? FieldId { set; get; }
         public int TaskTypeId { set; get; }
         public int? ManagerId { set; get; }
-        public int? OtherId { set; get; }
         public int? PlantId { set; get; }
         public int? LiveStockId { set; get; }
         public int Remind { set; get; }
+        public string? AddressDetail { get; set; }
+        [Range(0, int.MaxValue, ErrorMessage = "OverallEfforMinutes must be greater than 0.")]
+        public int OverallEfforMinutes { set; get; }
+        [Range(0, int.MaxValue, ErrorMessage = "OverallEffortHour must be greater than 0.")]
+        public int OverallEffortHour { set; get; }
+        //public DateTime? UpdateDate { set; get; }
+        //public int OriginalTaskId { set; get; }
     }
 }

@@ -26,5 +26,7 @@ namespace SomoTaskManagement.Domain.Model.Employee
         public int FarmId { get; set; }
         public string TaskTypeName { get; set; }
         public List<int> TaskTypeId { get; set; }
+        public string Avatar { get; set; }
+        public DateTime DateOfBirth { get; set; }
     }
 }

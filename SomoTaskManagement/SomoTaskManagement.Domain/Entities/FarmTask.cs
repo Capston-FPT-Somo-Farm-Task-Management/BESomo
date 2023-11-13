@@ -18,15 +18,21 @@ namespace SomoTaskManagement.Domain.Entities
             Material_Tasks = new HashSet<Material_Task>();
             Employee_Tasks = new HashSet<Employee_Task>();
         }
-
+        public string Code { get; set; }   
+        public string? AddressDetail { get; set; }   
         [Required(ErrorMessage = "CreateDate is required.")]
         public DateTime CreateDate { set; get; }
 
         [Required(ErrorMessage = "StartDate is required.")]
         public DateTime StartDate { set; get; }
+        public DateTime? UpdateDate { set; get; }
 
         [Required(ErrorMessage = "EndDate is required.")]
         public DateTime EndDate { set; get; }
+        [Range(0, int.MaxValue, ErrorMessage = "OverallEfforMinutes must be greater than 0.")]
+        public int OverallEfforMinutes { set; get; }
+        [Range(0, int.MaxValue, ErrorMessage = "OverallEffortHour must be greater than 0.")]
+        public int OverallEffortHour { set; get; }
 
         public string? Description { set; get; }
 
@@ -42,10 +48,12 @@ namespace SomoTaskManagement.Domain.Entities
         public int? PlantId { set; get; }
         public int? LiveStockId { set; get; }
 
-        
+        public int OriginalTaskId {  set; get; }
 
         [JsonIgnore]
-        public virtual Member? Member { set; get; }
+        public virtual Member? Manager { set; get; }
+        //[JsonIgnore]
+        //public virtual Member? Supervisor { set; get; }
         [JsonIgnore]
         public virtual Plant? Plant { set; get; }
         [JsonIgnore]

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -22,8 +23,10 @@ namespace SomoTaskManagement.Domain.Model.Employee
         public string Address { get; set; }
         [Required]
         public bool Gender { get; set; }
-
+        public IFormFile ImageFile { get; set; }
         public int FarmId { get; set; }
+        public DateTime DateOfBirth { get; set; }
 
+        public List<int> TaskTypeIds {  get; set; }
     }
 }

@@ -1,12 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using SomoTaskManagement.Data;
 using SomoTaskManagement.Data.Abtract;
-using SomoTaskManagement.Notify.HubSignalR;
-using SomoTaskManagement.Notify.MiddlewareExtensions;
-using SomoTaskManagement.Notify.SubscribeTableDependencies;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
-using SomoTaskManagement.Services.Repo;
 using TestClient.Repos;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,7 +27,7 @@ builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-builder.Services.AddSingleton<NotifyHub>();
+//builder.Services.AddSingleton<NotifyHub>();
 //builder.Services.AddSingleton<SubscribeNotificationTableDependency>();
 builder.Services.AddRazorPages();
 
@@ -50,13 +46,13 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 app.UseAuthorization();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapHub<NotifyHub>("/notifyHub"); 
-    endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Task}/{action=Index}/{id?}");
-});
+//app.UseEndpoints(endpoints =>
+//{
+//    endpoints.MapHub<NotifyHub>("/notifyHub");
+//    endpoints.MapControllerRoute(
+//        name: "default",
+//        pattern: "{controller=Task}/{action=Index}/{id?}");
+//});
 
 //app.UseSqlTableDependency<SubscribeNotificationTableDependency>(connectionString);
 app.Run();

@@ -10,12 +10,13 @@ namespace SomoTaskManagement.Services.Interface
 {
     public interface IMaterialService
     {
-        Task AddMaterial(Material material);
+        Task AddMaterial(MaterialCreateUpdateModel material);
         Task DeleteByStatus(int id);
         Task DeleteMaterial(Material material);
         Task<Material> GetMaterial(int id);
         Task<IEnumerable<MaterialModel>> ListMaterial();
-        Task<IEnumerable<MaterialModel>> ListMaterialActive();
-        Task UpdateMaterial(int id, Material material);
+        Task<IEnumerable<MaterialModel>> ListMaterialActive(int farmid);
+        Task<IEnumerable<MaterialModel>> ListMaterialByFarm(int farmid);
+        Task UpdateMaterial(int id, MaterialCreateUpdateModel material);
     }
 }

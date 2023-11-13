@@ -1,5 +1,10 @@
-﻿using SomoTaskManagement.Data.Abtract;
+﻿using Firebase.Storage;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
+using SomoTaskManagement.Domain.Model.Farm;
+using SomoTaskManagement.Domain.Model.TaskEvidence;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;
@@ -9,13 +14,15 @@ using System.Threading.Tasks;
 
 namespace SomoTaskManagement.Services.Imp
 {
-    public class FarmService: IFarmService
+    public class FarmService : IFarmService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IConfiguration _configuration;
 
-        public FarmService(IUnitOfWork unitOfWork)
+        public FarmService(IUnitOfWork unitOfWork, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
+            _configuration = configuration;
         }
 
         public async Task<IEnumerable<Farm>> ListFarm()
@@ -25,25 +32,84 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task<Farm> GetFarmById(int id)
         {
-            return await _unitOfWork.RepositoryFarm.GetById(id);
+
+            var farm = await _unitOfWork.RepositoryFarm.GetById(id);
+            if (farm == null)
+            {
+                throw new Exception("Không tìm thấy trang trại");
+            }
+            return farm;
         }
 
-        public async Task CreateFarm(Farm farm)
+
+        public async Task CreateFarm(FarmCreateUpdateModel farm)
         {
-            farm.Status = 1;
-            await _unitOfWork.RepositoryFarm.Add(farm);
+            var farmCreate = new Farm
+            {
+                Name = farm.Name,
+                Description = farm.Description,
+                FarmArea = farm.FarmArea,
+                Address = farm.Address,
+                Status = 1
+            };
+            var urlImage = await UploadImageToFirebaseAsync(farmCreate, farm.ImageFile);
+            farmCreate.UrlImage = urlImage;
+            await _unitOfWork.RepositoryFarm.Add(farmCreate);
             await _unitOfWork.RepositoryFarm.Commit();
         }
 
-        public async Task UpdateFarm(Farm farm)
+        private async Task<string> UploadImageToFirebaseAsync(Farm farm, IFormFile imageFile)
         {
-            _unitOfWork.RepositoryFarm.Update(farm);
+            var options = new FirebaseStorageOptions
+            {
+                AuthTokenAsyncFactory = () => Task.FromResult(_configuration["Firebase:apiKey"])
+            };
+
+            string fileName = farm.Id.ToString();
+            string fileExtension = Path.GetExtension(imageFile.FileName);
+
+            var firebaseStorage = new FirebaseStorage(_configuration["Firebase:Bucket"], options)
+                .Child("images")
+                .Child(fileName + fileExtension);
+
+            using (var stream = imageFile.OpenReadStream())
+            {
+                await firebaseStorage.PutAsync(stream);
+            }
+
+            var imageUrl = await firebaseStorage.GetDownloadUrlAsync();
+
+            return imageUrl;
+        }
+
+
+        public async Task UpdateFarm(int id, FarmCreateUpdateModel farm)
+        {
+            var farmUpdate = await _unitOfWork.RepositoryFarm.GetById(id);
+            if (farmUpdate == null)
+            {
+                throw new Exception("Không tìm thấy trang trại");
+            }
+
+            farmUpdate.Name = farm.Name;
+            farmUpdate.Status = 1;
+            farmUpdate.Description = farm.Description;
+            farmUpdate.Address = farm.Address;
+            farmUpdate.FarmArea = farm.FarmArea;
+
+            _unitOfWork.RepositoryFarm.Update(farmUpdate);
+            await _unitOfWork.RepositoryFarm.Commit();
+
+            farmUpdate.UrlImage = await UploadImageToFirebaseAsync(farmUpdate, farm.ImageFile);
+
+            _unitOfWork.RepositoryFarm.Update(farmUpdate);
             await _unitOfWork.RepositoryFarm.Commit();
         }
+
 
         public async Task DeleteFarm(Farm farm)
         {
-            _unitOfWork.RepositoryFarm.Delete(f=>f.Id ==farm.Id);
+            _unitOfWork.RepositoryFarm.Delete(f => f.Id == farm.Id);
             await _unitOfWork.RepositoryFarm.Commit();
         }
 

@@ -17,6 +17,8 @@ namespace SomoTaskManagement.Domain.Entities
             Areas = new HashSet<Area>();
             Members = new HashSet<Member>();
             Employees = new HashSet<Employee>();
+            HabitantTypes = new HashSet<HabitantType>();
+            Materials = new HashSet<Material>();
         }
 
         [Required(ErrorMessage = "Area is required.")]
@@ -36,6 +38,12 @@ namespace SomoTaskManagement.Domain.Entities
         public ICollection<Member> Members { get; set; }
 
         [JsonIgnore]
+        public ICollection<HabitantType>? HabitantTypes { get; set; }
+
+        [JsonIgnore]
         public ICollection<Employee> Employees { get; set; }
+
+        [JsonIgnore]
+        public ICollection<Material>? Materials { get; set; }
     }
 }

@@ -14,7 +14,7 @@ namespace SomoTaskManagement.Domain.Model.Task
         //[RegularExpression("^[a-zA-Z ]*$", ErrorMessage = "Name must contain only letters.")]
         [StringLength(100, ErrorMessage = "Name must not exceed 100 characters.")]
         public string Name { get; set; }
-
+        public string CodeTask {  get; set; }
         [Required]
         public string Status { set; get; }
 
@@ -57,6 +57,7 @@ namespace SomoTaskManagement.Domain.Model.Task
         public int ZoneId { set; get; }
         public string AreaName { set; get; }
         public int AreaId { set; get; }
-        public float? Effort {  get; set; }
+        public int ActualEfforMinutes { set; get; }
+        public int ActualEffortHour { set; get; }
     }
 }

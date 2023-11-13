@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using DemoRedis.Attributes;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Farm;
 using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Services.Interface;
 
@@ -18,6 +20,7 @@ namespace SomoTaskManagement.Api.Controllers
             _farmService = farmService;
         }
         [HttpGet]
+        //[Cache]
         public async Task<IActionResult> GetList()
         {
             try
@@ -29,7 +32,7 @@ namespace SomoTaskManagement.Api.Controllers
                 return BadRequest(e.Message);
             }
         }
-        
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
@@ -55,7 +58,7 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
         [HttpPost]
-        public async Task<IActionResult> CreateArea([FromBody] Farm farm)
+        public async Task<IActionResult> CreateArea([FromForm] FarmCreateUpdateModel farm)
         {
             try
             {
@@ -91,39 +94,18 @@ namespace SomoTaskManagement.Api.Controllers
 
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Farm farm)
+        public async Task<IActionResult> Update(int id, [FromForm] FarmCreateUpdateModel farm)
         {
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
+                await _farmService.UpdateFarm(id,farm);
+                var responseData = new ApiResponseModel
                 {
-                    var existingArea = await _farmService.GetFarmById(id);
-                    if (existingArea == null)
-                    {
-                        response.Message = "Farm not found";
-                        return NotFound(response);
-                    }
-                    await _farmService.UpdateFarm(farm);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = farm,
-                        Message = "Farm is updated",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
-
-                    response.Message = "Invalid Farm data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                    Data = farm,
+                    Message = "Farm is updated",
+                    Success = true,
+                };
+                return Ok(responseData);
             }
             catch (Exception e)
             {

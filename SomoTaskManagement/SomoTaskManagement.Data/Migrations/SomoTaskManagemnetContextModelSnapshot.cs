@@ -69,10 +69,17 @@ namespace SomoTaskManagement.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("Avatar")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .IsUnicode(true)
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("FarmId")
                         .HasColumnType("int");
@@ -102,25 +109,45 @@ namespace SomoTaskManagement.Data.Migrations
 
             modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Employee_Task", b =>
                 {
-                    b.Property<int>("EmployeeId")
+                    b.Property<int>("SubtaskId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("TaskId")
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubtaskId"), 1L, 1);
+
+                    b.Property<int>("ActualEfforMinutes")
                         .HasColumnType("int");
 
-                    b.Property<float?>("ActualEffort")
-                        .HasColumnType("real");
+                    b.Property<int>("ActualEffortHour")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("EndDay")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("StartDay")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool?>("Status")
                         .HasColumnType("bit");
 
-                    b.HasKey("EmployeeId", "TaskId");
+                    b.Property<int>("TaskId")
+                        .HasColumnType("int");
+
+                    b.HasKey("SubtaskId");
+
+                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("TaskId");
 
@@ -212,6 +239,13 @@ namespace SomoTaskManagement.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<string>("AddressDetail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
@@ -238,7 +272,13 @@ namespace SomoTaskManagement.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("OtherId")
+                    b.Property<int>("OriginalTaskId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OverallEfforMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OverallEffortHour")
                         .HasColumnType("int");
 
                     b.Property<int?>("PlantId")
@@ -262,6 +302,9 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<int>("TaskTypeId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
                     b.HasIndex("FieldId");
@@ -269,8 +312,6 @@ namespace SomoTaskManagement.Data.Migrations
                     b.HasIndex("LiveStockId");
 
                     b.HasIndex("ManagerId");
-
-                    b.HasIndex("OtherId");
 
                     b.HasIndex("PlantId");
 
@@ -330,6 +371,9 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<string>("Environment")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("FarmId")
+                        .HasColumnType("int");
+
                     b.Property<bool?>("IsActive")
                         .HasColumnType("bit");
 
@@ -345,6 +389,8 @@ namespace SomoTaskManagement.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FarmId");
 
                     b.ToTable("HabitantType", (string)null);
                 });
@@ -429,6 +475,9 @@ namespace SomoTaskManagement.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<int>("FarmId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -437,7 +486,12 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<string>("UrlImage")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("FarmId");
 
                     b.ToTable("Material", (string)null);
                 });
@@ -472,6 +526,10 @@ namespace SomoTaskManagement.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Avatar")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Birthday")
                         .HasColumnType("datetime2");
@@ -629,27 +687,6 @@ namespace SomoTaskManagement.Data.Migrations
                     b.HasIndex("MemberId");
 
                     b.ToTable("Notification_Member", (string)null);
-                });
-
-            modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Other", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Other", (string)null);
                 });
 
             modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Plant", b =>
@@ -925,15 +962,11 @@ namespace SomoTaskManagement.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_LiveStock_FarmTask");
 
-                    b.HasOne("SomoTaskManagement.Domain.Entities.Member", "Member")
-                        .WithMany("Tasks")
+                    b.HasOne("SomoTaskManagement.Domain.Entities.Member", "Manager")
+                        .WithMany("TaskManagers")
                         .HasForeignKey("ManagerId")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_Member_Task");
-
-                    b.HasOne("SomoTaskManagement.Domain.Entities.Other", null)
-                        .WithMany("Tasks")
-                        .HasForeignKey("OtherId");
+                        .HasConstraintName("FK_Manager_Task");
 
                     b.HasOne("SomoTaskManagement.Domain.Entities.Plant", "Plant")
                         .WithMany("Tasks")
@@ -952,7 +985,7 @@ namespace SomoTaskManagement.Data.Migrations
 
                     b.Navigation("LiveStrock");
 
-                    b.Navigation("Member");
+                    b.Navigation("Manager");
 
                     b.Navigation("Plant");
 
@@ -969,6 +1002,18 @@ namespace SomoTaskManagement.Data.Migrations
                         .HasConstraintName("FK_Zone_Field");
 
                     b.Navigation("Zone");
+                });
+
+            modelBuilder.Entity("SomoTaskManagement.Domain.Entities.HabitantType", b =>
+                {
+                    b.HasOne("SomoTaskManagement.Domain.Entities.Farm", "Farm")
+                        .WithMany("HabitantTypes")
+                        .HasForeignKey("FarmId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_HabitantType_Farm");
+
+                    b.Navigation("Farm");
                 });
 
             modelBuilder.Entity("SomoTaskManagement.Domain.Entities.LiveStock", b =>
@@ -990,6 +1035,18 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Navigation("Field");
 
                     b.Navigation("HabitantType");
+                });
+
+            modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Material", b =>
+                {
+                    b.HasOne("SomoTaskManagement.Domain.Entities.Farm", "Farm")
+                        .WithMany("Materials")
+                        .HasForeignKey("FarmId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Material_Farm");
+
+                    b.Navigation("Farm");
                 });
 
             modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Material_Task", b =>
@@ -1145,6 +1202,10 @@ namespace SomoTaskManagement.Data.Migrations
 
                     b.Navigation("Employees");
 
+                    b.Navigation("HabitantTypes");
+
+                    b.Navigation("Materials");
+
                     b.Navigation("Members");
                 });
 
@@ -1194,17 +1255,12 @@ namespace SomoTaskManagement.Data.Migrations
 
                     b.Navigation("Notification_Members");
 
-                    b.Navigation("Tasks");
+                    b.Navigation("TaskManagers");
                 });
 
             modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Notification", b =>
                 {
                     b.Navigation("Notification_Members");
-                });
-
-            modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Other", b =>
-                {
-                    b.Navigation("Tasks");
                 });
 
             modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Plant", b =>

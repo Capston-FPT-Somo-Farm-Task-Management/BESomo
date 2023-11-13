@@ -14,7 +14,8 @@ namespace SomoTaskManagement.Domain.Entities
     {
         public Member()
         {
-            Tasks = new HashSet<FarmTask>();
+            TaskManagers = new HashSet<FarmTask>();
+            //TaskSupervisors = new HashSet<FarmTask>();
             MemberTokens = new HashSet<MemberToken>();
             Notification_Members = new HashSet<Notification_Member>();
         }
@@ -48,7 +49,7 @@ namespace SomoTaskManagement.Domain.Entities
         public int RoleId { set; get; }
         public int FarmId { set; get; }
         public int? HubConnectionId { set; get; }
-
+        public string Avatar { get; set; }
         [JsonIgnore]
         public virtual Role? Role { set; get; }
 
@@ -57,7 +58,9 @@ namespace SomoTaskManagement.Domain.Entities
         [JsonIgnore]
         public virtual HubConnection? HubConnection { set; get; }
         [JsonIgnore]
-        public virtual ICollection<FarmTask>? Tasks { set; get; }
+        public virtual ICollection<FarmTask>? TaskManagers { set; get; }
+        //[JsonIgnore]
+        //public virtual ICollection<FarmTask>? TaskSupervisors { set; get; }
         [JsonIgnore]
         public virtual ICollection<MemberToken>? MemberTokens { set; get; }
         [JsonIgnore]

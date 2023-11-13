@@ -115,8 +115,33 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+
+        [HttpGet("Farm({id})")]
+        public async Task<IActionResult> ListMemberByFarm(int id)
+        {
+            try
+            {
+                var supervisor = await _memberService.ListMemberByFarm(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = supervisor,
+                    Message = "Supervisor is founded",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] MemberCreateUpdateModel member)
+        public async Task<IActionResult> Create([FromForm] MemberCreateUpdateModel member)
         {
             try
             {
@@ -142,8 +167,10 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] MemberCreateUpdateModel liveStock)
+        public async Task<IActionResult> Update(int id, [FromForm] MemberUpdateModel liveStock)
         {
             try
             {
@@ -167,6 +194,58 @@ namespace SomoTaskManagement.Api.Controllers
                 });
             }
 
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteMember(int id)
+        {
+            try
+            {
+                await _memberService.DeleteMember(id);
+                var responseData = new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Xóa thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+        [HttpDelete("ChangStatusMember({id})")]
+        public async Task<IActionResult> ChangStatusMember(int id)
+        {
+            try
+            {
+                await _memberService.ChangStatusMember(id);
+                var responseData = new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Xóa thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
         }
     }
 }

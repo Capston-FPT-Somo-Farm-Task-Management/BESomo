@@ -68,12 +68,36 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpGet("Employee({memberId})/TotalEffort")]
-        public async Task<IActionResult> GetTotalEffortEmployee(int memberId, [FromQuery]DateTime? startDay, [FromQuery]DateTime? endDay)
+        [HttpGet("Task({taskId})/NonSubtaskByTask")]
+        public async Task<IActionResult> NonSubtaskByTask(int taskId)
         {
             try
             {
-                var subtask = await _subTaskService.GetTotalEffortEmployee(memberId,startDay,endDay);
+                var subtask = await _subTaskService.NonSubtaskByTask(taskId);
+                return Ok(new ApiResponseModel
+                {
+                    Data = subtask,
+                    Message = "Nhiệm vụ đã tìm thấy",
+                    Success = true
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = ex.Message,
+                    Success = true
+                });
+            }
+        }
+
+        [HttpGet("Employee({memberId})/TotalEffort")]
+        public async Task<IActionResult> GetTotalEffortEmployee(int memberId, [FromQuery] DateTime? startDay, [FromQuery] DateTime? endDay)
+        {
+            try
+            {
+                var subtask = await _subTaskService.GetTotalEffortEmployee(memberId, startDay, endDay);
                 return Ok(new ApiResponseModel
                 {
                     Data = subtask,
@@ -116,7 +140,7 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpPost("Task")]
+        [HttpPost]
         public async Task<IActionResult> CreateSubTasks(SubTaskCreateModel subTask)
         {
             try
@@ -139,15 +163,16 @@ namespace SomoTaskManagement.Api.Controllers
                 });
             }
         }
-        [HttpPut("Delete/Task({taskId})/Employee({employeeId})")]
-        public async Task<IActionResult> DeleteSubTasks(int taskId, int employeeId)
+
+        [HttpPut("({subtaskId})")]
+        public async Task<IActionResult> UpdateSubTasks(int subtaskId, SubTaskUpdateModel subTask)
         {
             try
             {
-                await _subTaskService.DeleteSubTasks(taskId,employeeId);
+                await _subTaskService.UpdateSubTasks(subtaskId,subTask);
                 return Ok(new ApiResponseModel
                 {
-                    Data = null,
+                    Data = subTask,
                     Message = "Nhiệm vụ đã cập nhật thành công",
                     Success = true
                 });
@@ -163,13 +188,60 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+        [HttpDelete("Delete({subtaskId})")]
+        public async Task<IActionResult> DeleteSubTasks(int subtaskId)
+        {
+            try
+            {
+                await _subTaskService.DeleteSubTasks(subtaskId);
+                return Ok(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Nhiệm vụ đã xoá thành công",
+                    Success = true
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = ex.Message,
+                    Success = true
+                });
+            }
+        }
+
+        [HttpPut("({subtaskId})/Effort")]
+        public async Task<IActionResult> UpdateEffortOfSubtask(int subtaskId, EmployeeEffortUpdate employeeEffortTime)
+        {
+            try
+            {
+                await _subTaskService.UpdateEffortOfSubtask(subtaskId, employeeEffortTime);
+                return Ok(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Chấm công thành công",
+                    Success = true
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = ex.Message,
+                    Success = true
+                });
+            }
+        }
 
         [HttpPut("Task({taskId})")]
         public async Task<IActionResult> UpdateEffortTime(int taskId, List<EmployeeEffortUpdate> employeeEffortTimes)
         {
             try
             {
-                await _subTaskService.UpdateEffortTime(taskId,employeeEffortTimes);
+                await _subTaskService.UpdateEffortTime(taskId, employeeEffortTimes);
                 return Ok(new ApiResponseModel
                 {
                     Data = employeeEffortTimes,
@@ -193,7 +265,7 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                await _subTaskService.UpdateEffortTimeAndStatusTask(taskId, employeeEffortTimes,statusTask);
+                await _subTaskService.UpdateEffortTimeAndStatusTask(taskId, employeeEffortTimes, statusTask);
                 return Ok(new ApiResponseModel
                 {
                     Data = employeeEffortTimes,

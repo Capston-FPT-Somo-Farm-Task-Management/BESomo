@@ -221,6 +221,10 @@
               "target": "Package",
               "version": "[2.2.2, )"
             },
+            "Quartz": {
+              "target": "Package",
+              "version": "[3.7.0, )"
+            },
             "UnidecodeSharpFork": {
               "target": "Package",
               "version": "[1.0.0, )"

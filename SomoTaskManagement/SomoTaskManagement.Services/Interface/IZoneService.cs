@@ -24,5 +24,6 @@ namespace SomoTaskManagement.Services.Interface
         Task UpdateStatus(int id);
         Task UpdateZone(int id, ZoneCreateUpdateModel zone);
         Task<IEnumerable<ZoneModel>> GetActiveByFarmId(int id);
+        Task Delete(int zoneId);
     }
 }

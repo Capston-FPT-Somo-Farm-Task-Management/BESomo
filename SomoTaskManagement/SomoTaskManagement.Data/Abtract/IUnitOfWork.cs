@@ -18,7 +18,6 @@ namespace SomoTaskManagement.Data.Abtract
         Repository<HabitantType> RepositoryHabitantType { get; }
         Repository<Material> RepositoryMaterial { get; }
         Repository<Field> RepositoryField { get; }
-        Repository<Other> RepositoryOther { get; }
         Repository<Role> RepositoryRole { get; }
         Repository<TaskEvidence> RepositoryTaskEvidence { get; }
         Repository<TaskType> RepositoryTaskTaskType { get; }

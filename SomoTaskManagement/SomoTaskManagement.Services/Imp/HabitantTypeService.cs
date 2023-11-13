@@ -26,32 +26,32 @@ namespace SomoTaskManagement.Services.Imp
             var habitantType = await _unitOfWork.RepositoryHabitantType.GetData(null);
             return _mapper.Map<IEnumerable<HabitantType>, IEnumerable<HabitantTypeModel>>(habitantType);
         }
-        public async Task<IEnumerable<HabitantTypeModel>> ListHabitantTypeActive()
+        public async Task<IEnumerable<HabitantTypeModel>> ListHabitantTypeActive(int farmId)
         {
-            var habitantType = await _unitOfWork.RepositoryHabitantType.GetData(expression:h=>h.IsActive == true);
+            var habitantType = await _unitOfWork.RepositoryHabitantType.GetData(expression:h=>h.IsActive == true && h.FarmId == farmId);
             return _mapper.Map<IEnumerable<HabitantType>, IEnumerable<HabitantTypeModel>>(habitantType);
         }
 
-        public async Task<IEnumerable<HabitantTypeModel>> ListPlantType()
+        public async Task<IEnumerable<HabitantTypeModel>> ListPlantType(int farmId)
         {
-            var habitantType = await _unitOfWork.RepositoryHabitantType.GetData(expression:p=>p.Status == 0);
+            var habitantType = await _unitOfWork.RepositoryHabitantType.GetData(expression:p=>p.Status == 0 && p.FarmId == farmId);
             return _mapper.Map<IEnumerable<HabitantType>, IEnumerable<HabitantTypeModel>>(habitantType);
         }
-        public async Task<IEnumerable<HabitantTypeModel>> ListLiveStock()
+        public async Task<IEnumerable<HabitantTypeModel>> ListLiveStock(int farmId)
         {
-            var habitantType = await _unitOfWork.RepositoryHabitantType.GetData(expression: p => p.Status == 1);
+            var habitantType = await _unitOfWork.RepositoryHabitantType.GetData(expression: p => p.Status == 1 && p.FarmId == farmId);
             return _mapper.Map<IEnumerable<HabitantType>, IEnumerable<HabitantTypeModel>>(habitantType);
         }
 
 
-        public async Task<IEnumerable<HabitantTypeModel>> ListPlantTypeActive()
+        public async Task<IEnumerable<HabitantTypeModel>> ListPlantTypeActive(int farmId)
         {
-            var habitantType = await _unitOfWork.RepositoryHabitantType.GetData(expression: p => p.Status == 0 && p.IsActive == true);
+            var habitantType = await _unitOfWork.RepositoryHabitantType.GetData(expression: p => p.Status == 0 && p.IsActive == true && p.FarmId == farmId);
             return _mapper.Map<IEnumerable<HabitantType>, IEnumerable<HabitantTypeModel>>(habitantType);
         }
-        public async Task<IEnumerable<HabitantTypeModel>> ListLiveStockActive()
+        public async Task<IEnumerable<HabitantTypeModel>> ListLiveStockActive(int farmId)
         {
-            var habitantType = await _unitOfWork.RepositoryHabitantType.GetData(expression: p => p.Status == 1 && p.IsActive == true);
+            var habitantType = await _unitOfWork.RepositoryHabitantType.GetData(expression: p => p.Status == 1 && p.IsActive == true && p.FarmId == farmId);
             return _mapper.Map<IEnumerable<HabitantType>, IEnumerable<HabitantTypeModel>>(habitantType);
         }
 

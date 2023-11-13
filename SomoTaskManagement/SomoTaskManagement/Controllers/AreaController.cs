@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Pipelines.Sockets.Unofficial.Arenas;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
 using SomoTaskManagement.Domain.Model.Area;
@@ -77,6 +78,63 @@ namespace SomoTaskManagement.Api.Controllers
             }
             
         }
+
+        [HttpGet("GetAreaWithZoneTypeLiveStock/Farm({farmId})")]
+        public async Task<IActionResult> GetAreaWithZoneTypeLiveStock(int farmId)
+        {
+            //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+            //{
+            //    return Unauthorized("You do not have access to this method.");
+            //}
+            try
+            {
+                var area = await _areaService.GetAreaWithZoneTypeLiveStock(farmId);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = e.Message,
+                    Success = false
+                });
+            }
+
+        }
+
+        [HttpGet("GetAreaWithZoneTypePlant/Farm({farmId})")]
+        public async Task<IActionResult> GetAreaWithZoneTypePlant(int farmId)
+        {
+            //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+            //{
+            //    return Unauthorized("You do not have access to this method.");
+            //}
+            try
+            {
+                var area = await _areaService.GetAreaWithZoneTypePlant(farmId);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = e.Message,
+                    Success = false
+                });
+            }
+
+        }
+
         [HttpPut("Delete/{id}")]
         public async Task<IActionResult> UpdateStatus(int id)
         {
@@ -247,25 +305,33 @@ namespace SomoTaskManagement.Api.Controllers
 
         }
 
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteArea(int id)
-        //{
-        //    //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
-        //    //{
-        //    //    return Unauthorized("You do not have access to this method.");
-        //    //}
-        //    var response = new ApiResponseModel();
-        //    var existingArea = await _areaService.GetArea(id);
-        //    if (existingArea == null)
-        //    {
-        //        response.Message = "Area not found";
-        //        return NotFound(response);
-        //    }
-
-        //    await _areaService.DeleteArea(existingArea);
-        //    response.Message = "Area is deleted";
-        //    response.Success = true;
-        //    return Ok(response);
-        //}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteArea(int id)
+        {
+            //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+            //{
+            //    return Unauthorized("You do not have access to this method.");
+            //}
+            try
+            {
+                await _areaService.DeleteArea(id);
+                var responseData = new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Xóa thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
+            }
+        }
     }
 }

@@ -15,9 +15,12 @@ namespace SomoTaskManagement.Domain.Entities
         {
             MaterialTasks = new HashSet<Material_Task>();
         }
-
+        public string? UrlImage {  get; set; }
+        public int FarmId {  get; set; }
         [JsonIgnore]
         public virtual ICollection<Material_Task> MaterialTasks { get; set; }
+        [JsonIgnore]
+        public virtual Farm? Farm { get; set; }
     }
 }
 

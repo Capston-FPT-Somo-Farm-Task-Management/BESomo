@@ -1,4 +1,5 @@
 ﻿using SomoTaskManagement.Domain.Entities;
+using SomoTaskManagement.Domain.Model.Farm;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,10 @@ namespace SomoTaskManagement.Services.Interface
 {
     public interface IFarmService
     {
-        Task CreateFarm(Farm farm);
+        Task CreateFarm(FarmCreateUpdateModel farm);
         Task DeleteFarm(Farm farm);
         Task<Farm> GetFarmById(int id);
         Task<IEnumerable<Farm>> ListFarm();
-        Task UpdateFarm(Farm farm);
+        Task UpdateFarm(int id, FarmCreateUpdateModel farm);
     }
 }

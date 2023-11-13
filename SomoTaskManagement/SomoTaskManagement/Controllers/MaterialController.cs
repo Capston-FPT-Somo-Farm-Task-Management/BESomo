@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Material;
 using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
@@ -37,12 +38,12 @@ namespace SomoTaskManagement.Api.Controllers
                 return BadRequest(e.Message);
             }
         }
-        [HttpGet("Active")]
-        public async Task<IActionResult> ListMaterialActive()
+        [HttpGet("Active/Farm({farmid})")]
+        public async Task<IActionResult> ListMaterialActive(int farmid)
         {
             try
             {
-                var material = await _materialService.ListMaterial();
+                var material = await _materialService.ListMaterialActive(farmid);
                 return Ok(new ApiResponseModel
                 {
                     Data = material,
@@ -55,6 +56,26 @@ namespace SomoTaskManagement.Api.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpGet("Farm({farmid})")]
+        public async Task<IActionResult> ListMaterialByFarm(int farmid)
+        {
+            try
+            {
+                var material = await _materialService.ListMaterialByFarm(farmid);
+                return Ok(new ApiResponseModel
+                {
+                    Data = material,
+                    Message = "Material is found",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -80,7 +101,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateArea([FromBody] Material material)
+        public async Task<IActionResult> CreateArea([FromForm] MaterialCreateUpdateModel material)
         {
             try
             {
@@ -116,7 +137,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Material material)
+        public async Task<IActionResult> Update(int id, [FromForm] MaterialCreateUpdateModel material)
         {
             try
             {

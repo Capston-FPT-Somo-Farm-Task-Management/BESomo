@@ -10,7 +10,7 @@ namespace SomoTaskManagement.Services.Interface
 {
     public interface IEmployeeService
     {
-        Task AddEmployee(List<int> taskTypeIds, EmployeeCreateModel employee);
+        Task AddEmployee(EmployeeCreateModel employee);
         Task DeleteEmployee(Employee employee);
         Task<IEnumerable<EmployeeListModel>> GetByTaskType(int id);
         Task<EmployeeListModel> GetEmployee(int id);
@@ -20,7 +20,7 @@ namespace SomoTaskManagement.Services.Interface
         Task<IEnumerable<EmployeeFarmModel>> ListEmployeeActiveByFarm(int id);
         Task<IEnumerable<EmployeeFarmModel>> ListEmployeeByFarm(int id);
         Task<IEnumerable<EmployeeFarmModel>> ListTaskEmployee(int taskId);
-        Task UpdateEmployee(int id, EmployeeCreateModel employee, List<int> taskTypeIds);
+        Task UpdateEmployee(int id, EmployeeCreateModel employeeModel);
         Task UpdateStatus(int id);
     }
 }

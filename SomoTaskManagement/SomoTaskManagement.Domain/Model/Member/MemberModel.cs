@@ -46,5 +46,8 @@ namespace SomoTaskManagement.Domain.Model.Member
         public string Address { set; get; }
         public string RoleName { set; get; }
         public string FarmName { set; get; }
+        public int FarmId { set; get; }
+
+        public string Avatar { get; set; }
     }
 }

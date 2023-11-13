@@ -12,12 +12,15 @@ namespace SomoTaskManagement.Services.Interface
     public interface ISubTaskService
     {
         Task CreateSubTasks(SubTaskCreateModel subTask);
-        Task DeleteSubTasks(int taskId, int employeeId);
-        Task<IEnumerable<SubtaskEffortModel>> GetEffortByTask(int taskId);
+        Task DeleteSubTasks(int subtaskId);
+        Task<GetEffortByTaskModel> GetEffortByTask(int taskId);
         Task<IEnumerable<EmployeeListModel>> GetEmployeesNoSubtask(int taskId);
         Task<TotalEffortModel> GetTotalEffortEmployee(int id, DateTime? startDay, DateTime? endDay);
+        Task<IEnumerable<SubTaskModel>> NonSubtaskByTask(int taskId);
         Task<IEnumerable<SubTaskModel>> SubtaskByTask(int taskId);
+        Task UpdateEffortOfSubtask(int subtaskId, EmployeeEffortUpdate employeeEffortTime);
         Task UpdateEffortTime(int taskId, List<EmployeeEffortUpdate> employeeEffortTimes);
         Task UpdateEffortTimeAndStatusTask(int taskId, List<EmployeeEffortUpdate> employeeEffortTimes, int statusTask);
+        Task UpdateSubTasks(int subtaskId, SubTaskUpdateModel subTask);
     }
 }

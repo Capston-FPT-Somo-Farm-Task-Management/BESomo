@@ -21,6 +21,7 @@ namespace SomoTaskManagement.Domain.Entities
         public string? Origin {  get; set; }
         public string? Environment {  get; set; }
         public string? Description {  get; set; }
+        public int FarmId {  get; set; }
 
         public bool? IsActive {  get; set; }
         [JsonIgnore]
@@ -28,5 +29,8 @@ namespace SomoTaskManagement.Domain.Entities
 
         [JsonIgnore]
         public virtual ICollection<LiveStock> LiveStocks { get; set; }
+
+        [JsonIgnore]
+        public virtual Farm? Farm { get; set; }
     }
 }

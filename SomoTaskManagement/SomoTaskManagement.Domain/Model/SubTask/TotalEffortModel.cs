@@ -11,7 +11,8 @@ namespace SomoTaskManagement.Domain.Model.SubTask
         public int EmployeeId { get; set; }
         public string EmployeeCode { get; set; }
         public string EmployeeName { get; set; }
-        public float? EffortTime {  get; set; }
+        public int ActualEfforMinutes { set; get; }
+        public int ActualEffortHour { set; get; }
         public int TotalTask {  get; set; }
     }
 }

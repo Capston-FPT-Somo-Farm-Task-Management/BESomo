@@ -250,11 +250,20 @@ namespace SomoTaskManagement.Services.Imp
             var zone = await _unitOfWork.RepositoryZone.GetById(id);
             if (zone == null)
             {
-                throw new Exception("Zone not found");
+                throw new Exception("Không tìm thấy vùng");
             }
             zone.Status = zone.Status == 1 ? 0 : 1;
             await _unitOfWork.RepositoryZone.Commit();
         }
-
+        public async Task Delete(int zoneId)
+        {
+            var zone = await _unitOfWork.RepositoryField.GetData(z => z.ZoneId == zoneId && z.Status == 1);
+            if (zone.Count() > 0)
+            {
+                throw new Exception("Không thể xóa vùng này  khi còn thực thể bên trong");
+            }
+            _unitOfWork.RepositoryZone.Delete(a => a.Id == zoneId);
+            await _unitOfWork.RepositoryZone.Commit();
+        }
     }
 }

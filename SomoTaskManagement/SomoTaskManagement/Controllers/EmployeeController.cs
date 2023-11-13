@@ -5,6 +5,7 @@ using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
 using SomoTaskManagement.Domain.Model.Employee;
 using SomoTaskManagement.Domain.Model.Reponse;
+using SomoTaskManagement.Domain.Model.TaskEvidence;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
@@ -250,7 +251,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] EmployeeRequestModel employee)
+        public async Task<IActionResult> Create([FromForm] EmployeeCreateModel employee)
         {
             try
             {
@@ -259,7 +260,7 @@ namespace SomoTaskManagement.Api.Controllers
                 //    return Unauthorized("You do not have access to this method.");
                 //}
 
-                await _employeeService.AddEmployee(employee.TaskTypeId, employee.Employee);
+                await _employeeService.AddEmployee(employee);
                 var responseData = new ApiResponseModel
                 {
                     Data = employee,
@@ -281,7 +282,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, EmployeeRequestModel employeeUpdateRequest)
+        public async Task<IActionResult> Update(int id, [FromForm]EmployeeCreateModel employeeUpdateRequest)
         {
             try
             {
@@ -289,7 +290,7 @@ namespace SomoTaskManagement.Api.Controllers
                 //{
                 //    return Unauthorized("You do not have access to this method.");
                 //}
-                await _employeeService.UpdateEmployee(id, employeeUpdateRequest.Employee, employeeUpdateRequest.TaskTypeId);
+                await _employeeService.UpdateEmployee(id, employeeUpdateRequest);
                 var responseData = new ApiResponseModel
                 {
                     Data = employeeUpdateRequest,

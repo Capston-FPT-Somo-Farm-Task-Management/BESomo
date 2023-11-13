@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SomoTaskManagement.Domain.Model.SubTask
+{
+    public class SubTaskUpdateModel
+    {
+        //public int TaskId { set; get; }
+
+        public int EmployeeId { set; get; }
+
+        public string? Description { set; get; }
+        public DateTime? StartDay { get; set; }
+        public DateTime? EndDay { get; set; }
+
+        public string Name { set; get; }
+    }
+}

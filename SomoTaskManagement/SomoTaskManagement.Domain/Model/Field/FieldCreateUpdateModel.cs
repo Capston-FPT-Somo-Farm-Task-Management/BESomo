@@ -14,8 +14,6 @@ namespace SomoTaskManagement.Domain.Model.Field
         [StringLength(100, ErrorMessage = "Name must not exceed 100 characters.")]
         public string Name { get; set; }
 
-        [Required]
-        public int Status { set; get; }
         public string Code { get; set; }
 
         [Required(ErrorMessage = "Area is required.")]

@@ -14,11 +14,11 @@ namespace SomoTaskManagement.Services.Interface
         //Task DeleteHabitantType(HabitantType habitantType);
         Task<HabitantType> GetHabitant(int id);
         Task<IEnumerable<HabitantTypeModel>> ListHabitantType();
-        Task<IEnumerable<HabitantTypeModel>> ListHabitantTypeActive();
-        Task<IEnumerable<HabitantTypeModel>> ListLiveStock();
-        Task<IEnumerable<HabitantTypeModel>> ListLiveStockActive();
-        Task<IEnumerable<HabitantTypeModel>> ListPlantType();
-        Task<IEnumerable<HabitantTypeModel>> ListPlantTypeActive();
+        Task<IEnumerable<HabitantTypeModel>> ListHabitantTypeActive(int farmId);
+        Task<IEnumerable<HabitantTypeModel>> ListLiveStock(int farmId);
+        Task<IEnumerable<HabitantTypeModel>> ListLiveStockActive(int farmId);
+        Task<IEnumerable<HabitantTypeModel>> ListPlantType(int farmId);
+        Task<IEnumerable<HabitantTypeModel>> ListPlantTypeActive(int farmId);
         Task UpdateHabitantType(int id, HabitantTypeCUModel habitantType);
         Task UpdateStatus(int id);
     }

@@ -13,6 +13,7 @@ namespace SomoTaskManagement.Domain.Model.Employee
         [Required(ErrorMessage = "Name is required.")]
         public string Name { get; set; }
         public string Code { get; set; }
+        public string NameCode { get; set; }
         [Required]
         public string Status { set; get; }
         [StringLength(10, ErrorMessage = "Phone number must be exactly 10 digits.", MinimumLength = 10)]
@@ -21,7 +22,8 @@ namespace SomoTaskManagement.Domain.Model.Employee
 
         [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters.")]
         public string Address { get; set; }
-
+        public string Avatar { get; set; }
+        public DateTime DateOfBirth { get; set; }
         public int FarmId { get; set; }
     }
 }

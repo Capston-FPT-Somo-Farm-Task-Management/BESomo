@@ -28,7 +28,7 @@ namespace SomoTaskManagement.Api.Controllers
             var member = await _memberSerivce.CheckLogin(loginModel.UserName, loginModel.Password);
             if(member == null)
             {
-                return NotFound("Member not found");
+                return NotFound("Tài khoản đăng nhập sai (hoặc đã bị vô hiệu hóa)");
             }
             (string accessToken, DateTime expiredDateAccess) = await _tokenHandler.CreateAccessToken(member);
             (string code, string refreshToken, DateTime expiredDateRefresh) = await _tokenHandler.CreateRefrehToken(member);

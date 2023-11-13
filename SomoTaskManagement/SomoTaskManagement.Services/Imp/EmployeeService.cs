@@ -1,5 +1,9 @@
 ﻿using AutoMapper;
+using AutoMapper.Execution;
+using Firebase.Storage;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SomoTaskManagement.Data;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
@@ -8,6 +12,7 @@ using SomoTaskManagement.Domain.Model.Employee;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,11 +23,13 @@ namespace SomoTaskManagement.Services.Imp
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
 
-        public EmployeeService(IUnitOfWork unitOfWork, IMapper mapper)
+        public EmployeeService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _configuration = configuration;
         }
 
         public async Task<IEnumerable<EmployeeListModel>> ListEmployee()
@@ -54,11 +61,13 @@ namespace SomoTaskManagement.Services.Imp
                 PhoneNumber = employee.PhoneNumber,
                 FarmId = employee.FarmId,
                 Address = employee.Address,
+                Avatar = employee.Avatar,
+                Code = employee.Code
             };
             return employeeModel;
         }
 
-        public async Task AddEmployee(List<int> taskTypeIds, EmployeeCreateModel employeeModel)
+        public async Task AddEmployee(EmployeeCreateModel employeeModel)
         {
             await _unitOfWork.BeginTransactionAsync();
             try
@@ -72,11 +81,14 @@ namespace SomoTaskManagement.Services.Imp
                     Gender = employeeModel.Gender,
                     Code = employeeModel.Code,
                     Status = 1,
+                    DateOfBirth = employeeModel.DateOfBirth
                 };
 
-                for (int i = 0; i < taskTypeIds.Count; i++)
+                var urlImage = await UploadImageToFirebaseAsync(employeeNew, employeeModel.ImageFile);
+                employeeNew.Avatar = urlImage;
+                for (int i = 0; i < employeeModel.TaskTypeIds.Count; i++)
                 {
-                    var taskTypeId = taskTypeIds[i];
+                    var taskTypeId = employeeModel.TaskTypeIds[i];
 
                     var taskType = await _unitOfWork.RepositoryTaskTaskType.GetById(taskTypeId);
 
@@ -111,6 +123,31 @@ namespace SomoTaskManagement.Services.Imp
                 throw new Exception(ex.Message);
             }
         }
+
+        private async Task<string> UploadImageToFirebaseAsync(Employee employee, IFormFile imageFile)
+        {
+            var options = new FirebaseStorageOptions
+            {
+                AuthTokenAsyncFactory = () => Task.FromResult(_configuration["Firebase:apiKey"])
+            };
+
+            string fileName = employee.Id.ToString();
+            string fileExtension = Path.GetExtension(imageFile.FileName);
+
+            var firebaseStorage = new FirebaseStorage(_configuration["Firebase:Bucket"], options)
+                .Child("images")
+                .Child(fileName + fileExtension);
+
+            using (var stream = imageFile.OpenReadStream())
+            {
+                await firebaseStorage.PutAsync(stream);
+            }
+
+            var imageUrl = await firebaseStorage.GetDownloadUrlAsync();
+
+            return imageUrl;
+        }
+
         public async Task<IEnumerable<EmployeeListModel>> GetByTaskType(int id)
         {
             var taskType = await _unitOfWork.RepositoryTaskTaskType.GetById(id);
@@ -305,7 +342,7 @@ namespace SomoTaskManagement.Services.Imp
             return null;
         }
 
-        public async Task UpdateEmployee(int id, EmployeeCreateModel employee, List<int> taskTypeIds)
+        public async Task UpdateEmployee(int id, EmployeeCreateModel employeeModel)
         {
             var employeeUpdate = await _unitOfWork.RepositoryEmployee.GetSingleByCondition(e => e.Id == id);
             if (employeeUpdate == null)
@@ -315,11 +352,11 @@ namespace SomoTaskManagement.Services.Imp
             var initialCode = employeeUpdate.Code;
 
             employeeUpdate.Id = id;
-            employeeUpdate.PhoneNumber = employee.PhoneNumber;
-            employeeUpdate.Address = employee.Address;
-            employeeUpdate.Name = employee.Name;
-            employeeUpdate.Code = employee.Code;
-            employeeUpdate.Gender = employee.Gender;
+            employeeUpdate.PhoneNumber = employeeModel.PhoneNumber;
+            employeeUpdate.Address = employeeModel.Address;
+            employeeUpdate.Name = employeeModel.Name;
+            employeeUpdate.Code = employeeModel.Code;
+            employeeUpdate.Gender = employeeModel.Gender;
             employeeUpdate.Status = 1;
 
             //if (employeeUpdate.Code != initialCode)
@@ -330,14 +367,17 @@ namespace SomoTaskManagement.Services.Imp
             //        throw new Exception("Mã không thể trùng");
             //    }
             //}
-
+            var urlImage = employeeModel.ImageFile != null
+                  ? await UploadImageToFirebaseAsync(employeeUpdate, employeeModel.ImageFile)
+                  : employeeUpdate.Avatar;
+            employeeUpdate.Avatar = urlImage;
 
             _unitOfWork.RepositoryEmployee_TaskType.Delete(expression: t => t.EmployeeId == employeeUpdate.Id);
             //_unitOfWork.RepositoryEmployee_TaskType.Commit();
 
-            for (int i = 0; i < taskTypeIds.Count; i++)
+            for (int i = 0; i < employeeModel.TaskTypeIds.Count; i++)
             {
-                var taskTypeId = taskTypeIds[i];
+                var taskTypeId = employeeModel.TaskTypeIds[i];
 
                 var taskType = await _unitOfWork.RepositoryTaskTaskType.GetById(taskTypeId);
 
@@ -358,6 +398,7 @@ namespace SomoTaskManagement.Services.Imp
             await _unitOfWork.RepositoryEmployee.Commit();
 
         }
+
         public async Task DeleteEmployee(Employee employee)
         {
             _unitOfWork.RepositoryEmployee.Delete(a => a.Id == employee.Id);

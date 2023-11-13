@@ -13,12 +13,19 @@ namespace SomoTaskManagement.Domain.Entities
 
     public class Employee_Task
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
+        public int SubtaskId { get; set; } 
+        
         public int TaskId { set; get; }
-        [Key]
+        
         public int EmployeeId { set; get; }
 
-        public float? ActualEffort { get; set; }
+        public int ActualEfforMinutes { set; get; }
+        public int ActualEffortHour { set; get; }
+        public string? Code { get; set; }
+        public DateTime? StartDay { get; set; }
+        public DateTime? EndDay { get; set; }
 
         public string? Description { set; get; }
 

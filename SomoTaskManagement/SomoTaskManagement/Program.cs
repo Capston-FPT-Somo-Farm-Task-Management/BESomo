@@ -3,7 +3,6 @@ using SomoTaskManagement.Data.Mapper;
 using SomoTaskManagement.Infrastructure.Configuration;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using SomoTaskManagement.Notify.HubSignalR;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using SomoTaskManagement.Data;
@@ -49,21 +48,12 @@ builder.Services.RegisterTokenBear(builder.Configuration);
 builder.Services.AddAuthorization();
 builder.Services.AddSignalR();
 
-string policyName = "Policy";
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy(name: policyName,
-//        builder =>
-//        {
-//            builder.WithOrigins("http://localhost:3000", "https://localhost:7095")
-//                .AllowAnyHeader()
-//                .AllowAnyMethod()
-//                .AllowCredentials();
-//        });
-//});
+builder.Services.RegisterCache(builder.Configuration);
 
 builder.Services.AddCors();
 builder.Services.AddAutoMapper(typeof(MapperApplication));
+
+builder.Services.RegisterQuart();
 
 string filePath = "SecretKey/somotaskmanagement-firebase-adminsdk-z13iv-aa59ff5b48.json";
 
@@ -83,19 +73,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseWebSockets();
 
-app.Use(async (context, next) =>
-{
-    var unitOfWork = context.RequestServices.GetRequiredService<IUnitOfWork>();
-    var webSocketMiddleware = new WebSocketMiddleware(next);
-    await webSocketMiddleware.Invoke(context, unitOfWork);
-});
+//app.Use(async (context, next) =>
+//{
+//    var unitOfWork = context.RequestServices.GetRequiredService<IUnitOfWork>();
+//});
 
 
 app.UseSwaggerUI();
 
 app.UseSwagger();
-
-//app.UseCors(policyName);
 
 app.UseCors(options => options
         .AllowAnyOrigin()

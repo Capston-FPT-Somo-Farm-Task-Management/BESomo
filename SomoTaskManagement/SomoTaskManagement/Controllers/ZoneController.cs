@@ -343,29 +343,30 @@ namespace SomoTaskManagement.Api.Controllers
 
         }
 
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    try
-        //    {
-        //        var response = new ApiResponseModel();
-        //        var existingArea = await _zoneService.GetZone(id);
-        //        if (existingArea == null)
-        //        {
-        //            response.Message = "Zone not found";
-        //            return NotFound(response);
-        //        }
-
-        //        await _zoneService.DeleteZone(existingArea);
-        //        response.Message = "Zone is deleted";
-        //        response.Success = true;
-        //        return Ok(response);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return BadRequest(e.Message);
-        //    }
-        //}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                await _zoneService.Delete(id);
+                var responseData = new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Delete success",
+                    Success = true,
+                };
+                return Ok(responseData);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = false,
+                });
+            }
+        }
 
         [HttpPut("Delete/{id}")]
         public async Task<IActionResult> UpdateStatus(int id)
@@ -380,7 +381,7 @@ namespace SomoTaskManagement.Api.Controllers
                 var responseData = new ApiResponseModel
                 {
                     Data = null,
-                    Message = "Delete success",
+                    Message = "Xóa thành công",
                     Success = true,
                 };
                 return Ok(responseData);

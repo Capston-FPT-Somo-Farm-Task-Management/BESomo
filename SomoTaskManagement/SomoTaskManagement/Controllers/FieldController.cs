@@ -395,36 +395,36 @@ namespace SomoTaskManagement.Api.Controllers
             {
                 return BadRequest(new ApiResponseModel
                 {
-                    Message = "Lỗi" + e.Message,
+                    Message = "Lỗi " + e.Message,
                     Success = false
                 });
             }
 
         }
 
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    try
-        //    {
-        //        var response = new ApiResponseModel();
-        //        var existingArea = await _fieldService.GetZoneField(id);
-        //        if (existingArea == null)
-        //        {
-        //            response.Message = "Field not found";
-        //            return NotFound(response);
-        //        }
-
-        //        await _fieldService.DeleteField(existingArea);
-        //        response.Message = "Field is deleted";
-        //        response.Success = true;
-        //        return Ok(response);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return BadRequest(e.Message);
-        //    }
-        //}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteField(int id)
+        {
+            try
+            {
+                await _fieldService.DeleteField(id);
+                var responseData = new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                };
+                return Ok(responseData);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = "Lỗi" + e.Message,
+                    Success = false
+                });
+            }
+        }
 
     }
 }

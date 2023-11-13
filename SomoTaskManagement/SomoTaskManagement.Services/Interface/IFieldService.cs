@@ -12,7 +12,7 @@ namespace SomoTaskManagement.Services.Interface
     public interface IFieldService
     {
         Task AddField(FieldCreateUpdateModel field);
-        Task DeleteField(Field field);
+        Task DeleteField(int fieldId);
         Task DeleteFieldByStatus(int id);
         Task<IEnumerable<FieldModel>> GetAllByZone(int id);
         Task<AreaZoneModel> GetAreaZoneByField(int id);

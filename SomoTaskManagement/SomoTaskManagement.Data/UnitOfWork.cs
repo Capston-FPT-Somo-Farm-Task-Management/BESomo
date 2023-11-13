@@ -28,7 +28,6 @@ namespace SomoTaskManagement.Data
         Repository<LiveStock> repositoryLiveStock;
         Repository<HabitantType> repositoryHabitantType;
         Repository<Material> repositoryMaterial;
-        Repository<Other> repositoryOther;
         Repository<Role> repositoryRole;
         Repository<TaskEvidence> repositoryTaskEvidence;
         Repository<TaskType> repositoryTaskTaskType;
@@ -60,7 +59,6 @@ namespace SomoTaskManagement.Data
         public Repository<HabitantType> RepositoryHabitantType { get { return repositoryHabitantType ??= new Repository<HabitantType>(_context);} }
         public Repository<Material> RepositoryMaterial { get { return repositoryMaterial ??= new Repository<Material>(_context);} }
         public Repository<Field> RepositoryField { get { return repositoryField ??= new Repository<Field>(_context);} }
-        public Repository<Other> RepositoryOther { get { return repositoryOther ??= new Repository<Other>(_context);} }
         public Repository<Role> RepositoryRole { get { return repositoryRole ??= new Repository<Role>(_context);} }
         public Repository<TaskEvidence> RepositoryTaskEvidence { get { return repositoryTaskEvidence ??= new Repository<TaskEvidence>(_context);} }
         public Repository<TaskType> RepositoryTaskTaskType { get { return repositoryTaskTaskType ??= new Repository<TaskType>(_context);} }

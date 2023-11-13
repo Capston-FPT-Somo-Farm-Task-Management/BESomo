@@ -9,6 +9,7 @@ namespace SomoTaskManagement.Domain.Model.Employee
     public class EmployeeEffortUpdate
     {
         public int EmployeeId { get; set; }
-        public float EffortTime { get; set; }
+        public int ActualEfforMinutes { set; get; }
+        public int ActualEffortHour { set; get; }
     }
 }

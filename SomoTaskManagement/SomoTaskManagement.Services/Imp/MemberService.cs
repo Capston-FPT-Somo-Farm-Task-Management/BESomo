@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
+using Firebase.Storage;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SomoTaskManagement.Data;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
@@ -7,6 +10,7 @@ using SomoTaskManagement.Domain.Model.Member;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
@@ -21,17 +25,19 @@ namespace SomoTaskManagement.Services.Imp
         private readonly IUnitOfWork _unitOfWork;
         private readonly SomoTaskManagemnetContext _context;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
 
-        public MemberService(IUnitOfWork unitOfWork, SomoTaskManagemnetContext context, IMapper mapper)
+        public MemberService(IUnitOfWork unitOfWork, SomoTaskManagemnetContext context, IMapper mapper, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _context = context;
             _mapper = mapper;
+            _configuration = configuration;
         }
 
         public async Task<Member> CheckLogin(string userName, string password)
         {
-            return await _context.Member.SingleOrDefaultAsync(m => m.UserName == userName && m.Password == password);
+            return await _context.Member.SingleOrDefaultAsync(m => m.UserName == userName && m.Password == password && m.Status ==1);
         }
 
         public async Task<Member> GetByUser(string userName, string password)
@@ -41,7 +47,6 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task CreateMember(MemberCreateUpdateModel member)
         {
-            
             var memberNew = new Member
             {
                 Name = member.Name,
@@ -56,6 +61,9 @@ namespace SomoTaskManagement.Services.Imp
                 RoleId = member.RoleId,
                 FarmId = member.FarmId,
             };
+            var urlImage = await UploadImageToFirebaseAsync(memberNew, member.ImageFile);
+            memberNew.Avatar = urlImage;
+
             var existingMember = await _unitOfWork.RepositoryMember.GetSingleByCondition(m => m.Code == member.Code);
             if(existingMember != null)
             {
@@ -65,7 +73,31 @@ namespace SomoTaskManagement.Services.Imp
             await _unitOfWork.RepositoryMember.Commit();
         }
 
-        public async Task UdateMember(int id,MemberCreateUpdateModel member)
+        private async Task<string> UploadImageToFirebaseAsync(Member member, IFormFile imageFile)
+        {
+            var options = new FirebaseStorageOptions
+            {
+                AuthTokenAsyncFactory = () => Task.FromResult(_configuration["Firebase:apiKey"])
+            };
+
+            string fileName = member.Id.ToString();
+            string fileExtension = Path.GetExtension(imageFile.FileName);
+
+            var firebaseStorage = new FirebaseStorage(_configuration["Firebase:Bucket"], options)
+                .Child("images")
+                .Child(fileName + fileExtension);
+
+            using (var stream = imageFile.OpenReadStream())
+            {
+                await firebaseStorage.PutAsync(stream);
+            }
+
+            var imageUrl = await firebaseStorage.GetDownloadUrlAsync();
+
+            return imageUrl;
+        }
+
+        public async Task UdateMember(int id, MemberUpdateModel member)
         {
             var memberUpdate = await _unitOfWork.RepositoryMember.GetById(id);
             if(memberUpdate == null)
@@ -76,15 +108,17 @@ namespace SomoTaskManagement.Services.Imp
             memberUpdate.Name = member.Name;
             memberUpdate.Status = 1;
             memberUpdate.Email = member.Email;
-            memberUpdate.UserName = member.UserName;
-            memberUpdate.Password = member.Password;
             memberUpdate.Code = member.Code;
             memberUpdate.PhoneNumber = member.PhoneNumber;
             memberUpdate.Birthday = member.Birthday;
             memberUpdate.Address = member.Address;
-            memberUpdate.RoleId = member.RoleId;
-            memberUpdate.FarmId = member.FarmId;
-            
+
+            var urlImage = member.ImageFile != null
+                   ? await UploadImageToFirebaseAsync(memberUpdate, member.ImageFile)
+                   : memberUpdate.Avatar;
+
+            memberUpdate.Avatar = urlImage;
+
             await _unitOfWork.RepositoryMember.Commit();
         }
 
@@ -116,6 +150,8 @@ namespace SomoTaskManagement.Services.Imp
                 FarmId = member.FarmId,
                 Name = member.Name,
                 Status = member.Status,
+                Avatar = member.Avatar,
+                Code =member.Code
             };
 
             return memberModel;
@@ -141,10 +177,25 @@ namespace SomoTaskManagement.Services.Imp
                 t => t.Role,
                 t => t.Farm,
             };
-            var member = await _unitOfWork.RepositoryMember.GetData(expression: m => m.FarmId == id && m.RoleId == 3, includes: includes);
+            var member = await _unitOfWork.RepositoryMember.GetData(expression: m => m.FarmId == id && m.RoleId == 4, includes: includes);
             if(member == null)
             {
                 throw new Exception("Không tìm thấy người giám sát");
+            }
+            return _mapper.Map<IEnumerable<Member>, IEnumerable<MemberModel>>(member);
+        }
+
+        public async Task<IEnumerable<MemberModel>> ListMemberByFarm(int farmId)
+        {
+            var includes = new Expression<Func<Member, object>>[]
+            {
+                t => t.Role,
+                t => t.Farm,
+            };
+            var member = await _unitOfWork.RepositoryMember.GetData(expression: m => m.FarmId == farmId , includes: includes);
+            if (member == null)
+            {
+                throw new Exception("Không tìm thấy người dùng");
             }
             return _mapper.Map<IEnumerable<Member>, IEnumerable<MemberModel>>(member);
         }
@@ -156,7 +207,7 @@ namespace SomoTaskManagement.Services.Imp
                 t => t.Role,
                 t => t.Farm,
             };
-            var member = await _unitOfWork.RepositoryMember.GetData(expression: m => m.FarmId == id && m.RoleId == 3 && m.Status == 1, includes: includes);
+            var member = await _unitOfWork.RepositoryMember.GetData(expression: m => m.FarmId == id && m.RoleId == 4 && m.Status == 1, includes: includes);
             if (member == null)
             {
                 throw new Exception("Không tìm thấy người giám sát");
@@ -164,9 +215,26 @@ namespace SomoTaskManagement.Services.Imp
             return _mapper.Map<IEnumerable<Member>, IEnumerable<MemberActiveModel>>(member);
         }
 
-        //public async Task<IEnumerable>ListNotifyByMember (int id)
-        //{
-        //    return   await _unitOfWork.RepositoryMember.GetSingleByCondition(m=>m.)
-        //}
+        public async Task ChangStatusMember(int memberId)
+        {
+            var member = await _unitOfWork.RepositoryMember.GetById(memberId);
+            if(member == null)
+            {
+                throw new Exception("Không tìm thấy người dùng");
+            }
+            member.Status = member.Status == 1 ? 0 : 1;
+            await _unitOfWork.RepositoryMember.Commit();
+        }
+
+        public async Task DeleteMember(int memberId)
+        {
+            var member = await _unitOfWork.RepositoryMember.GetById(memberId);
+            if (member == null)
+            {
+                throw new Exception("Không tìm thấy người dùng");
+            }
+            _unitOfWork.RepositoryMember.Delete(m => m.Id == memberId);
+            await _unitOfWork.RepositoryMember.Commit();
+        }
     }
 }

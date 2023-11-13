@@ -32,12 +32,12 @@ namespace SomoTaskManagement.Api.Controllers
                 return BadRequest(e.Message);
             }
         }
-        [HttpGet("PlantType")]
-        public async Task<IActionResult> ListPlantType()
+        [HttpGet("PlantType/Farm({farmId})")]
+        public async Task<IActionResult> ListPlantType(int farmId)
         {
             try
             {
-                var area = await _hanbitantTypeService.ListPlantType();
+                var area = await _hanbitantTypeService.ListPlantType(farmId);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
@@ -52,12 +52,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpGet("PlantType/Active")]
-        public async Task<IActionResult> ListPlantTypeActive()
+        [HttpGet("PlantType/Active/Farm({farmId})")]
+        public async Task<IActionResult> ListPlantTypeActive(int farmId)
         {
             try
             {
-                var area = await _hanbitantTypeService.ListPlantTypeActive();
+                var area = await _hanbitantTypeService.ListPlantTypeActive(farmId);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
@@ -72,12 +72,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpGet("Active")]
-        public async Task<IActionResult> ListHabitantTypeActive()
+        [HttpGet("Active/Farm({farmId})")]
+        public async Task<IActionResult> ListHabitantTypeActive(int farmId)
         {
             try
             {
-                var area = await _hanbitantTypeService.ListHabitantTypeActive();
+                var area = await _hanbitantTypeService.ListHabitantTypeActive(farmId);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
@@ -92,12 +92,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpGet("LivestockType")]
-        public async Task<IActionResult> ListLiveStock()
+        [HttpGet("LivestockType/Farm({farmId})")]
+        public async Task<IActionResult> ListLiveStock(int farmId)
         {
             try
             {
-                var area = await _hanbitantTypeService.ListLiveStock();
+                var area = await _hanbitantTypeService.ListLiveStock(farmId);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
@@ -112,12 +112,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpGet("LivestockType/Active")]
-        public async Task<IActionResult> ListLiveStockActive()
+        [HttpGet("LivestockType/Active/Farm({farmId})")]
+        public async Task<IActionResult> ListLiveStockActive(int farmId)
         {
             try
             {
-                var area = await _hanbitantTypeService.ListLiveStockActive();
+                var area = await _hanbitantTypeService.ListLiveStockActive(farmId);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,

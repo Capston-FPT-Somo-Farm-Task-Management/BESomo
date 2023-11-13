@@ -29,35 +29,38 @@ namespace SomoTaskManagement.Data.Mapper
         public MapperApplication()
         {
             CreateMap<FarmTask, FarmTaskModel>()
-            .ForMember(dest => dest.ManagerName, opt => opt.MapFrom(src => src.Member.Name))
+            .ForMember(dest => dest.ManagerName, opt => opt.MapFrom(src => src.Manager.Name))
             .ForMember(dest => dest.SupervisorName, opt => opt.MapFrom(src => src.SuppervisorId))
             .ForMember(dest => dest.FieldName, opt => opt.MapFrom(src => src.Field.Name))
-            .ForMember(dest => dest.FieldStatus, opt => opt.MapFrom(src => GetHabitantDescription((HabitantTypeStatus)src.Field.Status)))
+            .ForMember(dest => dest.FieldStatus, opt => opt.MapFrom(src => GetEnumDescription((HabitantTypeStatus)src.Field.Status)))
             .ForMember(dest => dest.ZoneId, opt => opt.MapFrom(src => src.Field.Zone.Id))
             .ForMember(dest => dest.AreaId, opt => opt.MapFrom(src => src.Field.Zone.Area.Id))
             .ForMember(dest => dest.TaskTypeName, opt => opt.MapFrom(src => src.TaskType.Name))
-            .ForMember(dest => dest.StatusTaskType, opt => opt.MapFrom(src => GetTaskTypeDescription((PlantLivestockEnum)src.TaskType.Status)))
+            .ForMember(dest => dest.StatusTaskType, opt => opt.MapFrom(src => GetEnumDescription((PlantLivestockEnum)src.TaskType.Status)))
             .ForMember(dest => dest.PlantName, opt => opt.MapFrom(src => src.Plant.Name))
             .ForMember(dest => dest.liveStockName, opt => opt.MapFrom(src => src.LiveStrock.Name))
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetTaskStatusDescription((TaskStatusEnum)src.Status)))
-            .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => GetPriorityDescription((PriorityEnum)src.Priority)))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((TaskStatusEnum)src.Status)))
+            .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => GetEnumDescription((PriorityEnum)src.Priority)))
             .ForMember(dest => dest.ZoneName, opt => opt.MapFrom(src => string.Concat($"{src.Field.Zone.Code} - ", src.Field.Zone.Name).ToString()))
              .ForMember(dest => dest.AreaName, opt => opt.MapFrom(src => string.Concat($"{src.Field.Zone.Area.Code} - ", src.Field.Zone.Area.Name).ToString()))
-            .ForMember(dest => dest.ExternalId, opt => opt.MapFrom(src => src.LiveStrock.ExternalId));
+            .ForMember(dest => dest.ExternalId, opt => opt.MapFrom(src => src.LiveStrock != null ? src.LiveStrock.ExternalId : src.Plant.ExternalId))
+            .ForMember(dest => dest.IsParent, opt => opt.MapFrom(src => src.OriginalTaskId == 0))
+            .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.Manager.Avatar)); 
 
             CreateMap<FarmTask, TaskByEmployeeDates>()
-           .ForMember(dest => dest.ManagerName, opt => opt.MapFrom(src => src.Member.Name))
+           .ForMember(dest => dest.ManagerName, opt => opt.MapFrom(src => src.Manager.Name))
            //.ForMember(dest => dest.SupervisorName, opt => opt.MapFrom(src => src.SuppervisorId))
            .ForMember(dest => dest.FieldName, opt => opt.MapFrom(src => src.Field.Name))
-           .ForMember(dest => dest.FieldStatus, opt => opt.MapFrom(src => GetHabitantDescription((HabitantTypeStatus)src.Field.Status)))
+           .ForMember(dest => dest.CodeTask, opt => opt.MapFrom(src => src.Code))
+           .ForMember(dest => dest.FieldStatus, opt => opt.MapFrom(src => GetEnumDescription((HabitantTypeStatus)src.Field.Status)))
            .ForMember(dest => dest.ZoneId, opt => opt.MapFrom(src => src.Field.Zone.Id))
            .ForMember(dest => dest.AreaId, opt => opt.MapFrom(src => src.Field.Zone.Area.Id))
            .ForMember(dest => dest.TaskTypeName, opt => opt.MapFrom(src => src.TaskType.Name))
-           .ForMember(dest => dest.StatusTaskType, opt => opt.MapFrom(src => GetTaskTypeDescription((PlantLivestockEnum)src.TaskType.Status)))
+           .ForMember(dest => dest.StatusTaskType, opt => opt.MapFrom(src => GetEnumDescription((PlantLivestockEnum)src.TaskType.Status)))
            .ForMember(dest => dest.PlantName, opt => opt.MapFrom(src => src.Plant.Name))
            .ForMember(dest => dest.liveStockName, opt => opt.MapFrom(src => src.LiveStrock.Name))
-           .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetTaskStatusDescription((TaskStatusEnum)src.Status)))
-           .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => GetPriorityDescription((PriorityEnum)src.Priority)))
+           .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((TaskStatusEnum)src.Status)))
+           .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => GetEnumDescription((PriorityEnum)src.Priority)))
            .ForMember(dest => dest.ZoneName, opt => opt.MapFrom(src => string.Concat($"{src.Field.Zone.Code} - ", src.Field.Zone.Name).ToString()))
             .ForMember(dest => dest.AreaName, opt => opt.MapFrom(src => string.Concat($"{src.Field.Zone.Area.Code} - ", src.Field.Zone.Area.Name).ToString()))
            .ForMember(dest => dest.ExternalId, opt => opt.MapFrom(src => src.LiveStrock.ExternalId));
@@ -65,7 +68,7 @@ namespace SomoTaskManagement.Data.Mapper
             CreateMap<FarmTask, TaskCreateUpdateModel>().ReverseMap();
 
             CreateMap<Field, FieldModel>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetHabitantDescription((HabitantTypeStatus)src.Status)))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((HabitantTypeStatus)src.Status)))
                 .ForMember(dest => dest.ZoneName, opt => opt.MapFrom(src => string.Concat($"{src.Zone.Code} - ", src.Zone.Name).ToString()))
                 .ForMember(dest => dest.AreaName, opt => opt.MapFrom(src => string.Concat($"{src.Zone.Area.Code} - ", src.Zone.Area.Name).ToString()))
                 .ForMember(dest => dest.NameCode, opt => opt.MapFrom(src => string.Concat($"{src.Code} - ", src.Name).ToString()))
@@ -102,8 +105,7 @@ namespace SomoTaskManagement.Data.Mapper
 
             CreateMap<Employee_Task, SubtaskEffortModel>()
                 .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee.Name))
-                .ForMember(dest => dest.EmployeeCode, opt => opt.MapFrom(src => src.Employee.Code))
-                .ForMember(dest => dest.EffortTime, opt => opt.MapFrom(src => src.ActualEffort));
+                .ForMember(dest => dest.EmployeeCode, opt => opt.MapFrom(src => src.Employee.Code));
 
 
             CreateMap<Plant, ExternalIdModel>()
@@ -150,17 +152,18 @@ namespace SomoTaskManagement.Data.Mapper
                             ((EnumStatus)src.Status) == EnumStatus.Active ? "Active" : "Inactive"));
 
             CreateMap<TaskType, TaskTypeModel>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetTaskTypeDescription((PlantLivestockEnum)src.Status)));
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((PlantLivestockEnum)src.Status)));
 
 
             CreateMap<HabitantType, HabitantTypeModel>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetHabitantDescription((HabitantTypeStatus)src.Status)));
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((HabitantTypeStatus)src.Status)));
 
             CreateMap<Employee, EmployeeCreateModel>();
 
             CreateMap<Employee, EmployeeListModel>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src =>
-                            ((EnumStatus)src.Status) == EnumStatus.Active ? "Active" : "Inactive"));
+                            ((EnumStatus)src.Status) == EnumStatus.Active ? "Active" : "Inactive"))
+                .ForMember(dest => dest.NameCode, opt => opt.MapFrom(src => string.Concat($"{src.Code} - ", src.Name).ToString()));
 
 
             CreateMap<TaskEvidence, TaskEvidenceModel>();
@@ -179,7 +182,8 @@ namespace SomoTaskManagement.Data.Mapper
 
             CreateMap<Employee_Task, SubTaskModel>()
              .ForMember(dest => dest.TaskName, opt => opt.MapFrom(src => src.Task.Name))
-             .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee.Name));
+             .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee.Name))
+             .ForMember(dest => dest.CodeEmployee, opt => opt.MapFrom(src => src.Employee.Code));
         }
 
         public string FormatTimeDifference(DateTime startTime)
@@ -208,65 +212,15 @@ namespace SomoTaskManagement.Data.Mapper
             return $"{seconds} giây trước";
         }
 
-        private GenderEnum GetGenderFromBool(bool isMale)
+        public static string GetEnumDescription<T>(T enumValue)
         {
-            return isMale ? GenderEnum.Male : GenderEnum.Female;
-        }
-
-        public static string GetTaskStatusDescription(TaskStatusEnum status)
-        {
-            var fieldInfo = status.GetType().GetField(status.ToString());
+            var fieldInfo = enumValue.GetType().GetField(enumValue.ToString());
 
             if (fieldInfo == null) return string.Empty;
 
             var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
 
-            return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : status.ToString();
+            return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : enumValue.ToString();
         }
-
-        public static string GetPriorityDescription(PriorityEnum status)
-        {
-            var fieldInfo = status.GetType().GetField(status.ToString());
-
-            if (fieldInfo == null) return string.Empty;
-
-            var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
-
-            return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : status.ToString();
-        }
-
-        public static string GetTaskTypeDescription(PlantLivestockEnum status)
-        {
-            var fieldInfo = status.GetType().GetField(status.ToString());
-
-            if (fieldInfo == null) return string.Empty;
-
-            var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
-
-            return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : status.ToString();
-        }
-
-        public static string GetHabitantDescription(HabitantTypeStatus status)
-        {
-            var fieldInfo = status.GetType().GetField(status.ToString());
-
-            if (fieldInfo == null) return string.Empty;
-
-            var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
-
-            return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : status.ToString();
-        }
-
-        public static string GetGenderDescription(GenderEnum status)
-        {
-            var fieldInfo = status.GetType().GetField(status.ToString());
-
-            if (fieldInfo == null) return string.Empty;
-
-            var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
-
-            return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : status.ToString();
-        }
-
     }
 }

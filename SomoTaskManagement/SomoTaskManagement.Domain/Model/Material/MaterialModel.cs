@@ -18,5 +18,8 @@ namespace SomoTaskManagement.Domain.Model.Material
 
         [Required]
         public string Status { set; get; }
+
+        public string? UrlImage { get; set; }
+        public int FarmId { get; set; }
     }
 }
