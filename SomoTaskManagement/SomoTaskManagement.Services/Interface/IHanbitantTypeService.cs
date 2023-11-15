@@ -10,7 +10,7 @@ namespace SomoTaskManagement.Services.Interface
 {
     public interface IHanbitantTypeService
     {
-        Task AddHabitantType(HabitantType habitantType);
+        Task AddHabitantType(HabitantTypeCUModel habitantType);
         //Task DeleteHabitantType(HabitantType habitantType);
         Task<HabitantType> GetHabitant(int id);
         Task<IEnumerable<HabitantTypeModel>> ListHabitantType();

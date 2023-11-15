@@ -15,5 +15,6 @@ namespace SomoTaskManagement.Domain.Model.SubTask
         public int TotalActualEffortHour { set; get; }
         public DateTime? StartDay { get; set; }
         public DateTime? EndDay { get; set; }
+        public string Code {  get; set; }
     }
 }

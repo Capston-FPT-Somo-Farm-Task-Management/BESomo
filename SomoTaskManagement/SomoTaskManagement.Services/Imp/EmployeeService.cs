@@ -4,6 +4,7 @@ using Firebase.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using OfficeOpenXml;
 using SomoTaskManagement.Data;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
@@ -12,8 +13,10 @@ using SomoTaskManagement.Domain.Model.Employee;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -123,6 +126,162 @@ namespace SomoTaskManagement.Services.Imp
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task ImportEmployeesFromExcel(Stream excelFileStream)
+        {
+            await _unitOfWork.BeginTransactionAsync();
+
+            try
+            {
+                using (var package = new ExcelPackage(excelFileStream))
+                {
+                    var worksheet = package.Workbook.Worksheets[0];
+                    int rowCount = worksheet.Dimension.Rows;
+
+                    for (int row = 2; row <= rowCount; row++)
+                    {
+                        var taskTypeIdsString = worksheet.Cells[row, 8].Value?.ToString();
+
+                        var taskTypeIds = new List<int>();
+
+                        if (!string.IsNullOrEmpty(taskTypeIdsString))
+                        {
+                            var taskTypeIdsArray = taskTypeIdsString.Split(',');
+
+                            foreach (var idString in taskTypeIdsArray)
+                            {
+                                if (int.TryParse(idString, out int id))
+                                {
+                                    taskTypeIds.Add(id);
+                                }
+                            }
+                        }
+
+                        var employeeModel = new EmployeeImportExcelModel
+                        {
+                            Code = worksheet.Cells[row, 1].Value?.ToString(),
+                            Name = worksheet.Cells[row, 2].Value?.ToString(),
+                            PhoneNumber = worksheet.Cells[row, 3].Value?.ToString(),
+                            Address = worksheet.Cells[row, 4].Value?.ToString(),
+                            FarmId = Convert.ToInt32(worksheet.Cells[row, 5].Value),
+                            Gender = worksheet.Cells[row, 6].Value != null ? (bool)worksheet.Cells[row, 5].Value : false,
+                            DateOfBirth = Convert.ToDateTime(worksheet.Cells[row, 7].Value),
+                            TaskTypeIds = taskTypeIds,
+                            ImageUrl = worksheet.Cells[row, 9].Value?.ToString()
+                        };
+
+                        var existCode = await _unitOfWork.RepositoryEmployee.GetSingleByCondition(a => a.Code == employeeModel.Code);
+                        if (existCode != null)
+                        {
+                            throw new Exception($"Duplicate code found: {employeeModel.Code}");
+                        }
+
+                        var employeeNew = new Employee
+                        {
+                            PhoneNumber = employeeModel.PhoneNumber,
+                            Address = employeeModel.Address,
+                            Name = employeeModel.Name,
+                            FarmId = employeeModel.FarmId,
+                            Gender = employeeModel.Gender,
+                            Code = employeeModel.Code,
+                            Status = 1,
+                            DateOfBirth = employeeModel.DateOfBirth,
+                            Avatar = employeeModel.ImageUrl
+                        };
+
+                        foreach (var taskTypeId in employeeModel.TaskTypeIds)
+                        {
+                            var taskType = await _unitOfWork.RepositoryTaskTaskType.GetById(taskTypeId);
+
+                            if (taskType == null)
+                            {
+                                throw new Exception($"Task type with ID '{taskTypeId}' not found.");
+                            }
+
+                            var employee_TaskType = new Employee_TaskType
+                            {
+                                EmployeeId = employeeNew.Id,
+                                TaskTypeId = taskType.Id,
+                                Status = true,
+                            };
+
+                            employeeNew.Employee_TaskTypes.Add(employee_TaskType);
+                        }
+
+                        await _unitOfWork.RepositoryEmployee.Add(employeeNew);
+                    }
+
+                    await _unitOfWork.RepositoryEmployee.Commit();
+                    _unitOfWork.CommitTransaction();
+                }
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.RollbackTransaction();
+                throw new Exception($"Error during employee import: {ex.Message}");
+            }
+        }
+
+        public async Task<byte[]> ExportEmployeesToExcel(int farmId)
+        {
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Employees");
+
+                worksheet.Cells[1, 1].Value = "Mã nhân viên";
+                worksheet.Cells[1, 2].Value = "Họ tên";
+                worksheet.Cells[1, 3].Value = " Số điện thoại";
+                worksheet.Cells[1, 4].Value = "Địa chỉ";
+                worksheet.Cells[1, 5].Value = "Trang trại";
+                worksheet.Cells[1, 6].Value = "Giới tính";
+                worksheet.Cells[1, 7].Value = "Ngày sinh";
+                worksheet.Cells[1, 8].Value = "Kỹ năng";
+                worksheet.Cells[1, 9].Value = "Hình ảnh";
+
+                var employees = await _unitOfWork.RepositoryEmployee.GetData(e => e.FarmId == farmId && e.Status == 1);
+
+                int row = 2;
+                foreach (var employee in employees)
+                {
+                    worksheet.Cells[row, 1].Value = employee.Code;
+                    worksheet.Cells[row, 2].Value = employee.Name;
+                    worksheet.Cells[row, 3].Value = employee.PhoneNumber;
+                    worksheet.Cells[row, 4].Value = employee.Address;
+
+                    var farm = await _unitOfWork.RepositoryFarm.GetById(farmId);
+                    worksheet.Cells[row, 5].Value = farm.Name;
+
+                    var gender = (bool)employee.Gender ? EmployeeGenderEnum.Male : EmployeeGenderEnum.Female;
+                    var genderString = GetGenderDescription(gender);
+                    worksheet.Cells[row, 6].Value = genderString;
+                    worksheet.Cells[row, 7].Value = employee.DateOfBirth;
+                    worksheet.Cells[row, 7].Style.Numberformat.Format = "yyyy-mm-dd";
+
+                    var employee_taskType = await _unitOfWork.RepositoryEmployee_TaskType.GetData(et => et.EmployeeId == employee.Id);
+                    var taskTypeIds = employee_taskType.Select(t => t.TaskTypeId).ToList();
+                    var taskTypeOfEmployee = await _unitOfWork.RepositoryTaskTaskType.GetData(et => taskTypeIds.Contains(et.Id));
+                    var taskTypeName = taskTypeOfEmployee.Select(t => t.Name).ToList();
+                    worksheet.Cells[row, 8].Value = string.Join(",", taskTypeName);
+
+                    worksheet.Cells[row, 9].Value = employee.Avatar;
+
+                    row++;
+                }
+
+                return package.GetAsByteArray();
+            }
+        }
+        public static string GetGenderDescription(EmployeeGenderEnum status)
+        {
+            var fieldInfo = status.GetType().GetField(status.ToString());
+
+            if (fieldInfo == null) return string.Empty;
+
+            var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+
+            return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : status.ToString();
+        }
+
 
         private async Task<string> UploadImageToFirebaseAsync(Employee employee, IFormFile imageFile)
         {

@@ -24,14 +24,11 @@ namespace SomoFarmTaskManagement.Test
         private Mock<IAreaService> _areaServiceMock;
         private Mock<IFarmService> _farmServiceMock;
         private Mock<IZoneService> _zoneServiceMock;
-        private Mock<IUnitOfWork> _unitOfWorkMock;
         private IMapper _mapper;
 
         [SetUp]
         public void Setup()
         {
-            _unitOfWorkMock = new Mock<IUnitOfWork>();
-
             _areaServiceMock = new Mock<IAreaService>();
             _farmServiceMock = new Mock<IFarmService>();
             _zoneServiceMock = new Mock<IZoneService>();

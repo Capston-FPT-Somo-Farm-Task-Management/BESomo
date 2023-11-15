@@ -37,6 +37,7 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task<IEnumerable<MaterialModel>> ListMaterialByFarm(int farmid)
         {
+            var farm = await _unitOfWork.RepositoryFarm.GetById(farmid) ?? throw new Exception("KHông tìm thấy trang trại");
             var material = await _unitOfWork.RepositoryMaterial.GetData(m=>m.FarmId == farmid);
             material = material.OrderBy(x => x.Name).ToList();
             return _mapper.Map<IEnumerable<Material>, IEnumerable<MaterialModel>>(material); ;
@@ -53,6 +54,7 @@ namespace SomoTaskManagement.Services.Imp
         {
             return _unitOfWork.RepositoryMaterial.GetById(id);
         }
+
         public async Task AddMaterial(MaterialCreateUpdateModel material)
         {
             var materialNew = new Material

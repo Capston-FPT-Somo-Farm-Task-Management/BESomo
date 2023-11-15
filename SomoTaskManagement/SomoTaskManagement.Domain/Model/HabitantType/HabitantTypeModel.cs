@@ -21,6 +21,7 @@ namespace SomoTaskManagement.Domain.Model.HabitantType
         public bool IsActive { get; set; }
         public int Quantity { set; get; }
         public int FarmId { get; set; }
+        public string FarmName { get; set; }
         public string? Origin { get; set; }
         public string? Environment { get; set; }
         public string? Description { get; set; }

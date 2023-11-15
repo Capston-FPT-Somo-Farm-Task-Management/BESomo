@@ -12,7 +12,9 @@ namespace SomoTaskManagement.Services.Interface
     {
         Task AddTaskType(TaskType taskType);
         Task DeleteTaskType(TaskType taskType);
+        Task<byte[]> ExportTaskTypeToExcel();
         Task<TaskType> GetTaskType(int id);
+        Task ImportTaskTypeFromExcel(Stream excelFileStream);
         Task<IEnumerable<TaskTypeModel>> ListTaskType();
         Task<IEnumerable<TaskTypeModel>> ListTaskTypeActive();
         Task<IEnumerable<TaskTypeModel>> ListTaskTypeLivestock();

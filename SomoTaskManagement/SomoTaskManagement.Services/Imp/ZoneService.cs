@@ -172,6 +172,7 @@ namespace SomoTaskManagement.Services.Imp
                 t => t.Area,
                 t =>t.ZoneType
             };
+            var area = await _unitOfWork.RepositoryArea.GetById(id) ?? throw new Exception("Không tìm thấy khu vực");
 
             var zones = await _unitOfWork.RepositoryZone
                 .GetData(expression: z => z.AreaId == id && z.ZoneTypeId == 2 && z.Status == 1, includes: includes);
@@ -186,6 +187,7 @@ namespace SomoTaskManagement.Services.Imp
                 t => t.Area,
                 t =>t.ZoneType
             };
+            var area = await _unitOfWork.RepositoryArea.GetById(id) ?? throw new Exception("Không tìm thấy khu vực");
 
             var zones = await _unitOfWork.RepositoryZone
                 .GetData(expression: z => z.AreaId == id && z.ZoneTypeId == 1 && z.Status == 1, includes: includes);
@@ -201,7 +203,7 @@ namespace SomoTaskManagement.Services.Imp
                 t => t.Area,
                 t =>t.ZoneType
             };
-
+            var zoneType = await _unitOfWork.RepositoryZoneType.GetById(id) ?? throw new Exception("Không tìm thấy loại công việc");
             var zones = await _unitOfWork.RepositoryZone
                 .GetData(expression: z => z.ZoneTypeId == id, includes: includes);
 
@@ -209,6 +211,7 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task<IEnumerable<ZoneModel>> GetByFarmId(int id)
         {
+            var farm = await _unitOfWork.RepositoryFarm.GetById(id) ?? throw new Exception("Không tìm thấy trang trại");
             var areas = await _unitOfWork.RepositoryArea.GetData(expression: a => a.FarmId == id);
             var areaIds = areas.Select(a => a.Id).ToList();
             var includes = new Expression<Func<Zone, object>>[]
@@ -219,10 +222,6 @@ namespace SomoTaskManagement.Services.Imp
 
             var zones = await _unitOfWork.RepositoryZone
                 .GetData(expression: z => areaIds.Contains(z.AreaId), includes: includes);
-            if(zones == null)
-            {
-                throw new Exception("Không tìm thấy");
-            }
             return _mapper.Map<IEnumerable<Zone>, IEnumerable<ZoneModel>>(zones);
         }
 

@@ -56,9 +56,9 @@ namespace SomoTaskManagement.Services.Imp
                     map[farmTask].SupervisorName = member.Name;
                 }
 
-                if (member != null && map.ContainsKey(farmTask) && farmTask.ManagerId == null)
+                if (member != null && map.ContainsKey(farmTask) )
                 {
-                    map[farmTask].Avatar = member.Avatar;
+                    map[farmTask].AvatarSupervisor = member.Avatar;
                 }
                 var employeeNames = await ListTaskEmployee(farmTask.Id);
 
@@ -568,7 +568,7 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task<List<int>> GetManagerId()
         {
-            var manager = await _unitOfWork.RepositoryMember.GetData(m => m.RoleId == 1);
+            var manager = await _unitOfWork.RepositoryMember.GetData(m => m.RoleId == 2);
             var managerId = manager.Select(m => m.Id).ToList();
             return managerId;
         }
@@ -632,7 +632,6 @@ namespace SomoTaskManagement.Services.Imp
                         UpdateDate = null,
                         Code = taskCode,
                     };
-                    taskCounter++;
                     var suppervisor = await _unitOfWork.RepositoryMember.GetById(taskModel.FarmTask.SuppervisorId);
 
                     if (suppervisor == null)
@@ -676,7 +675,13 @@ namespace SomoTaskManagement.Services.Imp
                         }
                     }
                     await CreateTaskForDate(farmTaskNew, taskModel.EmployeeIds, taskModel.MaterialIds);
-                    taskId = farmTaskNew.Id;
+
+                    taskCounter++;
+                    if (farmTaskNew.OriginalTaskId ==0)
+                    {
+                        taskId = farmTaskNew.Id;
+
+                    }
                     if (taskModel.FarmTask.IsRepeat)
                     {
                         if (originalTaskId == 0)
@@ -726,6 +731,7 @@ namespace SomoTaskManagement.Services.Imp
                 }
                 }).ToList();
 
+
                 foreach (var deviceMessage in deviceMessages)
                 {
                     await SendNotificationToDevices(new List<string> { deviceMessage.Token }, deviceMessage);
@@ -762,7 +768,6 @@ namespace SomoTaskManagement.Services.Imp
                 _unitOfWork.RollbackTransaction();
                 throw new Exception(ex.Message);
             }
-
         }
 
         private async Task ScheduleAndChangeStatus(int taskId)
@@ -1423,8 +1428,6 @@ namespace SomoTaskManagement.Services.Imp
 
             var totalPages = (int)Math.Ceiling((double)totalTaskCount / pageSize);
 
-
-
             var map = new Dictionary<FarmTask, TaskByEmployeeDates>();
 
             var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<TaskByEmployeeDates>>(task);
@@ -1443,9 +1446,10 @@ namespace SomoTaskManagement.Services.Imp
                     map[farmTask].SupervisorName = member.Name;
                 }
 
-                var subtaskEffort = await _unitOfWork.RepositoryEmployee_Task.GetSingleByCondition(s => s.TaskId == farmTask.Id && s.EmployeeId == employeeId);
-                var effortMinutes = subtaskEffort.ActualEfforMinutes;
-                var effortHours = subtaskEffort.ActualEffortHour;
+                var subtaskEffort = await _unitOfWork.RepositoryEmployee_Task.GetData(s => s.TaskId == farmTask.Id && s.EmployeeId == employeeId);
+                var effortMinutes = subtaskEffort.Select(s=>s.ActualEfforMinutes).Sum();
+                var effortHours = subtaskEffort.Select(s => s.ActualEffortHour).Sum();
+
                 if (effortMinutes != null && map.ContainsKey(farmTask))
                 {
                     map[farmTask].ActualEfforMinutes = effortMinutes;

@@ -73,7 +73,8 @@ namespace SomoTaskManagement.Domain.Model.Task
         public List<int> MaterialId { get; set; }
         public int OriginalTaskId { set; get; }
         public bool IsParent {  set; get; }
-        public string Avatar { get; set; }
+        public string AvatarManager { get; set; }
+        public string AvatarSupervisor { get; set; }
         public List<DateTime> DateRepeate { set; get; }
     }
 }

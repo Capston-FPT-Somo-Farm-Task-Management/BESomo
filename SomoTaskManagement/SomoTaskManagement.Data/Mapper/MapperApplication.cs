@@ -45,7 +45,7 @@ namespace SomoTaskManagement.Data.Mapper
              .ForMember(dest => dest.AreaName, opt => opt.MapFrom(src => string.Concat($"{src.Field.Zone.Area.Code} - ", src.Field.Zone.Area.Name).ToString()))
             .ForMember(dest => dest.ExternalId, opt => opt.MapFrom(src => src.LiveStrock != null ? src.LiveStrock.ExternalId : src.Plant.ExternalId))
             .ForMember(dest => dest.IsParent, opt => opt.MapFrom(src => src.OriginalTaskId == 0))
-            .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.Manager.Avatar)); 
+            .ForMember(dest => dest.AvatarManager, opt => opt.MapFrom(src => src.Manager.Avatar)); 
 
             CreateMap<FarmTask, TaskByEmployeeDates>()
            .ForMember(dest => dest.ManagerName, opt => opt.MapFrom(src => src.Manager.Name))
@@ -79,8 +79,7 @@ namespace SomoTaskManagement.Data.Mapper
             CreateMap<Plant, PlantModel>()
                 .ForMember(dest => dest.FieldName, opt => opt.MapFrom(src => string.Concat($"{src.Field.Code} - ", src.Field.Name).ToString()))
                 .ForMember(dest => dest.HabitantTypeName, opt => opt.MapFrom(src => src.HabitantType.Name))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src =>
-                            ((EnumStatus)src.Status) == EnumStatus.Active ? "Active" : "Inactive"))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((EnumStatus)src.Status)))
                 .ForMember(dest => dest.ZoneName, opt => opt.MapFrom(src => string.Concat($"{src.Field.Zone.Code} - ", src.Field.Zone.Name).ToString()))
                 .ForMember(dest => dest.AreaName, opt => opt.MapFrom(src => string.Concat($"{src.Field.Zone.Area.Code} - ", src.Field.Zone.Area.Name).ToString()))
                 .ForMember(dest => dest.ZoneId, opt => opt.MapFrom(src => src.Field.Zone.Id))
@@ -89,8 +88,7 @@ namespace SomoTaskManagement.Data.Mapper
             CreateMap<LiveStock, LiveStockModel>()
             .ForMember(dest => dest.FieldName, opt => opt.MapFrom(src => string.Concat($"{src.Field.Code} - ", src.Field.Name).ToString()))
             .ForMember(dest => dest.HabitantTypeName, opt => opt.MapFrom(src => src.HabitantType.Name))
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src =>
-                ((EnumStatus)src.Status) == EnumStatus.Active ? "Active" : "Inactive"))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((EnumStatus)src.Status)))
             .ForMember(dest => dest.Gender, opt => opt.MapFrom(src =>
                 ((GenderEnum)(src.Gender ? GenderEnum.Male : GenderEnum.Female)).GetDescription()))
              .ForMember(dest => dest.ZoneName, opt => opt.MapFrom(src => string.Concat($"{src.Field.Zone.Code} - ", src.Field.Zone.Name).ToString()))
@@ -119,8 +117,7 @@ namespace SomoTaskManagement.Data.Mapper
             CreateMap<Member, MemberModel>()
                 .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.Name))
                 .ForMember(dest => dest.FarmName, opt => opt.MapFrom(src => src.Farm.Name))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src =>
-                            ((EnumStatus)src.Status) == EnumStatus.Active ? "Active" : "Inactive"));
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((EmployeeMemberStatus)src.Status)));
 
             CreateMap<Member, GetMemberModel>()
                 .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.Name));
@@ -128,18 +125,15 @@ namespace SomoTaskManagement.Data.Mapper
             CreateMap<Member, MemberActiveModel>()
                 .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.Name))
                 .ForMember(dest => dest.FarmName, opt => opt.MapFrom(src => src.Farm.Name))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src =>
-                            ((EnumStatus)src.Status) == EnumStatus.Active ? "Active" : "Inactive"))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((EmployeeMemberStatus)src.Status)))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => string.Concat($"{src.Name} - ", src.Code).ToString()));
 
             CreateMap<Material, MaterialModel>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src =>
-                            ((EnumStatus)src.Status) == EnumStatus.Active ? "Active" : "Inactive"));
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((EnumStatus)src.Status)));
 
             CreateMap<Zone, ZoneModel>()
                .ForMember(dest => dest.AreaName, opt => opt.MapFrom(src => string.Concat($"{src.Area.Code} - ", src.Area.Name).ToString()))
-               .ForMember(dest => dest.Status, opt => opt.MapFrom(src =>
-                            ((EnumStatus)src.Status) == EnumStatus.Active ? "Active" : "Inactive"))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((EnumStatus)src.Status)))
                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                .ForMember(dest => dest.AreaId, opt => opt.MapFrom(src => src.Area.Id))
                .ForMember(dest => dest.NameCode, opt => opt.MapFrom(src => string.Concat($"{src.Code} - ", src.Name).ToString()));
@@ -148,21 +142,20 @@ namespace SomoTaskManagement.Data.Mapper
                .ForMember(dest => dest.NameCode, opt => opt.MapFrom(src => string.Concat($"{src.Code} - ", src.Name).ToString()))
                .ForMember(dest => dest.FarmName, opt => opt.MapFrom(src => src.Farm.Name))
                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
-               .ForMember(dest => dest.Status, opt => opt.MapFrom(src =>
-                            ((EnumStatus)src.Status) == EnumStatus.Active ? "Active" : "Inactive"));
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((EnumStatus)src.Status)));
 
             CreateMap<TaskType, TaskTypeModel>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((PlantLivestockEnum)src.Status)));
 
 
             CreateMap<HabitantType, HabitantTypeModel>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((HabitantTypeStatus)src.Status)));
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((HabitantTypeStatus)src.Status)))
+                .ForMember(dest => dest.FarmName, opt => opt.MapFrom(src => src.Farm.Name));
 
             CreateMap<Employee, EmployeeCreateModel>();
 
             CreateMap<Employee, EmployeeListModel>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src =>
-                            ((EnumStatus)src.Status) == EnumStatus.Active ? "Active" : "Inactive"))
+                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((EmployeeMemberStatus)src.Status)))
                 .ForMember(dest => dest.NameCode, opt => opt.MapFrom(src => string.Concat($"{src.Code} - ", src.Name).ToString()));
 
 
@@ -170,8 +163,7 @@ namespace SomoTaskManagement.Data.Mapper
 
 
             CreateMap<Employee, EmployeeFarmModel>()
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src =>
-                ((EnumStatus)src.Status) == EnumStatus.Active ? "Active" : "Inactive"))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((EmployeeMemberStatus)src.Status)))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
             .ForMember(dest => dest.Gender, opt => opt.MapFrom(src =>
     src.Gender ? GenderEnum.Female : GenderEnum.Male))

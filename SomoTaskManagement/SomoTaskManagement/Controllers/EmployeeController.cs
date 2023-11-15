@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
 using SomoTaskManagement.Domain.Model.Employee;
@@ -269,6 +270,81 @@ namespace SomoTaskManagement.Api.Controllers
                 };
                 return Ok(responseData);
 
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+        [HttpGet("Template")]
+        public IActionResult GetExcelTemplate()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("EmployeeImportTemplate");
+
+                worksheet.Cells[1, 1].Value = "Mã nhân viên";
+                worksheet.Cells[1, 2].Value = "Họ tên";
+                worksheet.Cells[1, 3].Value = " Số điện thoại";
+                worksheet.Cells[1, 4].Value = "Địa chỉ";
+                worksheet.Cells[1, 5].Value = "Trang trại";
+                worksheet.Cells[1, 6].Value = "Giới tính";
+                worksheet.Cells[1, 7].Value = "Ngày sinh";
+                worksheet.Cells[1, 8].Value = "Kỹ năng";
+                worksheet.Cells[1, 9].Value = "Hình ảnh";
+
+                var stream = new MemoryStream(package.GetAsByteArray());
+
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "EmployeeImportTemplate.xlsx");
+            }
+        }
+
+
+        [HttpPost("ImortExcel")]
+        public async Task<IActionResult> ImportEmployeesFromExcel([FromForm] EmployeeImportModel employee)
+        {
+            try
+            {
+                using (var stream = employee.ExcelFile.OpenReadStream())
+                {
+                    await _employeeService.ImportEmployeesFromExcel(stream);
+                }
+                var responseData = new ApiResponseModel
+                {
+                    Data = employee,
+                    Message = "Employee is added",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+        [HttpPost("Export/{farmId}")]
+        public async Task<IActionResult> ExportEmployeesToExcel(int farmId)
+        {
+            try
+            {
+                var excelData = await _employeeService.ExportEmployeesToExcel(farmId);
+
+                var stream = new MemoryStream(excelData);
+
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "EmployeeExport.xlsx");
             }
             catch (Exception e)
             {

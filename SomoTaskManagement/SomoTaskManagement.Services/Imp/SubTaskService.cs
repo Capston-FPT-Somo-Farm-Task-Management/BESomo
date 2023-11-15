@@ -156,7 +156,11 @@ namespace SomoTaskManagement.Services.Imp
         public async Task UpdateEffortTime(int taskId, List<EmployeeEffortUpdate> employeeEffortTimes)
         {
             var existingTask = await _unitOfWork.RepositoryFarmTask.GetById(taskId);
-
+            var subtaskOfTask = await _unitOfWork.RepositoryEmployee_Task.GetData(s => s.TaskId == taskId && s.Status == true);
+            if (subtaskOfTask.Count() > 0)
+            {
+                throw new Exception("Không cập nhật được chấm công bởi vì nhiệm vụ đó có nhiệm vụ con");
+            }
             if (existingTask == null)
             {
                 throw new Exception("Không tìm thấy nhiệm vụ");
@@ -281,7 +285,7 @@ namespace SomoTaskManagement.Services.Imp
             {
                 checkSubtask = true;
             }
-            var groupedSubtasks = subtasks.GroupBy(s => new { s.TaskId, s.EmployeeId });
+            var groupedSubtasks = subtasks.GroupBy(s => new { s.TaskId, s.EmployeeId});
 
             var subtaskEffortModels = groupedSubtasks.Select(group =>
             {

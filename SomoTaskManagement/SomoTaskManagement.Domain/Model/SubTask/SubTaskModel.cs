@@ -11,7 +11,6 @@ namespace SomoTaskManagement.Domain.Model.SubTask
     {
         public int SubtaskId { get; set; } 
         public string TaskName { set; get; }
-        public string CodeTask { set; get; }
         public int TaskId { set; get; }
 
         public string EmployeeName { set; get; }

@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
+using SomoTaskManagement.Domain.Model.Employee;
 using SomoTaskManagement.Domain.Model.Reponse;
+using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
 namespace SomoTaskManagement.Api.Controllers
@@ -66,6 +69,71 @@ namespace SomoTaskManagement.Api.Controllers
             {
                 return BadRequest(e.Message);
 
+            }
+        }
+
+        [HttpGet("Export")]
+        public async Task<IActionResult> ExportTaskTypeToExcel()
+        {
+            try
+            {
+                var excelData = await _taskTypeService.ExportTaskTypeToExcel();
+
+                var stream = new MemoryStream(excelData);
+
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "TaskType.xlsx");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+        [HttpGet("Template")]
+        public IActionResult GetExcelTemplate()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("TaskTypeTemplate");
+
+                worksheet.Cells[1, 1].Value = "STT";
+                worksheet.Cells[1, 2].Value = "Mã";
+                worksheet.Cells[1, 3].Value = "Tên";
+                worksheet.Cells[1, 4].Value = "Loại công việc";
+                worksheet.Cells[1, 5].Value = "Mô tả";
+
+                var stream = new MemoryStream(package.GetAsByteArray());
+
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "TaskTypeTemplate.xlsx");
+            }
+        }
+
+        [HttpPost("ImortExcel")]
+        public async Task<IActionResult> ImportEmployeesFromExcel([FromForm] EmployeeImportModel employee)
+        {
+            try
+            {
+                using (var stream = employee.ExcelFile.OpenReadStream())
+                {
+                    await _taskTypeService.ImportTaskTypeFromExcel(stream);
+                }
+                var responseData = new ApiResponseModel
+                {
+                    Data = employee,
+                    Message = "Employee is added",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 

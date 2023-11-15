@@ -23,7 +23,7 @@ namespace SomoTaskManagement.Domain.Model.Employee
         public string Address { get; set; }
         [Required]
         public bool Gender { get; set; }
-        public IFormFile ImageFile { get; set; }
+        public IFormFile? ImageFile { get; set; }
         public int FarmId { get; set; }
         public DateTime DateOfBirth { get; set; }
 

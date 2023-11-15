@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
+using OfficeOpenXml;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
+using SomoTaskManagement.Domain.Enum;
+using SomoTaskManagement.Domain.Model.Employee;
 using SomoTaskManagement.Domain.Model.TaskType;
 using SomoTaskManagement.Services.Interface;
 using System;
@@ -49,7 +52,7 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task AddTaskType(TaskType taskType)
         {
-            taskType.Status = 1;
+            taskType.IsDelete = false;
             await _unitOfWork.RepositoryTaskTaskType.Add(taskType);
             await _unitOfWork.RepositoryTaskTaskType.Commit();
         }
@@ -63,5 +66,94 @@ namespace SomoTaskManagement.Services.Imp
             _unitOfWork.RepositoryTaskTaskType.Delete(a => a.Id == taskType.Id);
             await _unitOfWork.RepositoryTaskTaskType.Commit();
         }
+
+        public async Task<byte[]> ExportTaskTypeToExcel()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("TaskTypes");
+
+                worksheet.Cells[1, 1].Value = "STT";
+                worksheet.Cells[1, 2].Value = "Mã";
+                worksheet.Cells[1, 3].Value = "Tên";
+                worksheet.Cells[1, 4].Value = "Loại công việc";
+                worksheet.Cells[1, 5].Value = "Mô tả";
+
+                var taskTypes = await _unitOfWork.RepositoryTaskTaskType.GetData(e => e.IsDelete == false);
+
+                int row = 2;
+                int sequence = 1; 
+
+                foreach (var taskType in taskTypes)
+                {
+                    worksheet.Cells[row, 1].Value = sequence;
+                    worksheet.Cells[row, 2].Value = taskType.Id;
+                    worksheet.Cells[row, 3].Value = taskType.Name;
+                    worksheet.Cells[row, 4].Value = taskType.Status;
+                    worksheet.Cells[row, 5].Value = taskType.Description;
+
+                    row++;
+                    sequence++;
+                }
+
+                return package.GetAsByteArray();
+            }
+        }
+
+        public async Task ImportTaskTypeFromExcel(Stream excelFileStream)
+        {
+            try
+            {
+                using (var package = new ExcelPackage(excelFileStream))
+                {
+                    var worksheet = package.Workbook.Worksheets[0];
+                    int rowCount = worksheet.Dimension.Rows;
+
+                    for (int row = 2; row <= rowCount; row++)
+                    {
+                        var taskTypeImport = new TaskType
+                        {
+                            Name = worksheet.Cells[row, 3].Value?.ToString(),
+                            Status = Convert.ToInt32(worksheet.Cells[row, 4].Value),
+                            Description = worksheet.Cells[row, 5].Value?.ToString(),
+                        };
+
+                        int excelTaskTypeId = Convert.ToInt32(worksheet.Cells[row, 2].Value); 
+
+                        var existingTaskType = await _unitOfWork.RepositoryTaskTaskType
+                            .GetSingleByCondition(tt => tt.Id == excelTaskTypeId);
+
+                        if (existingTaskType == null)
+                        {
+                            var taskTypeNew = new TaskType
+                            {
+                                Name = taskTypeImport.Name,
+                                Status = taskTypeImport.Status,
+                                Description = taskTypeImport.Description,
+                                IsDelete = false,
+                            };
+
+                            await _unitOfWork.RepositoryTaskTaskType.Add(taskTypeNew);
+                        }
+                        else
+                        {
+                            existingTaskType.Name = taskTypeImport.Name;
+                            existingTaskType.Status = taskTypeImport.Status;
+                            existingTaskType.Description = taskTypeImport.Description;
+
+                            _unitOfWork.RepositoryTaskTaskType.Update(existingTaskType);
+                        }
+                    }
+
+                    await _unitOfWork.RepositoryTaskTaskType.Commit();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error during task type import: {ex.Message}");
+            }
+        }
+
+
     }
 }

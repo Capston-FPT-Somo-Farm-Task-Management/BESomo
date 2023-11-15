@@ -157,7 +157,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateArea([FromBody] HabitantType habitant)
+        public async Task<IActionResult> CreateArea([FromBody] HabitantTypeCUModel habitant)
         {
             try
             {

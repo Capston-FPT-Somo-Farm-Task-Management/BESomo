@@ -16,7 +16,6 @@ namespace SomoTaskManagement.Domain.Model.HabitantType
         public string? Origin { get; set; }
         public string? Environment { get; set; }
         public string? Description { get; set; }
-        public bool? IsActive { get; set; }
         [Required]
         public int Status { set; get; }
     }
