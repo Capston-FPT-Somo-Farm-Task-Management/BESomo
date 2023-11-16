@@ -8,6 +8,7 @@ using SomoTaskManagement.Domain.Model.TaskType;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task<IEnumerable<TaskTypeModel>> ListTaskTypePlant()
         {
-            var taskType = await _unitOfWork.RepositoryTaskTaskType.GetData(expression:e=>e.Status ==0);
+            var taskType = await _unitOfWork.RepositoryTaskTaskType.GetData(expression:e=>e.Status ==0 && e.IsDelete == false);
             return _mapper.Map<IEnumerable<TaskType>, IEnumerable<TaskTypeModel>>(taskType);
         }
         public async Task<IEnumerable<TaskTypeModel>> ListTaskTypeActive()
@@ -42,7 +43,13 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task<IEnumerable<TaskTypeModel>> ListTaskTypeLivestock()
         {
-            var taskType = await _unitOfWork.RepositoryTaskTaskType.GetData(expression: e => e.Status == 1);
+            var taskType = await _unitOfWork.RepositoryTaskTaskType.GetData(expression: e => e.Status == 1&& e.IsDelete == false);
+            return _mapper.Map<IEnumerable<TaskType>, IEnumerable<TaskTypeModel>>(taskType);
+        }
+
+        public async Task<IEnumerable<TaskTypeModel>> ListTaskTypeOther()
+        {
+            var taskType = await _unitOfWork.RepositoryTaskTaskType.GetData(expression: e => e.Status == 2 && e.IsDelete == false);
             return _mapper.Map<IEnumerable<TaskType>, IEnumerable<TaskTypeModel>>(taskType);
         }
 
@@ -50,20 +57,32 @@ namespace SomoTaskManagement.Services.Imp
         {
             return _unitOfWork.RepositoryTaskTaskType.GetById(id);
         }
-        public async Task AddTaskType(TaskType taskType)
+        public async Task AddTaskType(TaskTypeCreateUpdateModel taskType)
         {
-            taskType.IsDelete = false;
-            await _unitOfWork.RepositoryTaskTaskType.Add(taskType);
+            var taskTypeNew = new TaskType
+            {
+                Name = taskType.Name,
+                Description = taskType.Description,
+                Status = taskType.Status,
+                IsDelete = false
+            };
+            await _unitOfWork.RepositoryTaskTaskType.Add(taskTypeNew);
             await _unitOfWork.RepositoryTaskTaskType.Commit();
         }
-        public async Task UpdateTaskType(TaskType taskType)
+        public async Task UpdateTaskType(int taskTypeId, TaskTypeCreateUpdateModel taskType)
         {
-            _unitOfWork.RepositoryTaskTaskType.Update(taskType);
+            var taskTypeUpdate = await  _unitOfWork.RepositoryTaskTaskType.GetById(taskTypeId) ?? throw new Exception("Không tìm thấy loại công việc");
+            taskTypeUpdate.IsDelete = false;
+            taskTypeUpdate.Name = taskType.Name;
+            taskTypeUpdate.Description = taskType.Description;
+            taskTypeUpdate.Status = taskType.Status;
+
+            //_unitOfWork.RepositoryTaskTaskType.Update(taskType);
             await _unitOfWork.RepositoryTaskTaskType.Commit();
         }
-        public async Task DeleteTaskType(TaskType taskType)
+        public async Task DeleteTaskType(int taskTypeId)
         {
-            _unitOfWork.RepositoryTaskTaskType.Delete(a => a.Id == taskType.Id);
+            _unitOfWork.RepositoryTaskTaskType.Delete(a => a.Id == taskTypeId);
             await _unitOfWork.RepositoryTaskTaskType.Commit();
         }
 
@@ -89,7 +108,7 @@ namespace SomoTaskManagement.Services.Imp
                     worksheet.Cells[row, 1].Value = sequence;
                     worksheet.Cells[row, 2].Value = taskType.Id;
                     worksheet.Cells[row, 3].Value = taskType.Name;
-                    worksheet.Cells[row, 4].Value = taskType.Status;
+                    worksheet.Cells[row, 4].Value = GetEnumDescription((PlantLivestockEnum)taskType.Status);
                     worksheet.Cells[row, 5].Value = taskType.Description;
 
                     row++;
@@ -98,6 +117,16 @@ namespace SomoTaskManagement.Services.Imp
 
                 return package.GetAsByteArray();
             }
+        }
+        public static string GetEnumDescription<T>(T enumValue)
+        {
+            var fieldInfo = enumValue.GetType().GetField(enumValue.ToString());
+
+            if (fieldInfo == null) return string.Empty;
+
+            var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+
+            return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : enumValue.ToString();
         }
 
         public async Task ImportTaskTypeFromExcel(Stream excelFileStream)
@@ -114,11 +143,10 @@ namespace SomoTaskManagement.Services.Imp
                         var taskTypeImport = new TaskType
                         {
                             Name = worksheet.Cells[row, 3].Value?.ToString(),
-                            Status = Convert.ToInt32(worksheet.Cells[row, 4].Value),
                             Description = worksheet.Cells[row, 5].Value?.ToString(),
                         };
 
-                        int excelTaskTypeId = Convert.ToInt32(worksheet.Cells[row, 2].Value); 
+                        int excelTaskTypeId = Convert.ToInt32(worksheet.Cells[row, 2].Value);
 
                         var existingTaskType = await _unitOfWork.RepositoryTaskTaskType
                             .GetSingleByCondition(tt => tt.Id == excelTaskTypeId);
@@ -128,18 +156,25 @@ namespace SomoTaskManagement.Services.Imp
                             var taskTypeNew = new TaskType
                             {
                                 Name = taskTypeImport.Name,
-                                Status = taskTypeImport.Status,
                                 Description = taskTypeImport.Description,
                                 IsDelete = false,
                             };
 
+                            string statusText = worksheet.Cells[row, 4].Value?.ToString();
+                            PlantLivestockEnum statusEnum = GetEnumValueFromDescription<PlantLivestockEnum>(statusText);
+                            taskTypeNew.Status = (int)statusEnum;
                             await _unitOfWork.RepositoryTaskTaskType.Add(taskTypeNew);
                         }
                         else
                         {
                             existingTaskType.Name = taskTypeImport.Name;
-                            existingTaskType.Status = taskTypeImport.Status;
                             existingTaskType.Description = taskTypeImport.Description;
+
+                            string statusText = worksheet.Cells[row, 4].Value?.ToString();
+                            PlantLivestockEnum statusEnum = GetEnumValueFromDescription<PlantLivestockEnum>(statusText);
+
+                            existingTaskType.Status = (int)statusEnum;
+
 
                             _unitOfWork.RepositoryTaskTaskType.Update(existingTaskType);
                         }
@@ -155,5 +190,41 @@ namespace SomoTaskManagement.Services.Imp
         }
 
 
+        public static T GetEnumValueFromDescription<T>(string description)
+        {
+            var type = typeof(T);
+            if (!type.IsEnum)
+            {
+                throw new ArgumentException($"{nameof(T)} must be an enumerated type");
+            }
+
+            foreach (var field in type.GetFields())
+            {
+                var attribute = (DescriptionAttribute)Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute));
+
+                if (attribute != null && string.Equals(attribute.Description, description, StringComparison.OrdinalIgnoreCase))
+                {
+                    return (T)field.GetValue(null);
+                }
+                else if (string.Equals(field.Name, description, StringComparison.OrdinalIgnoreCase))
+                {
+                    return (T)field.GetValue(null);
+                }
+            }
+
+            throw new ArgumentException($"Giá trị hợp lệ là: 'Công việc cây trồng' , 'Công việc chăn nuôi', 'Công việc khác'");
+
+        }
+
+        public async Task UpdateStatus(int id)
+        {
+            var taskType = await _unitOfWork.RepositoryTaskTaskType.GetById(id);
+            if (taskType == null)
+            {
+                throw new Exception("Không tìm thấy loại công việc");
+            }
+            taskType.IsDelete = taskType.IsDelete == true ? false : true;
+            await _unitOfWork.RepositoryTaskTaskType.Commit();
+        }
     }
 }

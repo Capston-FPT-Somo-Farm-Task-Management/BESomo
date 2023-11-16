@@ -15,13 +15,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SomoTaskManagement.Services
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SomoTaskManagement.Authentication", "SomoTaskManagement.Authentication\SomoTaskManagement.Authentication.csproj", "{0B25E0D7-7777-4402-90F5-EAC8ED33CA4B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SomoTaskManagement.Notify", "SomoTaskManagement.Notification\SomoTaskManagement.Notify.csproj", "{EB1ADBD1-9065-40E3-97F7-5D91D0922B1A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient", "TestClient\TestClient.csproj", "{9CBCB095-5DC4-4569-8E68-9A6CC0049F55}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SomoFarmTaskManagement.Test", "SomoFarmTaskManagement.Test\SomoFarmTaskManagement.Test.csproj", "{B1B4D9DD-8BD5-4EBC-8A5E-E365626022DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SomoTaskManagement.Cache", "SomoTaskManagement.Cache\SomoTaskManagement.Cache.csproj", "{9E007E13-C786-43E5-85B1-686D0FFE0A4E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SomoTaskManagement.Cache", "SomoTaskManagement.Cache\SomoTaskManagement.Cache.csproj", "{9E007E13-C786-43E5-85B1-686D0FFE0A4E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,10 +51,6 @@ Global
 		{0B25E0D7-7777-4402-90F5-EAC8ED33CA4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B25E0D7-7777-4402-90F5-EAC8ED33CA4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B25E0D7-7777-4402-90F5-EAC8ED33CA4B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EB1ADBD1-9065-40E3-97F7-5D91D0922B1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EB1ADBD1-9065-40E3-97F7-5D91D0922B1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EB1ADBD1-9065-40E3-97F7-5D91D0922B1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EB1ADBD1-9065-40E3-97F7-5D91D0922B1A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9CBCB095-5DC4-4569-8E68-9A6CC0049F55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9CBCB095-5DC4-4569-8E68-9A6CC0049F55}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CBCB095-5DC4-4569-8E68-9A6CC0049F55}.Release|Any CPU.ActiveCfg = Release|Any CPU

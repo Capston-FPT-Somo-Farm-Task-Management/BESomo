@@ -18,5 +18,6 @@ namespace SomoTaskManagement.Domain.Model.HabitantType
         public string? Description { get; set; }
         [Required]
         public int Status { set; get; }
+        public int FarmId { set; get; }
     }
 }

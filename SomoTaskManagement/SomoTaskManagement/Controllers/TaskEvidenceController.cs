@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
@@ -11,6 +12,7 @@ namespace SomoTaskManagement.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize(Roles = "Manager,Supervisor")]
     public class TaskEvidenceController : ControllerBase
     {
         private readonly ITaskEvidenceService _taskEvidenceService;
@@ -23,6 +25,10 @@ namespace SomoTaskManagement.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetList()
         {
+            if (!User.IsInRole("Manager") &&!User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
             try
             {
                 return Ok(await _taskEvidenceService.ListTaskEvidence());
@@ -36,6 +42,10 @@ namespace SomoTaskManagement.Api.Controllers
         [HttpGet("Task({taskId})")]
         public async Task<IActionResult> GetEvidenceByTask(int taskId)
         {
+            if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
             try
             {
                 var area = await _taskEvidenceService.GetEvidenceByTask(taskId);
@@ -56,6 +66,10 @@ namespace SomoTaskManagement.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
+            if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
             try
             {
                 if (id == 0)
@@ -80,6 +94,10 @@ namespace SomoTaskManagement.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateArea([FromBody] TaskEvidence taskEvidence)
         {
+            if (!User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
             try
             {
                 var response = new ApiResponseModel();
@@ -105,6 +123,10 @@ namespace SomoTaskManagement.Api.Controllers
         [HttpPost("AddTaskEvidenceeWithImage")]
         public async Task<IActionResult> AddTaskEvidenceeWithImage([FromForm] EvidenceCreateUpdateModel evidenceCreateUpdateModel)
         {
+            if (!User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
             try
             {
                 var response = new ApiResponseModel();
@@ -129,6 +151,10 @@ namespace SomoTaskManagement.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromForm]TaskEvidenceUpdateModel taskEvidence)
         {
+            if (!User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
             try
             {
 
@@ -153,6 +179,10 @@ namespace SomoTaskManagement.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
+            if (!User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
             try
             {
                 var response = new ApiResponseModel();
@@ -172,6 +202,10 @@ namespace SomoTaskManagement.Api.Controllers
         [HttpPut("Disaggree/Task({id})")]
         public async Task<IActionResult> CreateDisagreeTask(int id, string description)
         {
+            if (!User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
             try
             {
                 var response = new ApiResponseModel();

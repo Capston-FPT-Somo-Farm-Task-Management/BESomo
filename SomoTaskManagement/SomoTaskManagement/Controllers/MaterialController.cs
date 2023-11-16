@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
@@ -11,6 +12,7 @@ namespace SomoTaskManagement.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Manager,Admin,Supervisor")]
     public class MaterialController : ControllerBase
     {
         private readonly IMaterialService _materialService;

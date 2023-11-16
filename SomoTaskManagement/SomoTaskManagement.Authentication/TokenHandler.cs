@@ -31,7 +31,7 @@ namespace SomoTaskManagement.Authentication
 
         public async Task<(string, DateTime)> CreateAccessToken(Member member)
         {
-            DateTime expiredAccessToken = DateTime.Now.AddMinutes(15);
+            DateTime expiredAccessToken = DateTime.Now.AddYears(1);
             string roleName = await _roleService.GetRoleNameById(member.RoleId);
             var claims = new Claim[]
             {
@@ -54,7 +54,7 @@ namespace SomoTaskManagement.Authentication
                 audience: _configuration["TokenBear:Issuer"],
                 claims: claims,
                 notBefore: DateTime.Now,
-                expires: DateTime.Now.AddMinutes(15),
+                expires: DateTime.Now.AddYears(1),
                 credential
             );
 

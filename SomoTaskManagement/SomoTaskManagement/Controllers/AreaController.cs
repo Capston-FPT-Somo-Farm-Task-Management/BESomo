@@ -13,7 +13,8 @@ namespace SomoTaskManagement.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(Roles = "Manager")]
+    [Authorize(Roles = "Manager,Admin,Supervisor")]
+
     public class AreaController : ControllerBase
     {
         private readonly IAreaService _areaService;
@@ -28,7 +29,7 @@ namespace SomoTaskManagement.Api.Controllers
         {
             //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
             //{
-            //    return Unauthorized("You do not have access to this method.");
+            //    return Unauthorized("Bạn không có quyền truy cập");
             //}
             try
             {

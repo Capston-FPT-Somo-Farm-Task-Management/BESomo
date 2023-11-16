@@ -568,7 +568,7 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task<List<int>> GetManagerId()
         {
-            var manager = await _unitOfWork.RepositoryMember.GetData(m => m.RoleId == 2);
+            var manager = await _unitOfWork.RepositoryMember.GetData(m => m.RoleId == 1);
             var managerId = manager.Select(m => m.Id).ToList();
             return managerId;
         }
@@ -586,9 +586,13 @@ namespace SomoTaskManagement.Services.Imp
         }
 
         private static int taskCounter = 1;
-        private string GenerateTaskCode(DateTime vietnamTime, int counter)
+        private string GenerateTaskCode()
         {
-            return "CV" + vietnamTime.Year.ToString().Substring(2) + counter.ToString("D5");
+            Guid uniqueId = Guid.NewGuid();
+
+            string uniquePart = uniqueId.ToString("N").Substring(0, 8);
+
+            return "CV" + uniquePart;
         }
 
         public async Task ProcessTaskCreation(int memberId, TaskRequestModel taskModel)
@@ -607,7 +611,47 @@ namespace SomoTaskManagement.Services.Imp
 
                 foreach (var date in new List<DateTime> { startDate }.Concat(taskModel.Dates))
                 {
-                    string taskCode = GenerateTaskCode(vietnamTime, taskCounter);
+                    if (date < startDate)
+                    {
+                        throw new Exception("Ngày truyền vào không được nhỏ hơn ngày bắt đầu (startDate).");
+                    }
+                    var plant = await _unitOfWork.RepositoryPlant.GetById(taskModel.FarmTask.PlantId);
+                    if (plant?.Status == 0)
+                    {
+                        throw new Exception($"{plant.Name} đã ở trạng thái inactive");
+                    }
+
+                    var livestock = await _unitOfWork.RepositoryLiveStock.GetById(taskModel.FarmTask.LiveStockId);
+                    if (livestock?.Status == 0)
+                    {
+                        throw new Exception($"{livestock.Name} đã ở trạng thái inactive");
+                    }
+
+                    var field = await _unitOfWork.RepositoryField.GetById(taskModel.FarmTask.FieldId);
+                    if (field?.IsDelete == true)
+                    {
+                        throw new Exception($"{field.Name} đã ở trạng thái inactive");
+                    }
+
+                    var taskType = await _unitOfWork.RepositoryTaskTaskType.GetById(taskModel.FarmTask.TaskTypeId);
+                    if (taskType?.IsDelete == true)
+                    {
+                        throw new Exception($"{taskType.Name} đã ở trạng thái inactive");
+                    }
+
+                    var manager = await _unitOfWork.RepositoryMember.GetById(taskModel.FarmTask.ManagerId);
+                    if (manager?.Status == 0)
+                    {
+                        throw new Exception($"{manager.Name} đã ở trạng thái inactive");
+                    }
+
+                    var supervisor = await _unitOfWork.RepositoryMember.GetById(taskModel.FarmTask.SuppervisorId);
+                    if (supervisor?.Status == 0)
+                    {
+                        throw new Exception($"{supervisor.Name} đã ở trạng thái inactive");
+                    }
+
+                    string taskCode = GenerateTaskCode();
                     var farmTaskNew = new FarmTask
                     {
                         CreateDate = vietnamTime,
@@ -700,7 +744,7 @@ namespace SomoTaskManagement.Services.Imp
 
                 List<int> listMemberNotify = new List<int>();
 
-                if (roleMember == 4)
+                if (roleMember == 3)
                 {
                     foreach (var manager in listManager)
                     {
@@ -709,7 +753,7 @@ namespace SomoTaskManagement.Services.Imp
                         listMemberNotify.Add(manager);
                     }
                 }
-                else if (roleMember == 2)
+                else if (roleMember == 1)
                 {
                     var supervisorTokens = await GetTokenByMemberId(taskModel.FarmTask.SuppervisorId);
                     deviceTokens.AddRange(supervisorTokens);
@@ -813,6 +857,10 @@ namespace SomoTaskManagement.Services.Imp
         }
         private async Task CreateTaskForDate(FarmTask farmTask, List<int> employeeIds, List<int> materialIds)
         {
+            if (employeeIds == null || !employeeIds.Any())
+            {
+                throw new ArgumentException("Nhân viên không được bỏ trống");
+            }
             for (int i = 0; i < employeeIds.Count; i++)
             {
                 var employeeId = employeeIds[i];
@@ -940,7 +988,10 @@ namespace SomoTaskManagement.Services.Imp
                 }
 
                 await UpdateFarmTask(farmTask, farmTask.StartDate.Date, taskModel);
-
+                if(taskModel.Dates == null)
+                {
+                    farmTask.IsRepeat = false;
+                }
                 _unitOfWork.RepositoryFarmTask.Delete(t => !taskModel.Dates.Contains(t.StartDate.Date) && t.OriginalTaskId == farmTask.Id);
                 await _unitOfWork.RepositoryFarmTask.Commit();
             }

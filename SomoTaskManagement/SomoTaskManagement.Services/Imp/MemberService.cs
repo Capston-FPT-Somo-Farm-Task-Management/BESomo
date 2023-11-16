@@ -80,12 +80,14 @@ namespace SomoTaskManagement.Services.Imp
                 AuthTokenAsyncFactory = () => Task.FromResult(_configuration["Firebase:apiKey"])
             };
 
-            string fileName = member.Id.ToString();
+            string uniqueIdentifier = Guid.NewGuid().ToString();
+            string fileName = $"{member.Id}_{uniqueIdentifier}";
             string fileExtension = Path.GetExtension(imageFile.FileName);
 
             var firebaseStorage = new FirebaseStorage(_configuration["Firebase:Bucket"], options)
-                .Child("images")
-                .Child(fileName + fileExtension);
+               .Child("images")
+               .Child("MemberAvatar")
+               .Child(fileName + fileExtension);
 
             using (var stream = imageFile.OpenReadStream())
             {
@@ -177,7 +179,7 @@ namespace SomoTaskManagement.Services.Imp
                 t => t.Role,
                 t => t.Farm,
             };
-            var member = await _unitOfWork.RepositoryMember.GetData(expression: m => m.FarmId == id && m.RoleId == 4, includes: includes);
+            var member = await _unitOfWork.RepositoryMember.GetData(expression: m => m.FarmId == id && m.RoleId == 3, includes: includes);
             if(member == null)
             {
                 throw new Exception("Không tìm thấy người giám sát");
@@ -207,7 +209,7 @@ namespace SomoTaskManagement.Services.Imp
                 t => t.Role,
                 t => t.Farm,
             };
-            var member = await _unitOfWork.RepositoryMember.GetData(expression: m => m.FarmId == id && m.RoleId == 4 && m.Status == 1, includes: includes);
+            var member = await _unitOfWork.RepositoryMember.GetData(expression: m => m.FarmId == id && m.RoleId == 3 && m.Status == 1, includes: includes);
             if (member == null)
             {
                 throw new Exception("Không tìm thấy người giám sát");

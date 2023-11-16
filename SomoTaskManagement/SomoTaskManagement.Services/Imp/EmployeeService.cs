@@ -86,9 +86,16 @@ namespace SomoTaskManagement.Services.Imp
                     Status = 1,
                     DateOfBirth = employeeModel.DateOfBirth
                 };
-
-                var urlImage = await UploadImageToFirebaseAsync(employeeNew, employeeModel.ImageFile);
-                employeeNew.Avatar = urlImage;
+                if (employeeModel.ImageFile != null)
+                {
+                    var urlImage = await UploadImageToFirebaseAsync(employeeNew, employeeModel.ImageFile);
+                    employeeNew.Avatar = urlImage;
+                }
+                else
+                {
+                    employeeNew.Avatar = "default_image_url";
+                }
+                
                 for (int i = 0; i < employeeModel.TaskTypeIds.Count; i++)
                 {
                     var taskTypeId = employeeModel.TaskTypeIds[i];
@@ -285,27 +292,37 @@ namespace SomoTaskManagement.Services.Imp
 
         private async Task<string> UploadImageToFirebaseAsync(Employee employee, IFormFile imageFile)
         {
-            var options = new FirebaseStorageOptions
+            if (imageFile != null)
             {
-                AuthTokenAsyncFactory = () => Task.FromResult(_configuration["Firebase:apiKey"])
-            };
+                var options = new FirebaseStorageOptions
+                {
+                    AuthTokenAsyncFactory = () => Task.FromResult(_configuration["Firebase:apiKey"])
+                };
 
-            string fileName = employee.Id.ToString();
-            string fileExtension = Path.GetExtension(imageFile.FileName);
+                string uniqueIdentifier = Guid.NewGuid().ToString();
+                string fileName = $"{employee.Id}_{uniqueIdentifier}";
+                string fileExtension = Path.GetExtension(imageFile.FileName);
 
-            var firebaseStorage = new FirebaseStorage(_configuration["Firebase:Bucket"], options)
-                .Child("images")
-                .Child(fileName + fileExtension);
+                var firebaseStorage = new FirebaseStorage(_configuration["Firebase:Bucket"], options)
+                    .Child("images")
+                    .Child("EmployeeAvatar")
+                    .Child(fileName + fileExtension);
 
-            using (var stream = imageFile.OpenReadStream())
-            {
-                await firebaseStorage.PutAsync(stream);
+                using (var stream = imageFile.OpenReadStream())
+                {
+                    await firebaseStorage.PutAsync(stream);
+                }
+
+                var imageUrl = await firebaseStorage.GetDownloadUrlAsync();
+
+                return imageUrl;
             }
-
-            var imageUrl = await firebaseStorage.GetDownloadUrlAsync();
-
-            return imageUrl;
+            else
+            {
+                return "default_image_url";
+            }
         }
+
 
         public async Task<IEnumerable<EmployeeListModel>> GetByTaskType(int id)
         {

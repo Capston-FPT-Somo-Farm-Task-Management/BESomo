@@ -44,7 +44,7 @@ namespace SomoTaskManagement.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Server=tcp:somodb.database.windows.net,1433;Initial Catalog=FarmTaskManagements;Persist Security Info=False;User ID=hoangvu;Password=somo123@;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False");
+                optionsBuilder.UseSqlServer("Server=tcp:somofarmtask-db.database.windows.net,1433;Initial Catalog=SomoTaskManagementDb;Persist Security Info=False;User ID=minhanh01;Password=somo123@;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
             }
         }
 

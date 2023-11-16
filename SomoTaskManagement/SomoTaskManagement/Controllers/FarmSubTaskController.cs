@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
 using SomoTaskManagement.Domain.Model.Employee;
@@ -11,6 +12,7 @@ namespace SomoTaskManagement.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Manager,Supervisor")]
     public class FarmSubTaskController : ControllerBase
     {
         private readonly ISubTaskService _subTaskService;

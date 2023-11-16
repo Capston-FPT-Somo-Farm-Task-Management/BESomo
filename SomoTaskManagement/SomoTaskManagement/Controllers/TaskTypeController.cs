@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper.Execution;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
 using SomoTaskManagement.Domain.Model.Employee;
 using SomoTaskManagement.Domain.Model.Reponse;
+using SomoTaskManagement.Domain.Model.TaskType;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 
@@ -12,6 +15,7 @@ namespace SomoTaskManagement.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Manager,Admin,Supervisor")]
     public class TaskTypeController : ControllerBase
     {
         private readonly ITaskTypeService _taskTypeService;
@@ -26,7 +30,13 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                return Ok(await _taskTypeService.ListTaskType());
+                var taskType = await _taskTypeService.ListTaskType();
+                return Ok(new ApiResponseModel
+                {
+                    Data = taskType,
+                    Message = "List task type",
+                    Success = true,
+                });
             }
             catch (Exception e)
             {
@@ -58,6 +68,26 @@ namespace SomoTaskManagement.Api.Controllers
             try
             {
                 var members = await _taskTypeService.ListTaskTypeActive();
+                return Ok(new ApiResponseModel
+                {
+                    Data = members,
+                    Message = "List task type of plant ",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+
+            }
+        }
+
+        [HttpGet("ListTaskTypeOther")]
+        public async Task<IActionResult> ListTaskTypeOther()
+        {
+            try
+            {
+                var members = await _taskTypeService.ListTaskTypeOther();
                 return Ok(new ApiResponseModel
                 {
                     Data = members,
@@ -182,7 +212,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateArea([FromBody] TaskType taskType)
+        public async Task<IActionResult> CreateArea([FromBody] TaskTypeCreateUpdateModel taskType)
         {
             try
             {
@@ -217,40 +247,21 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] TaskType taskType)
+        [HttpPut("{taskTypeId}")]
+        public async Task<IActionResult> Update(int taskTypeId, TaskTypeCreateUpdateModel taskType)
         {
             try
             {
-                var response = new ApiResponseModel();
-                if (ModelState.IsValid)
-                {
-                    var existingArea = await _taskTypeService.GetTaskType(id);
-                    if (existingArea == null)
-                    {
-                        response.Message = "TaskType not found";
-                        return NotFound(response);
-                    }
-                    await _taskTypeService.UpdateTaskType(taskType);
-                    var responseData = new ApiResponseModel
-                    {
-                        Data = taskType,
-                        Message = "TaskType is updated",
-                        Success = true,
-                    };
-                    return Ok(responseData);
-                }
-                else
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        errorMessages.Add(modelError.ErrorMessage);
-                    }
 
-                    response.Message = "TaskType Zone data: " + string.Join(" ", errorMessages);
-                    return BadRequest(response);
-                }
+                await _taskTypeService.UpdateTaskType(taskTypeId,taskType);
+                var responseData = new ApiResponseModel
+                {
+                    Data = taskType,
+                    Message = "TaskType is updated",
+                    Success = true,
+                };
+                return Ok(responseData);
+
             }
             catch (Exception e)
             {
@@ -259,20 +270,32 @@ namespace SomoTaskManagement.Api.Controllers
 
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete("{taskTypeId}")]
+        public async Task<IActionResult> Delete(int taskTypeId)
         {
             try
             {
                 var response = new ApiResponseModel();
-                var existingArea = await _taskTypeService.GetTaskType(id);
-                if (existingArea == null)
-                {
-                    response.Message = "TaskType not found";
-                    return NotFound(response);
-                }
+              
+                await _taskTypeService.DeleteTaskType(taskTypeId);
+                response.Message = "TaskType is deleted";
+                response.Success = true;
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
-                await _taskTypeService.DeleteTaskType(existingArea);
+        [HttpPut("({taskTypeId})/UpdateStatus")]
+        public async Task<IActionResult> UpdateStatus(int taskTypeId)
+        {
+            try
+            {
+                var response = new ApiResponseModel();
+
+                await _taskTypeService.UpdateStatus(taskTypeId);
                 response.Message = "TaskType is deleted";
                 response.Success = true;
                 return Ok(response);

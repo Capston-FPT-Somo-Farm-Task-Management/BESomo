@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SomoTaskManagement.Infrastructure\SomoTaskManagement.Infrastructure.csproj" />
-    <ProjectReference Include="..\SomoTaskManagement.Notification\SomoTaskManagement.Notify.csproj" />
   </ItemGroup>
 
 </Project>

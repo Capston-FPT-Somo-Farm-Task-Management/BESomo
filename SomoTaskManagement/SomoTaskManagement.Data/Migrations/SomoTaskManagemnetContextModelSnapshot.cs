@@ -70,7 +70,6 @@ namespace SomoTaskManagement.Data.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Avatar")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Code")

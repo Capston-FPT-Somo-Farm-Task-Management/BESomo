@@ -252,11 +252,19 @@ namespace SomoTaskManagement.Services.Imp
             {
                 throw new Exception("Không tìm thấy field");
             }
+
+            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => t.FieldId == id);
+
+            if (tasks.Any())
+            {
+                throw new Exception("Có các nhiệm vụ chứa thực thể này không thể xóa");
+            }
+
             var livestock = await _unitOfWork.RepositoryLiveStock.GetData(expression: l => l.FieldId == field.Id);
             var plant = await _unitOfWork.RepositoryPlant.GetData(expression: l => l.FieldId == field.Id);
             var numberLivestock = livestock.Count();
             var numberPlant = plant.Count();
-            if (numberLivestock != 0 || numberPlant != 0)
+            if ((numberLivestock != 0 || numberPlant != 0) && field.IsDelete == false)
             {
                 throw new Exception("Có một hoặc nhiều thực thể ở bên trong nên không thể xóa");
             }
@@ -338,6 +346,13 @@ namespace SomoTaskManagement.Services.Imp
                 throw new Exception("Không tìm thấy field");
             }
 
+            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => t.FieldId == fieldId);
+
+            if (tasks.Any())
+            {
+                throw new Exception("Có các nhiệm vụ chứa thực thể này không thể xóa");
+            }
+
             var livestock = await _unitOfWork.RepositoryLiveStock.GetData(expression: l => l.FieldId == fieldId);
             var plant = await _unitOfWork.RepositoryPlant.GetData(expression: l => l.FieldId == fieldId);
             var numberLivestock = livestock.Count();
@@ -350,6 +365,7 @@ namespace SomoTaskManagement.Services.Imp
             _unitOfWork.RepositoryField.Delete(a => a.Id == fieldId);
             await _unitOfWork.RepositoryField.Commit();
         }
+
 
         public async Task<Field> GetByCode(string code)
         {

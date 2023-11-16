@@ -14,7 +14,7 @@ namespace SomoTaskManagement.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(Roles = "Manager")]
+    [Authorize(Roles = "Manager,Admin,Supervisor")]
 
     public class EmployeeController : ControllerBase
     {

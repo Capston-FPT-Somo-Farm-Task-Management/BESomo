@@ -10,15 +10,17 @@ namespace SomoTaskManagement.Services.Interface
 {
     public interface ITaskTypeService
     {
-        Task AddTaskType(TaskType taskType);
-        Task DeleteTaskType(TaskType taskType);
+        Task AddTaskType(TaskTypeCreateUpdateModel taskType);
+        Task DeleteTaskType(int taskTypeId);
         Task<byte[]> ExportTaskTypeToExcel();
         Task<TaskType> GetTaskType(int id);
         Task ImportTaskTypeFromExcel(Stream excelFileStream);
         Task<IEnumerable<TaskTypeModel>> ListTaskType();
         Task<IEnumerable<TaskTypeModel>> ListTaskTypeActive();
         Task<IEnumerable<TaskTypeModel>> ListTaskTypeLivestock();
+        Task<IEnumerable<TaskTypeModel>> ListTaskTypeOther();
         Task<IEnumerable<TaskTypeModel>> ListTaskTypePlant();
-        Task UpdateTaskType(TaskType taskType);
+        Task UpdateStatus(int id);
+        Task UpdateTaskType(int taskTypeId, TaskTypeCreateUpdateModel taskType);
     }
 }

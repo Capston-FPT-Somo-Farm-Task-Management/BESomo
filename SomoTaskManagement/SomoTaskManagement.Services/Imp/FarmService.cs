@@ -65,12 +65,14 @@ namespace SomoTaskManagement.Services.Imp
                 AuthTokenAsyncFactory = () => Task.FromResult(_configuration["Firebase:apiKey"])
             };
 
-            string fileName = farm.Id.ToString();
+            string uniqueIdentifier = Guid.NewGuid().ToString();
+            string fileName = $"{farm.Id}_{uniqueIdentifier}";
             string fileExtension = Path.GetExtension(imageFile.FileName);
 
             var firebaseStorage = new FirebaseStorage(_configuration["Firebase:Bucket"], options)
-                .Child("images")
-                .Child(fileName + fileExtension);
+               .Child("images")
+               .Child("FarmImage")
+               .Child(fileName + fileExtension);
 
             using (var stream = imageFile.OpenReadStream())
             {

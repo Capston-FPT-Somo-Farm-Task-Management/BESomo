@@ -94,7 +94,8 @@ namespace SomoTaskManagement.Services.Imp
                 Environment = habitantType.Environment,
                 Description = habitantType.Description,
                 Status = habitantType.Status,
-                IsActive = true
+                IsActive = true,
+                FarmId = habitantType.FarmId
             };
             await _unitOfWork.RepositoryHabitantType.Add(habitantTypeNew);
             await _unitOfWork.RepositoryHabitantType.Commit();

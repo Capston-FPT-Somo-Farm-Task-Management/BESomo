@@ -46,17 +46,16 @@ namespace SomoTaskManagement.Services.Imp
             await _unitOfWork.RepositoryHubConnection.Add(hubConnection);
             await _unitOfWork.RepositoryHubConnection.Commit(); 
         }
-
+        
         public async Task Delete(HubConnectionDeleteModel token)
         {
 
-            var hubDelete = await _unitOfWork.RepositoryHubConnection.GetSingleByCondition(h=>h.ConnectionId == token.Token);
-            if(hubDelete == null)
+            var hubDeletes = await _unitOfWork.RepositoryHubConnection.GetData(h=>h.ConnectionId == token.Token);
+            foreach(var hubDelete in hubDeletes)
             {
-                throw new Exception("Không tìm thấy connection");
+                _unitOfWork.RepositoryHubConnection.Delete(hubDelete);
+                await _unitOfWork.RepositoryHubConnection.Commit();
             }
-            _unitOfWork.RepositoryHubConnection.Delete(hubDelete);
-            await _unitOfWork.RepositoryHubConnection.Commit();
         }
     }
 }

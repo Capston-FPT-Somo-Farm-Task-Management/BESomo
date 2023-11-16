@@ -18,7 +18,6 @@
     <ProjectReference Include="..\SomoTaskManagement.Authentication\SomoTaskManagement.Authentication.csproj" />
     <ProjectReference Include="..\SomoTaskManagement.Cache\SomoTaskManagement.Cache.csproj" />
     <ProjectReference Include="..\SomoTaskManagement.Data\SomoTaskManagement.Data.csproj" />
-    <ProjectReference Include="..\SomoTaskManagement.Notification\SomoTaskManagement.Notify.csproj" />
   </ItemGroup>
 
 </Project>

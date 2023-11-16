@@ -63,35 +63,56 @@ namespace SomoTaskManagement.Services.Imp
                 Status = 1,
                 FarmId = material.FarmId,
             };
-            var urlImage = await UploadImageToFirebaseAsync(materialNew, material.ImageFile);
-            materialNew.UrlImage = urlImage;
+
+            if (material.ImageFile != null)
+            {
+                var urlImage = await UploadImageToFirebaseAsync(materialNew, material.ImageFile);
+                materialNew.UrlImage = urlImage;
+            }
+            else
+            {
+                materialNew.UrlImage = "default_image_url";
+            }
+
             await _unitOfWork.RepositoryMaterial.Add(materialNew);
             await _unitOfWork.RepositoryMaterial.Commit();
         }
 
+
         private async Task<string> UploadImageToFirebaseAsync(Material material, IFormFile imageFile)
         {
-            var options = new FirebaseStorageOptions
+            if (imageFile != null)
             {
-                AuthTokenAsyncFactory = () => Task.FromResult(_configuration["Firebase:apiKey"])
-            };
+                // Thực hiện tải lên khi ImageFile không null
+                var options = new FirebaseStorageOptions
+                {
+                    AuthTokenAsyncFactory = () => Task.FromResult(_configuration["Firebase:apiKey"])
+                };
 
-            string fileName = material.Id.ToString();
-            string fileExtension = Path.GetExtension(imageFile.FileName);
+                string uniqueIdentifier = Guid.NewGuid().ToString();
+                string fileName = $"{material.Id}_{uniqueIdentifier}";
+                string fileExtension = Path.GetExtension(imageFile.FileName);
 
-            var firebaseStorage = new FirebaseStorage(_configuration["Firebase:Bucket"], options)
-                .Child("images")
-                .Child(fileName + fileExtension);
+                var firebaseStorage = new FirebaseStorage(_configuration["Firebase:Bucket"], options)
+                    .Child("images")
+                    .Child("employeeavatar")
+                    .Child(fileName + fileExtension);
 
-            using (var stream = imageFile.OpenReadStream())
-            {
-                await firebaseStorage.PutAsync(stream);
+                using (var stream = imageFile.OpenReadStream())
+                {
+                    await firebaseStorage.PutAsync(stream);
+                }
+
+                var imageUrl = await firebaseStorage.GetDownloadUrlAsync();
+                return imageUrl;
             }
-
-            var imageUrl = await firebaseStorage.GetDownloadUrlAsync();
-
-            return imageUrl;
+            else
+            {
+                return "default_image_url";
+            }
         }
+
+
 
         public async Task UpdateMaterial(int id, MaterialCreateUpdateModel material)
         {

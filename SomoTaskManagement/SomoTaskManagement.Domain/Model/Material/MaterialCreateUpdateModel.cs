@@ -18,6 +18,7 @@ namespace SomoTaskManagement.Domain.Model.Material
 
 
         public IFormFile? ImageFile { get; set; }
+
         public int FarmId { get; set; }
     }
 }

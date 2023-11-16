@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <parameters>
-  <parameter name="IIS Web Application Name" description="" value="farmtasksomo" tags="IisApp">
+  <parameter name="IIS Web Application Name" description="" value="SomoTaskManagementApi" tags="IisApp">
     <parameterEntry kind="ProviderPath" scope="IisApp" match="^C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement\\obj\\Release\\net6\.0\\PubTmp\\Out\\$" />
   </parameter>
 </parameters>

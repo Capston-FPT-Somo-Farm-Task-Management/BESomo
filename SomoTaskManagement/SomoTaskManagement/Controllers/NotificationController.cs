@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Services.Imp;
@@ -8,6 +9,7 @@ namespace SomoTaskManagement.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Manager,Admin,Supervisor")]
     public class NotificationController : ControllerBase
     {
         private readonly INotificationService _notificationService;
