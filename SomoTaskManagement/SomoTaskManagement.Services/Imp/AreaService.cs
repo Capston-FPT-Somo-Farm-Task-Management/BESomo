@@ -186,7 +186,6 @@ namespace SomoTaskManagement.Services.Imp
 
             areaUpdate.Id = id;
             areaUpdate.Name = area.Name;
-            areaUpdate.Status = 1;
             areaUpdate.Code = area.Code;
             areaUpdate.FarmId = area.FarmId;
             areaUpdate.FArea = area.FArea;
@@ -214,6 +213,23 @@ namespace SomoTaskManagement.Services.Imp
             _unitOfWork.RepositoryArea.Delete(a => a.Id == areaId);
             await _unitOfWork.RepositoryArea.Commit();
         }
+        public async Task UpdateStatus(int id)
+        {
+            var area = await _unitOfWork.RepositoryArea.GetById(id) ?? throw new Exception("Không tìm thấy khu vực");
 
+            if (area.Status == 1)
+            {
+                var zones = await _unitOfWork.RepositoryZone.GetData(f => f.AreaId == id && f.Status == 1);
+
+                if (zones.Any())
+                {
+                    throw new Exception("Không thể xóa vùng này khi còn thực thể bên trong");
+                }
+            }
+
+            area.Status = area.Status == 1 ? 0 : 1;
+
+            await _unitOfWork.RepositoryArea.Commit();
+        }
     }
 }

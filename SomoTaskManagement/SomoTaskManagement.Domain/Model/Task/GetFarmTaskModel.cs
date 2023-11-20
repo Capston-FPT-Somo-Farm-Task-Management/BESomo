@@ -22,11 +22,9 @@ namespace SomoTaskManagement.Domain.Model.Task
         [Required(ErrorMessage = "CreateDate is required.")]
         public DateTime CreateDate { set; get; }
 
-        [Required(ErrorMessage = "StartDate is required.")]
-        public DateTime StartDate { set; get; }
+        public DateTime? StartDate { set; get; }
 
-        [Required(ErrorMessage = "EndDate is required.")]
-        public DateTime EndDate { set; get; }
+        public DateTime? EndDate { set; get; }
         public DateTime? UpdateDate { set; get; }
         [Required(ErrorMessage = "Description is required.")]
         public string Description { set; get; }
@@ -40,8 +38,8 @@ namespace SomoTaskManagement.Domain.Model.Task
         public string Priority { set; get; }
         public bool IsRepeat { get; set; }
 
-        public string SupervisorName { set; get; }
-        public int SuppervisorId { set; get; }
+        public string? SupervisorName { set; get; }
+        public int? SuppervisorId { set; get; }
         public string? FieldName { set; get; }
         public int? FieldId { set; get; }
         public string? FieldStatus { set; get; }
@@ -70,6 +68,9 @@ namespace SomoTaskManagement.Domain.Model.Task
         public List<DateTime> DateRepeate {  set; get; }
         public int OriginalTaskId { set; get; }
         public bool IsParent {  set; get; }
-        public string AddressDetail {  set; get; }  
+        public string AddressDetail {  set; get; }
+
+        public bool? IsPlant { get; set; }
+        public bool IsSpecific { get; set; }
     }
 }

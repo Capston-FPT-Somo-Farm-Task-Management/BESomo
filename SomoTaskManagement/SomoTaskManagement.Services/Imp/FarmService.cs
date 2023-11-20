@@ -94,7 +94,6 @@ namespace SomoTaskManagement.Services.Imp
             }
 
             farmUpdate.Name = farm.Name;
-            farmUpdate.Status = 1;
             farmUpdate.Description = farm.Description;
             farmUpdate.Address = farm.Address;
             farmUpdate.FarmArea = farm.FarmArea;

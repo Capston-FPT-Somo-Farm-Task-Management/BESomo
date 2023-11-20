@@ -23,32 +23,33 @@ namespace SomoTaskManagement.Domain.Entities
         [Required(ErrorMessage = "CreateDate is required.")]
         public DateTime CreateDate { set; get; }
 
-        [Required(ErrorMessage = "StartDate is required.")]
-        public DateTime StartDate { set; get; }
+       
+        public DateTime? StartDate { set; get; }
         public DateTime? UpdateDate { set; get; }
 
-        [Required(ErrorMessage = "EndDate is required.")]
-        public DateTime EndDate { set; get; }
+      
+        public DateTime? EndDate { set; get; }
         [Range(0, int.MaxValue, ErrorMessage = "OverallEfforMinutes must be greater than 0.")]
-        public int OverallEfforMinutes { set; get; }
+        public int? OverallEfforMinutes { set; get; }
         [Range(0, int.MaxValue, ErrorMessage = "OverallEffortHour must be greater than 0.")]
-        public int OverallEffortHour { set; get; }
+        public int? OverallEffortHour { set; get; }
 
         public string? Description { set; get; }
 
-        [Required(ErrorMessage = "Priority is required.")]
-        public int Priority { set; get; }
-        public bool IsRepeat { get; set; }
-        public int Remind { get; set; }
+        public int? Priority { set; get; }
+        public bool? IsRepeat { get; set; }
+        public int? Remind { get; set; }
 
-        public int SuppervisorId { set; get; }
+        public int? SuppervisorId { set; get; }
         public int? FieldId { set; get; }
-        public int TaskTypeId { set; get; }
+        public int? TaskTypeId { set; get; }
         public int? ManagerId { set; get; }
         public int? PlantId { set; get; }
         public int? LiveStockId { set; get; }
-
+        public bool? IsPlant {  get; set; }
+        public bool IsSpecific {  get; set; }
         public int OriginalTaskId {  set; get; }
+        public bool IsExpired {  set; get; }
 
         [JsonIgnore]
         public virtual Member? Manager { set; get; }

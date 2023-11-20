@@ -72,7 +72,6 @@ namespace SomoTaskManagement.Services.Imp
         public async Task UpdateTaskType(int taskTypeId, TaskTypeCreateUpdateModel taskType)
         {
             var taskTypeUpdate = await  _unitOfWork.RepositoryTaskTaskType.GetById(taskTypeId) ?? throw new Exception("Không tìm thấy loại công việc");
-            taskTypeUpdate.IsDelete = false;
             taskTypeUpdate.Name = taskType.Name;
             taskTypeUpdate.Description = taskType.Description;
             taskTypeUpdate.Status = taskType.Status;
@@ -82,6 +81,13 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task DeleteTaskType(int taskTypeId)
         {
+            var taskType = await _unitOfWork.RepositoryTaskTaskType.GetById(taskTypeId) ?? throw new Exception("Không tìm thấy công việc");
+            var taskTypeOfTask = await _unitOfWork.RepositoryFarmTask.GetData(t => t.TaskTypeId == taskTypeId);
+            var taskTypeOfEmployee = await _unitOfWork.RepositoryEmployee_TaskType.GetData(t => t.TaskTypeId == taskTypeId);
+            if(taskTypeOfEmployee != null || taskTypeOfTask != null)
+            {
+                throw new Exception("Không thể xóa loại công việc đang được sử dụng.");
+            }
             _unitOfWork.RepositoryTaskTaskType.Delete(a => a.Id == taskTypeId);
             await _unitOfWork.RepositoryTaskTaskType.Commit();
         }

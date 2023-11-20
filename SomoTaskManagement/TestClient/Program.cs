@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SomoTaskManagement.Data;
 using SomoTaskManagement.Data.Abtract;
-using SomoTaskManagement.Services.Imp;
-using SomoTaskManagement.Services.Interface;
 using TestClient.Repos;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,7 +22,6 @@ builder.Services.AddSession();
 builder.Services.AddSingleton<UserRepo>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 //builder.Services.AddSingleton<NotifyHub>();

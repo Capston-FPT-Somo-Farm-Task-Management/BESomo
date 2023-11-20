@@ -9,9 +9,9 @@ namespace SomoTaskManagement.Domain.Enum
 {
     public enum EnumStatus
     {
-        [Description("Không tồn tại")]
+        [Description("Ẩn")]
         Inactive = 0,
-        [Description("Tồn tại")]
+        [Description("Hiện")]
         Active = 1
     }
 }

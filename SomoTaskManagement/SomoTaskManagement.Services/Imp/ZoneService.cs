@@ -113,7 +113,6 @@ namespace SomoTaskManagement.Services.Imp
                 zoneUpdate.FarmArea = zone.FarmArea;
                 zoneUpdate.AreaId = zone.AreaId;
                 zoneUpdate.Name = zone.Name;
-                zoneUpdate.Status = 1;
 
                 if (zoneUpdate.Code != initialCode)
                 {
@@ -175,7 +174,7 @@ namespace SomoTaskManagement.Services.Imp
             var area = await _unitOfWork.RepositoryArea.GetById(id) ?? throw new Exception("Không tìm thấy khu vực");
 
             var zones = await _unitOfWork.RepositoryZone
-                .GetData(expression: z => z.AreaId == id && z.ZoneTypeId == 2 && z.Status == 1, includes: includes);
+                .GetData(expression: z => z.AreaId == id && z.ZoneTypeId == 1 && z.Status == 1, includes: includes);
 
             return _mapper.Map<IEnumerable<Zone>, IEnumerable<ZoneModel>>(zones);
         }
@@ -190,7 +189,7 @@ namespace SomoTaskManagement.Services.Imp
             var area = await _unitOfWork.RepositoryArea.GetById(id) ?? throw new Exception("Không tìm thấy khu vực");
 
             var zones = await _unitOfWork.RepositoryZone
-                .GetData(expression: z => z.AreaId == id && z.ZoneTypeId == 1 && z.Status == 1, includes: includes);
+                .GetData(expression: z => z.AreaId == id && z.ZoneTypeId == 2 && z.Status == 1, includes: includes);
 
             return _mapper.Map<IEnumerable<Zone>, IEnumerable<ZoneModel>>(zones);
         }
@@ -246,18 +245,29 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task UpdateStatus(int id)
         {
-            var zone = await _unitOfWork.RepositoryZone.GetById(id);
-            if (zone == null)
+            var zone = await _unitOfWork.RepositoryZone.GetById(id) ?? throw new Exception("Không tìm thấy vùng");
+
+            if (zone.Status == 1)
             {
-                throw new Exception("Không tìm thấy vùng");
+                var fields = await _unitOfWork.RepositoryField.GetData(f => f.ZoneId == id && f.Status == 1);
+
+                if (fields.Any())
+                {
+                    throw new Exception("Không thể xóa vùng này khi còn thực thể bên trong");
+                }
             }
+
             zone.Status = zone.Status == 1 ? 0 : 1;
+
             await _unitOfWork.RepositoryZone.Commit();
         }
+
+
+
         public async Task Delete(int zoneId)
         {
-            var zone = await _unitOfWork.RepositoryField.GetData(z => z.ZoneId == zoneId && z.Status == 1);
-            if (zone.Count() > 0)
+            var fields = await _unitOfWork.RepositoryField.GetData(z => z.ZoneId == zoneId && z.Status == 1);
+            if (fields.Count() > 0)
             {
                 throw new Exception("Không thể xóa vùng này  khi còn thực thể bên trong");
             }

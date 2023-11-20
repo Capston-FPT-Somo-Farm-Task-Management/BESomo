@@ -8,7 +8,7 @@ namespace SomoTaskManagement.Domain.Model.Task
 {
     public class TaskCountPerDayModel
     {
-        public DateTime Date { get; set; }
+        public DateTime? Date { get; set; }
         public int TaskCount { get; set; }
         public int? TotalTaskOfLivestock { get; set; }
         public int? TotalTaskOfPlant { get; set; }

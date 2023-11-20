@@ -328,12 +328,12 @@ namespace SomoTaskManagement.Services.Imp
 
             var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id) && (t.Status == 2 || t.Status == 3) &&
                                                  (!startDay.HasValue || !endDay.HasValue || (
-                                                               (startDay.Value.Year <= t.StartDate.Year &&
-                                                                endDay.Value.Year >= t.StartDate.Year) &&
-                                                               (startDay.Value.Month <= t.StartDate.Month &&
-                                                                endDay.Value.Month >= t.StartDate.Month) &&
-                                                               (startDay.Value.Day <= t.StartDate.Day &&
-                                                                endDay.Value.Day >= t.StartDate.Day)
+                                                               (startDay.Value.Year <= t.StartDate.Value.Year &&
+                                                                endDay.Value.Year >= t.StartDate.Value.Year) &&
+                                                               (startDay.Value.Month <= t.StartDate.Value.Month &&
+                                                                endDay.Value.Month >= t.StartDate.Value.Month) &&
+                                                               (startDay.Value.Day <= t.StartDate.Value.Day &&
+                                                                endDay.Value.Day >= t.StartDate.Value.Day)
                                                             ))
                                                 );
 

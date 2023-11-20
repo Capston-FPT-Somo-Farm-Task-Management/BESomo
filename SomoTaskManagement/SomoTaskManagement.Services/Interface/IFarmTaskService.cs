@@ -17,7 +17,6 @@ namespace SomoTaskManagement.Services.Interface
         Task<IEnumerable<FarmTaskModel>> GetTaskByDay(DateTime dateStr);
         Task<IEnumerable<FarmTaskModel>> GetTaskByMemberId(int id);
         Task<IEnumerable<FarmTaskModel>> GetListActiveByMemberId(int id);
-        Task Update(int farmTaskId, TaskRequestModel taskModel);
         Task UpdateStatus(int id, int status);
         Task<IEnumerable<FarmTaskModel>> GetTaskByTotalDay(DateTime date, int id);
         Task<IEnumerable<FarmTaskModel>> GetListActiveWithPagging(int pageIndex, int pageSize);
@@ -34,5 +33,11 @@ namespace SomoTaskManagement.Services.Interface
         Task<IEnumerable<FarmTaskModel>> GetTaskPrepareAndDoing(int id);
         Task<IEnumerable<TaskCountPerDayModel>> GetTotalTaskOfWeekByMember(int memberId);
         Task<TotalTypeOfTaskInWeek> GetTotalTypeOfTaskInWeekByMember(int memberId);
+        Task CreateTaskToDo(TaskToDoModel taskToDoModel, List<DateTime>? Dates, List<int>? materialIds);
+        Task CreateTaskDraft(TaskDraftModel taskDraftModel, List<DateTime>? Dates, List<int>? materialIds);
+        Task UpdateTask(int taskId, TaskDraftModelUpdate taskModel, List<DateTime>? dates, List<int> materialIds);
+        Task UpdateTaskDraftAndToPrePare(int taskId, TaskDraftModelUpdate taskModel, List<DateTime>? dates, List<int>? materialIds);
+        Task DeleteTaskTodoAndDraft(int taskId);
+        Task AddEmployeeToTaskAsign(int taskId, List<int>? employeeIds, int? overallEfforMinutes, int? overallEffortHour);
     }
 }

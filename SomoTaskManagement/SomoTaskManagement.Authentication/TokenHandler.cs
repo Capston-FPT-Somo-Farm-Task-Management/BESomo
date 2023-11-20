@@ -54,7 +54,7 @@ namespace SomoTaskManagement.Authentication
                 audience: _configuration["TokenBear:Issuer"],
                 claims: claims,
                 notBefore: DateTime.Now,
-                expires: DateTime.Now.AddYears(1),
+                expires: expiredAccessToken,
                 credential
             );
 
@@ -74,8 +74,7 @@ namespace SomoTaskManagement.Authentication
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToString(),ClaimValueTypes.DateTime,_configuration["TokenBear:Issuer"]),
                 new Claim(JwtRegisteredClaimNames.Aud, _configuration["TokenBear:Audience"],ClaimValueTypes.String,_configuration["TokenBear:Issuer"]),
                 new Claim(JwtRegisteredClaimNames.Exp,expiredRefreshToken.ToString("yyyy/MM/dd hh:mm:ss"),ClaimValueTypes.String,_configuration["TokenBear:Issuer"]),
-                new Claim(ClaimTypes.SerialNumber, Guid.NewGuid().ToString(),ClaimValueTypes.String,_configuration["TokenBear:Issuer"]),
-
+                new Claim(ClaimTypes.SerialNumber, code ,ClaimValueTypes.String,_configuration["TokenBear:Issuer"]),
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["TokenBear:SignatureKey"]));
@@ -162,7 +161,7 @@ namespace SomoTaskManagement.Authentication
 
             if (userToken != null)
             {
-                Member member = await _memberService.FindById(userToken.Id);
+                Member member = await _memberService.FindById(userToken.MemberId);
                 (string newAccessToken, DateTime createdDate) = await CreateAccessToken(member);
                 (string codeRefreshToken, string newRefreshToken, DateTime newDateCreated) = await CreateRefrehToken(member);
 

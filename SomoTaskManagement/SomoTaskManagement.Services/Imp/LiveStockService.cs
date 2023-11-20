@@ -229,7 +229,6 @@ namespace SomoTaskManagement.Services.Imp
                 liveStockUpdate.HabitantTypeId = liveStock.HabitantTypeId;
                 liveStockUpdate.FieldId = liveStock.FieldId;
                 liveStockUpdate.Name = liveStock.Name;
-                liveStockUpdate.Status = 1;
                 liveStockUpdate.Gender = liveStock.Gender;
                 liveStockUpdate.IsActive = true;
 

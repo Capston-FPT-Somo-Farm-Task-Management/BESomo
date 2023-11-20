@@ -10,6 +10,7 @@ using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Enum;
 using SomoTaskManagement.Domain.Model.Employee;
+using SomoTaskManagement.Domain.Model.SubTask;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;
@@ -55,6 +56,7 @@ namespace SomoTaskManagement.Services.Imp
             {
                 throw new Exception("Employee not found");
             }
+            var farm = await _unitOfWork.RepositoryFarm.GetById(employee.FarmId);
             var status = (EnumStatus)employee.Status;
             var statusString = status == EnumStatus.Active ? "Active" : "Inactive";
             var employeeModel = new EmployeeListModel
@@ -63,9 +65,11 @@ namespace SomoTaskManagement.Services.Imp
                 Status = statusString,
                 PhoneNumber = employee.PhoneNumber,
                 FarmId = employee.FarmId,
+                FarmName = farm.Name,
                 Address = employee.Address,
                 Avatar = employee.Avatar,
-                Code = employee.Code
+                Code = employee.Code,
+                Id = employee.Id
             };
             return employeeModel;
         }
@@ -289,6 +293,106 @@ namespace SomoTaskManagement.Services.Imp
             return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : status.ToString();
         }
 
+        public async Task<byte[]> ExportEmployeesEffortToExcel(int farmId, DateTime startDay, DateTime endDay)
+        {
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Employees");
+
+                worksheet.Cells[1, 6].Value = $"Thời gian :{startDay} - {endDay}";
+                worksheet.Cells[2, 1].Value = "Mã nhân viên";
+                worksheet.Cells[2, 2].Value = "Họ tên";
+                worksheet.Cells[2, 3].Value = " Số điện thoại";
+                worksheet.Cells[2, 4].Value = "Địa chỉ";
+                worksheet.Cells[2, 5].Value = "Trang trại";
+                worksheet.Cells[2, 6].Value = "Giới tính";
+                worksheet.Cells[2, 7].Value = "Ngày sinh";
+                worksheet.Cells[2, 8].Value = "Kỹ năng";
+                worksheet.Cells[2, 9].Value = "Hình ảnh";
+                worksheet.Cells[2, 10].Value = "Chấm công";
+                worksheet.Cells[2, 11].Value = "Nhiệm vụ đã làm";
+
+                var employees = await _unitOfWork.RepositoryEmployee.GetData(e => e.FarmId == farmId && e.Status == 1);
+                int row = 3;
+                foreach (var employee in employees)
+                {
+                    var effortOfEmployee = await GetTotalEffortEmployee(employee.Id, startDay, endDay);
+                    worksheet.Cells[row, 1].Value = employee.Code;
+                    worksheet.Cells[row, 2].Value = employee.Name;
+                    worksheet.Cells[row, 3].Value = employee.PhoneNumber;
+                    worksheet.Cells[row, 4].Value = employee.Address;
+
+                    var farm = await _unitOfWork.RepositoryFarm.GetById(farmId);
+                    worksheet.Cells[row, 5].Value = farm.Name;
+
+                    var gender = (bool)employee.Gender ? EmployeeGenderEnum.Male : EmployeeGenderEnum.Female;
+                    var genderString = GetGenderDescription(gender);
+                    worksheet.Cells[row, 6].Value = genderString;
+                    worksheet.Cells[row, 7].Value = employee.DateOfBirth;
+                    worksheet.Cells[row, 7].Style.Numberformat.Format = "yyyy-mm-dd";
+
+                    var employee_taskType = await _unitOfWork.RepositoryEmployee_TaskType.GetData(et => et.EmployeeId == employee.Id);
+                    var taskTypeIds = employee_taskType.Select(t => t.TaskTypeId).ToList();
+                    var taskTypeOfEmployee = await _unitOfWork.RepositoryTaskTaskType.GetData(et => taskTypeIds.Contains(et.Id));
+                    var taskTypeName = taskTypeOfEmployee.Select(t => t.Name).ToList();
+                    worksheet.Cells[row, 8].Value = string.Join(",", taskTypeName);
+
+                    worksheet.Cells[row, 9].Value = employee.Avatar;
+                    worksheet.Cells[row, 10].Value = $"{effortOfEmployee.ActualEffortHour} giờ {effortOfEmployee.ActualEfforMinutes} phút";
+                    worksheet.Cells[row, 11].Value = effortOfEmployee.TotalTask;
+                    row++;
+                }
+
+                return package.GetAsByteArray();
+            }
+        }
+
+        private async Task<TotalEffortModel> GetTotalEffortEmployee(int id, DateTime? startDay, DateTime? endDay)
+        {
+            var employee = await _unitOfWork.RepositoryEmployee.GetById(id);
+            if (employee == null)
+            {
+                throw new Exception("Không tìm thấy nhân viên");
+            }
+
+            var subtasks = await _unitOfWork.RepositoryEmployee_Task.GetData(expression: s => s.EmployeeId == id);
+
+            var taskIds = subtasks.Select(s => s.TaskId);
+
+            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id) && (t.Status == 2 || t.Status == 3) &&
+                                                 (!startDay.HasValue || !endDay.HasValue || (
+                                                               (startDay.Value.Year <= t.StartDate.Value.Year &&
+                                                                endDay.Value.Year >= t.StartDate.Value.Year) &&
+                                                               (startDay.Value.Month <= t.StartDate.Value.Month &&
+                                                                endDay.Value.Month >= t.StartDate.Value.Month) &&
+                                                               (startDay.Value.Day <= t.StartDate.Value.Day &&
+                                                                endDay.Value.Day >= t.StartDate.Value.Day)
+                                                            ))
+                                                );
+
+
+
+            var totalTask = tasks.Count();
+
+            var taskEffortIds = tasks.Select(t => t.Id);
+
+            var subtaskEffort = await _unitOfWork.RepositoryEmployee_Task.GetData(s => taskEffortIds.Contains(s.TaskId) && s.EmployeeId == id);
+
+            var effortMinutes = subtaskEffort.Sum(s => s.ActualEfforMinutes);
+            var effortHours = subtaskEffort.Sum(s => s.ActualEffortHour);
+
+            var totalEffortEmployee = new TotalEffortModel
+            {
+                EmployeeId = id,
+                EmployeeName = employee.Name,
+                EmployeeCode = employee.Code,
+                TotalTask = totalTask,
+                ActualEfforMinutes = effortMinutes,
+                ActualEffortHour = effortHours
+            };
+
+            return totalEffortEmployee;
+        }
 
         private async Task<string> UploadImageToFirebaseAsync(Employee employee, IFormFile imageFile)
         {
@@ -533,7 +637,6 @@ namespace SomoTaskManagement.Services.Imp
             employeeUpdate.Name = employeeModel.Name;
             employeeUpdate.Code = employeeModel.Code;
             employeeUpdate.Gender = employeeModel.Gender;
-            employeeUpdate.Status = 1;
 
             //if (employeeUpdate.Code != initialCode)
             //{

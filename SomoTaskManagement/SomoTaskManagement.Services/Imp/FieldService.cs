@@ -291,11 +291,11 @@ namespace SomoTaskManagement.Services.Imp
             var zone = await _unitOfWork.RepositoryZone.GetById(field.ZoneId);
             if (zone.ZoneTypeId == 1)
             {
-                fieldNew.Status = 1;
+                fieldNew.Status = 0;
             }
             else if (zone.ZoneTypeId == 2)
             {
-                fieldNew.Status = 0;
+                fieldNew.Status = 1;
             }
 
             await _unitOfWork.RepositoryField.Add(fieldNew);
@@ -326,15 +326,15 @@ namespace SomoTaskManagement.Services.Imp
                 }
             }
 
-            var zone = await _unitOfWork.RepositoryZone.GetById(field.ZoneId);
-            if (zone.ZoneTypeId == 1)
-            {
-                fieldUpdate.Status = 1;
-            }
-            else if (zone.ZoneTypeId == 2)
-            {
-                fieldUpdate.Status = 0;
-            }
+            //var zone = await _unitOfWork.RepositoryZone.GetById(field.ZoneId);
+            //if (zone.ZoneTypeId == 1)
+            //{
+            //    fieldUpdate.Status = 1;
+            //}
+            //else if (zone.ZoneTypeId == 2)
+            //{
+            //    fieldUpdate.Status = 0;
+            //}
 
             await _unitOfWork.RepositoryField.Commit();
         }

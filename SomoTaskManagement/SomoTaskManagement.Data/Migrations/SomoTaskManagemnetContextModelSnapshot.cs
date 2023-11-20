@@ -251,13 +251,22 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("EndDate")
+                    b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("FieldId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsRepeat")
+                    b.Property<bool>("IsExpired")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("IsPlant")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("IsRepeat")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSpecific")
                         .HasColumnType("bit");
 
                     b.Property<int?>("LiveStockId")
@@ -274,31 +283,31 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<int>("OriginalTaskId")
                         .HasColumnType("int");
 
-                    b.Property<int>("OverallEfforMinutes")
+                    b.Property<int?>("OverallEfforMinutes")
                         .HasColumnType("int");
 
-                    b.Property<int>("OverallEffortHour")
+                    b.Property<int?>("OverallEffortHour")
                         .HasColumnType("int");
 
                     b.Property<int?>("PlantId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Priority")
+                    b.Property<int?>("Priority")
                         .HasColumnType("int");
 
-                    b.Property<int>("Remind")
+                    b.Property<int?>("Remind")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int>("SuppervisorId")
+                    b.Property<int?>("SuppervisorId")
                         .HasColumnType("int");
 
-                    b.Property<int>("TaskTypeId")
+                    b.Property<int?>("TaskTypeId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdateDate")
@@ -977,7 +986,6 @@ namespace SomoTaskManagement.Data.Migrations
                         .WithMany("Tasks")
                         .HasForeignKey("TaskTypeId")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
                         .HasConstraintName("FK_TaskType_Task");
 
                     b.Navigation("Field");

@@ -10,7 +10,6 @@ using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
 using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Domain.Model.Task;
-using SomoTaskManagement.Notify.FirebaseNotify;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 using System.Threading.Tasks;
@@ -24,14 +23,12 @@ namespace SomoTaskManagement.Api.Controllers
     public class FarmTaskController : ControllerBase
     {
         private readonly IFarmTaskService _farmTaskService;
-        private readonly FcmNotificationService _fcmService;
         private readonly IHubConnection _hubConnection;
         private readonly IUnitOfWork _unitOfWork;
 
         public FarmTaskController(IFarmTaskService farmTaskService, IHubConnection hubConnection, IUnitOfWork unitOfWork)
         {
             _farmTaskService = farmTaskService;
-            _fcmService = new FcmNotificationService();
             _hubConnection = hubConnection;
             _unitOfWork = unitOfWork;
         }
@@ -627,25 +624,23 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpPut("{taskId}")]
-        public async Task<IActionResult> Update(int taskId, [FromBody] TaskRequestModel taskModel)
+        [HttpPost("CreateTaskToDo")]
+        public async Task<IActionResult> CreateTaskToDo(TaskTodoRequestModel taskToDoModel)
         {
-            if (!User.IsInRole("Manager"))
+            if (!User.IsInRole("Manager") )
             {
                 return Unauthorized("Bạn không có quyền truy cập");
             }
-
             try
             {
-                await _farmTaskService.Update(taskId, taskModel);
-                var responseData = new ApiResponseModel
-                {
-                    Data = null,
-                    Message = "Nhiệm vụ đã được cập nhật",
-                    Success = true,
-                };
-                return Ok(responseData);
+                await _farmTaskService.CreateTaskToDo(taskToDoModel.FarmTask, taskToDoModel.Dates,taskToDoModel.MaterialIds);
 
+                return Ok(new ApiResponseModel
+                {
+                    Data = taskToDoModel,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                });
             }
             catch (Exception e)
             {
@@ -656,8 +651,96 @@ namespace SomoTaskManagement.Api.Controllers
                     Success = true,
                 });
             }
-
         }
+
+        [HttpPut("({taskId})/UpdateTaskDraftAndToPrePare")]
+        public async Task<IActionResult> UpdateTaskDraftAndToPrePare(int taskId, UpdateTaskDraftAndToPrePare taskToDoModel)
+        {
+            if (!User.IsInRole("Manager"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+                await _farmTaskService.UpdateTaskDraftAndToPrePare(taskId,taskToDoModel.TaskModel, taskToDoModel.Dates, taskToDoModel.MaterialIs);
+
+                return Ok(new ApiResponseModel
+                {
+                    Data = taskToDoModel,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+        [HttpPost("CreateTaskDraft")]
+        public async Task<IActionResult> CreateTaskDraft(TaskDraftRequest taskDraftModel)
+        {
+            if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+                await _farmTaskService.CreateTaskDraft(taskDraftModel.FarmTask, taskDraftModel.Dates,taskDraftModel.MaterialIds);
+
+                return Ok(new ApiResponseModel
+                {
+                    Data = taskDraftModel,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+        [HttpPut("({taskId})/UpdateTask")]
+        public async Task<IActionResult> UpdateTask(int taskId, RequestUpdateTaskDraft taskModel)
+        {
+            if (!User.IsInRole("Manager"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+                await _farmTaskService.UpdateTask(taskId,taskModel.TaskModel,taskModel.Dates,taskModel.MaterialIds);
+
+                return Ok(new ApiResponseModel
+                {
+                    Data = taskModel,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+        
 
         [HttpPut("ChangeStatus/{id}")]
         public async Task<IActionResult> UpdateStatus(int id, int status)
@@ -709,6 +792,72 @@ namespace SomoTaskManagement.Api.Controllers
                 {
                     Data = null,
                     Message = "Nhiệm vụ đã được xóa",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+
+        }
+
+        [HttpDelete("({id})")]
+        public async Task<IActionResult> DeleteTaskTodoAndDraft(int id)
+        {
+            if (!User.IsInRole("Manager"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+
+                await _farmTaskService.DeleteTaskTodoAndDraft(id);
+
+                var responseData = new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Nhiệm vụ đã được xóa",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+
+        }
+
+        [HttpPut("({id})/AddEmployeeToTaskAsign")]
+        public async Task<IActionResult> AddEmployeeToTaskAsign(int id, AddEmployeeToTaskAsign employeeToTaskAsign)
+        {
+            if (!User.IsInRole("Manager"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+
+                await _farmTaskService.AddEmployeeToTaskAsign(id, employeeToTaskAsign.EmployeeIds,employeeToTaskAsign.OverallEfforMinutes,employeeToTaskAsign.OverallEffortHour);
+
+                var responseData = new ApiResponseModel
+                {
+                    Data = employeeToTaskAsign,
+                    Message = "Nhiệm vụ đã được cập nhật",
                     Success = true,
                 };
                 return Ok(responseData);

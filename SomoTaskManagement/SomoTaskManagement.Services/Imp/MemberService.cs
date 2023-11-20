@@ -108,7 +108,6 @@ namespace SomoTaskManagement.Services.Imp
             }
             memberUpdate.Id= id;
             memberUpdate.Name = member.Name;
-            memberUpdate.Status = 1;
             memberUpdate.Email = member.Email;
             memberUpdate.Code = member.Code;
             memberUpdate.PhoneNumber = member.PhoneNumber;
@@ -150,6 +149,7 @@ namespace SomoTaskManagement.Services.Imp
                 Address = member.Address,
                 RoleName = member.Role.Name,
                 FarmId = member.FarmId,
+                FarmName = farm.Name,
                 Name = member.Name,
                 Status = member.Status,
                 Avatar = member.Avatar,

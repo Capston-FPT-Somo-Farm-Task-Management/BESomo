@@ -119,7 +119,6 @@ namespace SomoTaskManagement.Services.Imp
             var materialUpdate = await _unitOfWork.RepositoryMaterial.GetById(id);
             if (materialUpdate != null)
             {
-                materialUpdate.Status = 1;
                 materialUpdate.Id = id;
                 materialUpdate.Name = material.Name;
                 materialUpdate.FarmId = material.FarmId;

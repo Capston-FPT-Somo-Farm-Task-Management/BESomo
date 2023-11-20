@@ -9,24 +9,32 @@ namespace SomoTaskManagement.Domain.Enum
 {
     public enum TaskStatusEnum
     {
+        [Description("Bản nháp")]
+        Draft = 0,
 
         [Description("Chuẩn bị")]
-        Prepare = 0,
+        ToDo = 1,
+
+        [Description("Đã giao")]
+        Assigned = 2,
 
         [Description("Đang thực hiện")]
-        Processing = 1,
+        Doing = 3,
 
         [Description("Hoàn thành")]
-        Complete = 2,
+        Done = 4,
 
-        [Description("Không hoàn thành")]
-        Unfinished = 3,
-
-        [Description("Đã xóa")]
-        IsDelete = 4,
+        [Description("Tạm hoãn")]
+        Pending = 5,
 
         [Description("Từ chối")]
-        Disaggree = 5,
+        Rejected = 6,
+
+        [Description("Hủy bỏ")]
+        Cancelled = 7,
+
+        [Description("Đã đóng")]
+        Closed = 8,
     }
 
 }

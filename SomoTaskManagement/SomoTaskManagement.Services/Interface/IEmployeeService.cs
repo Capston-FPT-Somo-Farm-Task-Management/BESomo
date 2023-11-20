@@ -12,6 +12,7 @@ namespace SomoTaskManagement.Services.Interface
     {
         Task AddEmployee(EmployeeCreateModel employee);
         Task DeleteEmployee(Employee employee);
+        Task<byte[]> ExportEmployeesEffortToExcel(int farmId, DateTime startDay, DateTime endDay);
         Task<byte[]> ExportEmployeesToExcel(int farmId);
         Task<IEnumerable<EmployeeListModel>> GetByTaskType(int id);
         Task<EmployeeListModel> GetEmployee(int id);

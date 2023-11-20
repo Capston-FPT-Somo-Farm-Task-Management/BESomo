@@ -1,0 +1,15 @@
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\bin\Release\net6.0\SomoTaskManagement.Cache.deps.json
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\bin\Release\net6.0\SomoTaskManagement.Cache.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\bin\Release\net6.0\SomoTaskManagement.Cache.pdb
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\bin\Release\net6.0\SomoTaskManagement.Domain.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\bin\Release\net6.0\SomoTaskManagement.Domain.pdb
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\obj\Release\net6.0\SomoTaskManagement.Cache.csproj.AssemblyReference.cache
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\obj\Release\net6.0\SomoTaskManagement.Cache.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\obj\Release\net6.0\SomoTaskManagement.Cache.AssemblyInfoInputs.cache
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\obj\Release\net6.0\SomoTaskManagement.Cache.AssemblyInfo.cs
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\obj\Release\net6.0\SomoTaskManagement.Cache.csproj.CoreCompileInputs.cache
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\obj\Release\net6.0\SomoTaskManagement.Cache.csproj.CopyComplete
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\obj\Release\net6.0\SomoTaskManagement.Cache.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\obj\Release\net6.0\refint\SomoTaskManagement.Cache.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\obj\Release\net6.0\SomoTaskManagement.Cache.pdb
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Cache\obj\Release\net6.0\ref\SomoTaskManagement.Cache.dll

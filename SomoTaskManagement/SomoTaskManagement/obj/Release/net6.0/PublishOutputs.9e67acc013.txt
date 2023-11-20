@@ -57,7 +57,6 @@ C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskMan
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\Quartz.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\Quartz.Extensions.DependencyInjection.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\Quartz.Extensions.Hosting.dll
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\TableDependency.SqlClient.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\StackExchange.Redis.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\Swashbuckle.AspNetCore.SwaggerGen.dll
@@ -68,7 +67,6 @@ C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskMan
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\System.Drawing.Common.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\System.IdentityModel.Tokens.Jwt.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\System.Linq.Async.dll
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\System.Net.WebSockets.WebSocketProtocol.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\System.Runtime.Caching.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\System.Security.Cryptography.Pkcs.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\System.Security.Cryptography.ProtectedData.dll
@@ -82,10 +80,6 @@ C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskMan
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\runtimes\win7-x64\native\sni.dll
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\runtimes\win7-x86\native\sni.dll
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\runtimes\unix\lib\netstandard1.3\System.Data.SqlClient.dll
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\runtimes\win\lib\netstandard1.3\System.Data.SqlClient.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\runtimes\win\lib\netcoreapp2.0\System.Diagnostics.PerformanceCounter.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\runtimes\unix\lib\net6.0\System.Drawing.Common.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\runtimes\win\lib\net6.0\System.Drawing.Common.dll
@@ -98,10 +92,8 @@ C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskMan
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\SomoTaskManagement.Data.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\SomoTaskManagement.Domain.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\SomoTaskManagement.Infrastructure.dll
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\SomoTaskManagement.Notify.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\SomoTaskManagement.Services.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\SomoTaskManagement.Infrastructure.pdb
-C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\SomoTaskManagement.Notify.pdb
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\SomoTaskManagement.Authentication.pdb
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\SomoTaskManagement.Cache.pdb
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\PubTmp\Out\SomoTaskManagement.Data.pdb

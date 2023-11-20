@@ -174,20 +174,23 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.Status).IsRequired();
-                entity.Property(e => e.StartDate).IsRequired();
-                entity.Property(e => e.EndDate).IsRequired();
+                entity.Property(e => e.StartDate).IsRequired(false);
+                entity.Property(e => e.EndDate);
                 entity.Property(e => e.Description);
                 entity.Property(e => e.UpdateDate);
                 entity.Property(e => e.Code);
                 entity.Property(e => e.OverallEfforMinutes);
                 entity.Property(e => e.OverallEffortHour);
                 entity.Property(e => e.AddressDetail);
-                entity.Property(e => e.Priority).IsRequired();
+                entity.Property(e => e.Priority);
                 entity.Property(e => e.SuppervisorId);
                 entity.Property(e => e.IsRepeat);
                 entity.Property(e => e.CreateDate).IsRequired();
-                entity.Property(e => e.Remind).IsRequired();
+                entity.Property(e => e.Remind);
                 entity.Property(e => e.OriginalTaskId);
+                entity.Property(e => e.IsPlant);
+                entity.Property(e => e.IsSpecific);
+                entity.Property(e => e.IsExpired);
 
                 entity.HasOne(d => d.Plant).WithMany(p => p.Tasks).HasForeignKey(d => d.PlantId).HasConstraintName("FK_Plant_FarmTask").OnDelete(DeleteBehavior.NoAction);
                 entity.HasOne(d => d.LiveStrock).WithMany(p => p.Tasks).HasForeignKey(d => d.LiveStockId).HasConstraintName("FK_LiveStock_FarmTask").OnDelete(DeleteBehavior.NoAction);

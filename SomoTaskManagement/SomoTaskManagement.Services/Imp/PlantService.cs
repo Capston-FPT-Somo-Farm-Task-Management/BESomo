@@ -210,7 +210,6 @@ namespace SomoTaskManagement.Services.Imp
                 plantUpdate.HabitantTypeId = plant.HabitantTypeId;
                 plantUpdate.FieldId = plant.FieldId;
                 plantUpdate.Name = plant.Name;
-                plantUpdate.Status = 1;
                 plantUpdate.IsActive = true;
 
 
