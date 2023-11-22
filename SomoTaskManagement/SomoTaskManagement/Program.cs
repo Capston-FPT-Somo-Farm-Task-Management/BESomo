@@ -53,7 +53,7 @@ builder.Services.RegisterCache(builder.Configuration);
 builder.Services.AddCors();
 builder.Services.AddAutoMapper(typeof(MapperApplication));
 
-builder.Services.RegisterQuart();
+builder.Services.RegisterQuartz();
 
 string filePath = "SecretKey/somotaskmanagement-firebase-adminsdk-z13iv-aa59ff5b48.json";
 

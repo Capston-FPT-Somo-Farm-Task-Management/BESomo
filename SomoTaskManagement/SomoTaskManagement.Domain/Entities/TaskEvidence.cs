@@ -30,6 +30,7 @@ namespace SomoTaskManagement.Domain.Entities
         public string Description { get; set; }
 
         public int TaskId { get; set; }
+        public  int? EvidenceType {  get; set; }
 
         [JsonIgnore]
         public virtual ICollection<EvidenceImage> EvidenceImages { set; get; }

@@ -9,7 +9,7 @@ namespace SomoTaskManagement.Domain.Model.Task
     public class UpdateTaskDraftAndToPrePare
     {
         public List<DateTime>? Dates { get; set; }
-        public List<int>? MaterialIs { get; set; }
+        public List<int>? MaterialIds { get; set; }
         public TaskDraftModelUpdate TaskModel { get; set; }
     }
 }

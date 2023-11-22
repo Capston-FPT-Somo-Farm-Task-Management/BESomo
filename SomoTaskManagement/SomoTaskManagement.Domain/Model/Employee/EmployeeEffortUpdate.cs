@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,5 +12,8 @@ namespace SomoTaskManagement.Domain.Model.Employee
         public int EmployeeId { get; set; }
         public int ActualEfforMinutes { set; get; }
         public int ActualEffortHour { set; get; }
+        public DateTime DaySubmit {  get; set; }
+        public string Description { get; set; }
+        public string Name { get; set; }
     }
 }

@@ -24,5 +24,7 @@ namespace SomoTaskManagement.Domain.Model.TaskEvidence
         public List<string> UrlImage { get; set; }
 
         public string Time {  get; set; }
+
+        public string EvidenceType {  get; set; }
     }
 }

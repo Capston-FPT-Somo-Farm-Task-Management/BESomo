@@ -262,12 +262,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpPut("Task({taskId})/Status({statusTask})")]
-        public async Task<IActionResult> UpdateEffortTimeAndStatusTask(int taskId, List<EmployeeEffortUpdate> employeeEffortTimes, int statusTask)
+        [HttpPut("Task({taskId})/UpdateEffortTimeAndStatusTask")]
+        public async Task<IActionResult> UpdateEffortTimeAndStatusTask(int taskId, List<EmployeeEffortUpdateAndChangeStatus> employeeEffortTimes)
         {
             try
             {
-                await _subTaskService.UpdateEffortTimeAndStatusTask(taskId, employeeEffortTimes, statusTask);
+                await _subTaskService.UpdateEffortTimeAndStatusTask(taskId, employeeEffortTimes);
                 return Ok(new ApiResponseModel
                 {
                     Data = employeeEffortTimes,

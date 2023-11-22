@@ -11,7 +11,7 @@ namespace SomoTaskManagement.Domain.Enum
     {
         [Description("Đang làm việc")]
         Working = 1,
-        [Description("Đã nghĩ việc")]
+        [Description("Đã nghỉ việc")]
         Quit = 0
     }
 }

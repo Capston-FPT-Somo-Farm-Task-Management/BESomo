@@ -1,5 +1,6 @@
 ﻿using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model.Task;
+using SomoTaskManagement.Domain.Model.TaskEvidence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,16 +18,16 @@ namespace SomoTaskManagement.Services.Interface
         Task<IEnumerable<FarmTaskModel>> GetTaskByDay(DateTime dateStr);
         Task<IEnumerable<FarmTaskModel>> GetTaskByMemberId(int id);
         Task<IEnumerable<FarmTaskModel>> GetListActiveByMemberId(int id);
-        Task UpdateStatus(int id, int status);
+        Task UpdateStatusFormTodoToDraft(int id);
         Task<IEnumerable<FarmTaskModel>> GetTaskByTotalDay(DateTime date, int id);
         Task<IEnumerable<FarmTaskModel>> GetListActiveWithPagging(int pageIndex, int pageSize);
         Task<FarmTaskPageResult> GetTaskByStatusMemberDate(int id, int status, DateTime? date, int pageIndex, int pageSize, int? checkTaskParent, string? taskName);
         List<object> GetStatusDescriptions();
         Task<FarmTaskPageResult> GetTaskByStatusSupervisorDate(int id, int status, DateTime? date, int pageIndex, int pageSize, string? taskName);
         Task<int> CheckRoleMember(int id);
-        Task ProcessTaskCreation(int memberId, TaskRequestModel taskModel);
+        Task CreateAsignTask(TaskCreateAsignModel taskModel, List<int>? materialIds, List<int>? employeeIds);
         Task CreateDisagreeTask(int id, string description);
-        Task DisDisagreeTask(int id);
+        Task DisDisagreeTask(int id, string description);
         Task<TaskByEmployeeDatesEffort> GetTaskByEmployeeDates(int employeeId, DateTime? startDay, DateTime? endDay, int pageIndex, int pageSize, int? status);
         Task<FarmTaskPageResult> GetAllTaskByMemberDate(int id, DateTime? date, int pageIndex, int pageSize, int? checkTaskParent, string? taskName);
         Task DeleteTask(int farmTaskId);
@@ -39,5 +40,9 @@ namespace SomoTaskManagement.Services.Interface
         Task UpdateTaskDraftAndToPrePare(int taskId, TaskDraftModelUpdate taskModel, List<DateTime>? dates, List<int>? materialIds);
         Task DeleteTaskTodoAndDraft(int taskId);
         Task AddEmployeeToTaskAsign(int taskId, List<int>? employeeIds, int? overallEfforMinutes, int? overallEffortHour);
+        Task ChangeStatusToDoing(int id);
+        Task ChangeStatusToPendingAndCancel(int id, EvidenceCreateUpdateModel taskEvidence, int status, int isCancel);
+        Task ChangeStatusFromDoneToDoing(int id, string description);
+        Task ChangeStatusToClose(int id);
     }
 }

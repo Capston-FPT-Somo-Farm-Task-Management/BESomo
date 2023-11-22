@@ -123,20 +123,17 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("DaySubmit")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("EndDay")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("StartDay")
-                        .HasColumnType("datetime2");
 
                     b.Property<bool?>("Status")
                         .HasColumnType("bit");
@@ -774,6 +771,9 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("EvidenceType")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");

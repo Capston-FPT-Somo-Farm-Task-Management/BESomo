@@ -10,6 +10,7 @@ using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
 using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Domain.Model.Task;
+using SomoTaskManagement.Domain.Model.TaskEvidence;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
 using System.Threading.Tasks;
@@ -379,16 +380,16 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPut("Task({id})/Refuse")]
-        public async Task<IActionResult> DisDisagreeTask(int id)
+        public async Task<IActionResult> DisDisagreeTask(int id, string description)
         {
-            if (!User.IsInRole("Manager"))
+            if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
             {
                 return Unauthorized("Bạn không có quyền truy cập");
             }
             try
             {
 
-                await _farmTaskService.DisDisagreeTask(id);
+                await _farmTaskService.DisDisagreeTask(id,description);
 
                 return Ok(new ApiResponseModel
                 {
@@ -408,6 +409,35 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+        [HttpPut("({id})/ChangeStatusToClose")]
+        public async Task<IActionResult> ChangeStatusToClose(int id)
+        {
+            if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+
+                await _farmTaskService.ChangeStatusToClose(id);
+
+                return Ok(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
         [HttpGet("PageIndex({pageIndex})/PageSize({pageSize})/Manager({id})/Status({status})/Date")]
         public async Task<IActionResult> GetTaskByStatusMemberDate(int id, int status, [FromQuery] DateTime? date, int pageIndex, int pageSize, [FromQuery] int? checkTaskParent, [FromQuery] string? taskName)
         {
@@ -595,20 +625,20 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ProcessTaskCreation(int memberId, [FromBody] TaskRequestModel taskModel)
+        [HttpPost("supervisor/CreateAsignTask")]
+        public async Task<IActionResult> CreateAsignTask(CreateAsignTaskRequest createAsignTaskRequest)
         {
-            if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
+            if (!User.IsInRole("Supervisor"))
             {
                 return Unauthorized("Bạn không có quyền truy cập");
             }
             try
             {
-                await _farmTaskService.ProcessTaskCreation(memberId, taskModel);
+                await _farmTaskService.CreateAsignTask(createAsignTaskRequest.TaskModel, createAsignTaskRequest.MaterialIds, createAsignTaskRequest.EmployeeIds);
 
                 return Ok(new ApiResponseModel
                 {
-                    Data = taskModel,
+                    Data = createAsignTaskRequest,
                     Message = "Cập nhật thành công",
                     Success = true,
                 });
@@ -662,7 +692,7 @@ namespace SomoTaskManagement.Api.Controllers
             }
             try
             {
-                await _farmTaskService.UpdateTaskDraftAndToPrePare(taskId,taskToDoModel.TaskModel, taskToDoModel.Dates, taskToDoModel.MaterialIs);
+                await _farmTaskService.UpdateTaskDraftAndToPrePare(taskId,taskToDoModel.TaskModel, taskToDoModel.Dates, taskToDoModel.MaterialIds);
 
                 return Ok(new ApiResponseModel
                 {
@@ -742,8 +772,8 @@ namespace SomoTaskManagement.Api.Controllers
 
         
 
-        [HttpPut("ChangeStatus/{id}")]
-        public async Task<IActionResult> UpdateStatus(int id, int status)
+        [HttpPut("({id})/UpdateStatusFromTodoToDraft")]
+        public async Task<IActionResult> UpdateStatusFormTodoToDraft(int id)
         {
             if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
             {
@@ -753,7 +783,7 @@ namespace SomoTaskManagement.Api.Controllers
             {
 
                 //var task = await _farmTaskService.Get(id);
-                await _farmTaskService.UpdateStatus(id, status);
+                await _farmTaskService.UpdateStatusFormTodoToDraft(id);
 
                 var responseData = new ApiResponseModel
                 {
@@ -845,7 +875,7 @@ namespace SomoTaskManagement.Api.Controllers
         [HttpPut("({id})/AddEmployeeToTaskAsign")]
         public async Task<IActionResult> AddEmployeeToTaskAsign(int id, AddEmployeeToTaskAsign employeeToTaskAsign)
         {
-            if (!User.IsInRole("Manager"))
+            if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
             {
                 return Unauthorized("Bạn không có quyền truy cập");
             }
@@ -857,6 +887,105 @@ namespace SomoTaskManagement.Api.Controllers
                 var responseData = new ApiResponseModel
                 {
                     Data = employeeToTaskAsign,
+                    Message = "Nhiệm vụ đã được cập nhật",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+
+        }
+
+        [HttpPut("({id})/ChangeStatusToDoing")]
+        public async Task<IActionResult> ChangeStatusToDoing(int id)
+        {
+            if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+
+                await _farmTaskService.ChangeStatusToDoing(id);
+
+                var responseData = new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Nhiệm vụ đã được cập nhật",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+
+        }
+
+        [HttpPut("({id})/ChangeStatusToPendingAndCancel")]
+        public async Task<IActionResult> ChangeStatusToPendingAndCancel(int id, [FromForm]EvidenceCreateUpdateModel taskEvidence, int status, int evidenceType)
+        {
+            if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+
+                await _farmTaskService.ChangeStatusToPendingAndCancel(id, taskEvidence,status, evidenceType);
+
+                var responseData = new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Nhiệm vụ đã được cập nhật",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+
+        }
+
+        [HttpPut("({id})/ChangeStatusFromDoneToDoing")]
+        public async Task<IActionResult> ChangeStatusFromDoneToDoing(int id, string description)
+        {
+            if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+
+                await _farmTaskService.ChangeStatusFromDoneToDoing(id, description);
+
+                var responseData = new ApiResponseModel
+                {
+                    Data = null,
                     Message = "Nhiệm vụ đã được cập nhật",
                     Success = true,
                 };

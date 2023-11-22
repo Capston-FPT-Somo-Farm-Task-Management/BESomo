@@ -43,7 +43,7 @@ namespace SomoTaskManagement.Data.Mapper
                 .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => GetEnumDescription((PriorityEnum)src.Priority)))
                 .ForMember(dest => dest.ZoneName, opt => opt.MapFrom(src => src.Field != null && src.Field.Zone != null ? string.Concat($"{src.Field.Zone.Code} - ", src.Field.Zone.Name).ToString() : null))
                 .ForMember(dest => dest.AreaName, opt => opt.MapFrom(src => src.Field != null && src.Field.Zone != null && src.Field.Zone.Area != null ? string.Concat($"{src.Field.Zone.Area.Code} - ", src.Field.Zone.Area.Name).ToString() : null))
-                .ForMember(dest => dest.ExternalId, opt => opt.MapFrom(src => src.LiveStrock != null ? src.LiveStrock.ExternalId : (string)null))
+                .ForMember(dest => dest.ExternalId,opt => opt.MapFrom(src => src.LiveStrock != null? src.LiveStrock.ExternalId: (src.Plant != null ? src.Plant.ExternalId : (string)null)))
                 .ForMember(dest => dest.IsParent, opt => opt.MapFrom(src => src.OriginalTaskId == 0))
                 .ForMember(dest => dest.AvatarManager, opt => opt.MapFrom(src => src.Manager != null ? src.Manager.Avatar : (string)null));
 
@@ -159,7 +159,8 @@ namespace SomoTaskManagement.Data.Mapper
                 .ForMember(dest => dest.NameCode, opt => opt.MapFrom(src => string.Concat($"{src.Code} - ", src.Name).ToString()));
 
 
-            CreateMap<TaskEvidence, TaskEvidenceModel>();
+            CreateMap<TaskEvidence, TaskEvidenceModel>()
+                 .ForMember(dest => dest.EvidenceType, opt => opt.MapFrom(src => GetEnumDescription((EvidenceTypeEnum)src.EvidenceType)));
 
 
             CreateMap<Employee, EmployeeFarmModel>()

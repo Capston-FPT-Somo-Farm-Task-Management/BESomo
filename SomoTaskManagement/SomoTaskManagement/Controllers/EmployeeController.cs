@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model;
 using SomoTaskManagement.Domain.Model.Employee;
@@ -9,6 +10,7 @@ using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Domain.Model.TaskEvidence;
 using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Interface;
+using System.Globalization;
 
 namespace SomoTaskManagement.Api.Controllers
 {
@@ -171,7 +173,7 @@ namespace SomoTaskManagement.Api.Controllers
                 //{
                 //    return Unauthorized("You do not have access to this method.");
                 //}
-                
+
                 var area = await _employeeService.ListEmployeeActiveByFarm(id);
                 return Ok(new ApiResponseModel
                 {
@@ -200,9 +202,9 @@ namespace SomoTaskManagement.Api.Controllers
                 //{
                 //    return Unauthorized("You do not have access to this method.");
                 //}
-                
+
                 var employees = await _employeeService.GetByTaskType(id);
-               
+
                 return Ok(new ApiResponseModel
                 {
                     Data = employees,
@@ -230,7 +232,7 @@ namespace SomoTaskManagement.Api.Controllers
                 //{
                 //    return Unauthorized("You do not have access to this method.");
                 //}
-                
+
                 var area = await _employeeService.ListTaskEmployee(id);
                 return Ok(new ApiResponseModel
                 {
@@ -282,28 +284,108 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+        [HttpGet("GetTotalEffortEmployee")]
+        public async Task<IActionResult> GetTotalEffortEmployee(int id, int month, int year)
+        {
+            try
+            {
+                //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+                //{
+                //    return Unauthorized("You do not have access to this method.");
+                //}
+
+                var employeeEffort = await _employeeService.GetTotalEffortEmployee(id, month, year);
+                var responseData = new ApiResponseModel
+                {
+                    Data = employeeEffort,
+                    Message = "Employee is added",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
         [HttpGet("Template")]
         public IActionResult GetExcelTemplate()
         {
+            var numberOfDaysInMonth = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+
             using (var package = new ExcelPackage())
             {
                 var worksheet = package.Workbook.Worksheets.Add("EmployeeImportTemplate");
 
-                worksheet.Cells[1, 1].Value = "Mã nhân viên";
-                worksheet.Cells[1, 2].Value = "Họ tên";
-                worksheet.Cells[1, 3].Value = " Số điện thoại";
-                worksheet.Cells[1, 4].Value = "Địa chỉ";
-                worksheet.Cells[1, 5].Value = "Trang trại";
-                worksheet.Cells[1, 6].Value = "Giới tính";
-                worksheet.Cells[1, 7].Value = "Ngày sinh";
-                worksheet.Cells[1, 8].Value = "Kỹ năng";
-                worksheet.Cells[1, 9].Value = "Hình ảnh";
+                // Merge cells for the title
+                worksheet.Cells["A1:L1"].Merge = true;
+                worksheet.Cells[1, 1].Value = "BẢNG CHẤM CÔNG THÁNG 12 ";
+                worksheet.Cells[1, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+
+                using (var range = worksheet.Cells["A1:L1"])
+                {
+                    range.Style.Font.Bold = true;
+                    range.Style.Font.Size = 18;
+                    range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                }
+                worksheet.Cells["A2:A3"].Merge = true;
+                worksheet.Cells["B2:B3"].Merge = true;
+                worksheet.Cells["C2:C3"].Merge = true;
+                worksheet.Cells[2, 1].Value = "STT";
+                worksheet.Cells[2, 2].Value = "Mã nhân viên";
+                worksheet.Cells[2, 3].Value = "Họ tên";
+                worksheet.Cells[2, 4 + numberOfDaysInMonth].Value = "Tổng ngày công";
+                worksheet.Cells[2, 4, 2, 3 + numberOfDaysInMonth].Merge = true;
+                worksheet.Cells[2, 4, 2, 3 + numberOfDaysInMonth].Value = "NGÀY CÔNG";
+                worksheet.Cells[2, 4, 2, 3 + numberOfDaysInMonth].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                using (var range = worksheet.Cells["A2:M2"])
+                {
+                    range.Style.Font.Bold = true;
+                    range.Style.Font.Size = 12;
+                    range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                }
+
+                int currentColumn = 4;
+                for (int day = 1; day <= numberOfDaysInMonth; day++)
+                {
+                    worksheet.Cells[3, currentColumn].Value = $"{day:00}";
+                    currentColumn++;
+                }
+
+                using (var range = worksheet.Cells["A3:L3"])
+                {
+                    range.Style.Font.Size = 11;
+                    range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                }
+
+                //worksheet.Row(3).Height = 35;
+
+                worksheet.Column(1).Width = 10;
+                worksheet.Column(2).Width = 20;
+                worksheet.Column(3).Width = 30;
+                for (int col = 4; col <= numberOfDaysInMonth + 2; col++)
+                {
+                    worksheet.Column(col).Width = 5;
+                }
 
                 var stream = new MemoryStream(package.GetAsByteArray());
 
-                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "EmployeeImportTemplate.xlsx");
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "BangChamCong.xlsx");
             }
         }
+
+
+
+
 
 
         [HttpPost("ImortExcel")]
@@ -335,7 +417,7 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpPost("Export/{farmId}")]
+        [HttpGet("Export/{farmId}")]
         public async Task<IActionResult> ExportEmployeesToExcel(int farmId)
         {
             try
@@ -357,12 +439,12 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpPost("Effort/Farm({farmId})")]
-        public async Task<IActionResult> ExportEmployeesEffortToExcel(int farmId, DateTime startDay, DateTime endDay)
+        [HttpGet("Effort/Farm({farmId})")]
+        public async Task<IActionResult> ExportEmployeesEffortToExcel(int farmId, int month, int year)
         {
             try
             {
-                var excelData = await _employeeService.ExportEmployeesEffortToExcel(farmId, startDay, endDay);
+                var excelData = await _employeeService.ExportEmployeesEffortToExcel(farmId, month, year);
 
                 var stream = new MemoryStream(excelData);
 
@@ -380,7 +462,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromForm]EmployeeCreateModel employeeUpdateRequest)
+        public async Task<IActionResult> Update(int id, [FromForm] EmployeeCreateModel employeeUpdateRequest)
         {
             try
             {
@@ -392,6 +474,37 @@ namespace SomoTaskManagement.Api.Controllers
                 var responseData = new ApiResponseModel
                 {
                     Data = employeeUpdateRequest,
+                    Message = "Employee is updated",
+                    Success = true,
+                };
+                return Ok(responseData);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+
+        }
+
+        [HttpGet("GetEffortEmployeeInTask")]
+        public async Task<IActionResult> GetEffortEmployeeInTask(int id, int month, int year)
+        {
+            try
+            {
+                //if (!User.IsInRole("Manager") && !User.IsInRole("Admin"))
+                //{
+                //    return Unauthorized("You do not have access to this method.");
+                //}
+              var task=  await _employeeService.GetEffortEmployeeInTask(id, month,year);
+                var responseData = new ApiResponseModel
+                {
+                    Data = task,
                     Message = "Employee is updated",
                     Success = true,
                 };

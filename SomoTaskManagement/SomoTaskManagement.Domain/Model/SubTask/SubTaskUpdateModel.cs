@@ -13,9 +13,10 @@ namespace SomoTaskManagement.Domain.Model.SubTask
         public int EmployeeId { set; get; }
 
         public string? Description { set; get; }
-        public DateTime? StartDay { get; set; }
-        public DateTime? EndDay { get; set; }
+        public DateTime? DaySubmit { get; set; }
 
         public string Name { set; get; }
+        public int OverallEfforMinutes { set; get; }
+        public int OverallEffortHour { set; get; }
     }
 }

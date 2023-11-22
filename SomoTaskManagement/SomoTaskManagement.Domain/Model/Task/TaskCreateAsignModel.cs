@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SomoTaskManagement.Domain.Model.Task
 {
-    public class TaskUpdateModel
+    public class TaskCreateAsignModel
     {
         //public string Code {  get; set; }
         [Required]
@@ -27,20 +27,18 @@ namespace SomoTaskManagement.Domain.Model.Task
 
         [Required(ErrorMessage = "Priority is required.")]
         public string Priority { set; get; }
-        public bool IsRepeat { get; set; }
-
 
         public int SuppervisorId { set; get; }
         public int? FieldId { set; get; }
         public int TaskTypeId { set; get; }
-        public int? ManagerId { set; get; }
         public int? PlantId { set; get; }
         public int? LiveStockId { set; get; }
-        public int Remind { set; get; }
         public string? AddressDetail { get; set; }
         [Range(0, int.MaxValue, ErrorMessage = "OverallEfforMinutes must be greater than 0.")]
         public int OverallEfforMinutes { set; get; }
         [Range(0, int.MaxValue, ErrorMessage = "OverallEffortHour must be greater than 0.")]
         public int OverallEffortHour { set; get; }
+        public bool? IsPlant { get; set; }
+        public bool IsSpecific { get; set; }
     }
 }

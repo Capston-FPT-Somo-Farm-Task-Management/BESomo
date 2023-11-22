@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
+using Quartz.Impl;
 using SomoTaskManagement.Authentication;
 using SomoTaskManagement.Cache;
 using SomoTaskManagement.Data;
@@ -10,6 +11,7 @@ using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Model.Configuration;
 using SomoTaskManagement.Infrastructure.Quart;
 using SomoTaskManagement.Services.Imp;
+using SomoTaskManagement.Services.Impf;
 using SomoTaskManagement.Services.Interface;
 using StackExchange.Redis;
 using System;
@@ -76,7 +78,7 @@ namespace SomoTaskManagement.Infrastructure.Configuration
             services.AddSingleton<ICacheService, CacheService>();
         }
 
-        public static void RegisterQuart(this IServiceCollection services)
+        public static void RegisterQuartz(this IServiceCollection services)
         {
             services.AddQuartz(options =>
             {
@@ -93,9 +95,13 @@ namespace SomoTaskManagement.Infrastructure.Configuration
 
             services.AddQuartzHostedService(option =>
             {
-                option.WaitForJobsToComplete = true; 
+                option.WaitForJobsToComplete = true;
             });
         }
     }
 
+
+
 }
+
+

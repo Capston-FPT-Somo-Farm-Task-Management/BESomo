@@ -61,7 +61,7 @@ namespace SomoTaskManagement.Services.Imp
             if (!subtask.Any())
             {
                 throw new Exception("Nhiệm vụ con rỗng");
-            }
+            } 
             return _mapper.Map<IEnumerable<Employee_Task>, IEnumerable<SubTaskModel>>(subtask);
         }
 
@@ -69,7 +69,7 @@ namespace SomoTaskManagement.Services.Imp
         {
             TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
-            string taskCode = GenerateTaskCode(vietnamTime, taskCounter);
+            string taskCode = GenerateTaskCode();
             var subtaskUpdate = await _unitOfWork.RepositoryEmployee_Task.GetById(subtaskId);
 
             if (subtaskUpdate == null)
@@ -80,9 +80,10 @@ namespace SomoTaskManagement.Services.Imp
             subtaskUpdate.Description = subTask.Description;
             subtaskUpdate.Name = subTask.Name;
             subtaskUpdate.Status = true;
-            subtaskUpdate.StartDay = subTask.StartDay;
-            subtaskUpdate.EndDay = subTask.EndDay;
+            subtaskUpdate.DaySubmit = subTask.DaySubmit;
             subtaskUpdate.Code = taskCode;
+            subtaskUpdate.ActualEffortHour = subTask.OverallEffortHour;
+            subtaskUpdate.ActualEfforMinutes = subTask.OverallEfforMinutes;
 
 
             taskCounter++;
@@ -92,25 +93,20 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task CreateSubTasks(SubTaskCreateModel subTask)
         {
-            TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
-            string taskCode = GenerateTaskCode(vietnamTime, taskCounter);
+            string taskCode = GenerateTaskCode();
             var subTaskNew = new Employee_Task
             {
                 TaskId = subTask.TaskId,
                 EmployeeId = subTask.EmployeeId,
                 Description = subTask.Description,
                 Name = subTask.Name,
-                StartDay = subTask.StartDay,
-                EndDay = subTask.EndDay,
+                DaySubmit = subTask.DaySubmit,
                 Code = taskCode,
                 Status = true,
+                ActualEfforMinutes =subTask.OverallEfforMinutes,
+                ActualEffortHour = subTask.OverallEffortHour
             };
 
-            if (subTask.StartDay < subTaskNew.StartDay || subTask.EndDay > subTaskNew.EndDay)
-            {
-                throw new Exception("Ngày bắt đầu và kết thúc của subtask không nằm trong khoảng của task");
-            }
             var task = await _unitOfWork.RepositoryEmployee_Task.GetData(t => t.TaskId == subTask.TaskId);
             var employeeOfTask = task.Select(t => t.EmployeeId).ToList();
             if (!employeeOfTask.Contains(subTask.EmployeeId))
@@ -123,9 +119,13 @@ namespace SomoTaskManagement.Services.Imp
             await _unitOfWork.RepositoryEmployee_Task.Commit();
         }
 
-        private string GenerateTaskCode(DateTime vietnamTime, int counter)
+        private string GenerateTaskCode()
         {
-            return "CON" + vietnamTime.Year.ToString().Substring(2) + counter.ToString("D5");
+            Guid uniqueId = Guid.NewGuid();
+
+            string uniquePart = uniqueId.ToString("N").Substring(0, 8);
+
+            return "CN" + uniquePart;
         }
         public async Task DeleteSubTasks(int subtaskId)
         {
@@ -177,6 +177,9 @@ namespace SomoTaskManagement.Services.Imp
 
                 existingSubTask.ActualEfforMinutes = employeeEffortTime.ActualEfforMinutes;
                 existingSubTask.ActualEffortHour = employeeEffortTime.ActualEffortHour;
+                existingSubTask.DaySubmit = employeeEffortTime.DaySubmit;
+                existingSubTask.Name = employeeEffortTime.Name;
+                existingSubTask.Description = employeeEffortTime.Description;
 
                 _unitOfWork.RepositoryEmployee_Task.Update(existingSubTask);
                 await _unitOfWork.RepositoryEmployee_Task.Commit();
@@ -206,14 +209,10 @@ namespace SomoTaskManagement.Services.Imp
         }
 
 
-        public async Task UpdateEffortTimeAndStatusTask(int taskId, List<EmployeeEffortUpdate> employeeEffortTimes, int statusTask)
+        public async Task UpdateEffortTimeAndStatusTask(int taskId, List<EmployeeEffortUpdateAndChangeStatus> employeeEffortTimes)
         {
             try
             {
-                if (statusTask != 2 && statusTask != 3)
-                {
-                    throw new Exception("Chỉ được phép sử dụng giá trị hoàn thành và không hoàn thành");
-                }
 
                 await _unitOfWork.BeginTransactionAsync();
 
@@ -228,12 +227,12 @@ namespace SomoTaskManagement.Services.Imp
                     var subtaskOfTask = await _unitOfWork.RepositoryEmployee_Task.GetData(s => s.TaskId == taskId && s.Status == true);
                     if (subtaskOfTask.Count() > 0)
                     {
-                        existingTask.Status = statusTask;
+                        existingTask.Status = 4;
                         await _unitOfWork.RepositoryFarmTask.Commit();
                     }
                     else
                     {
-                        existingTask.Status = statusTask;
+                        existingTask.Status = 4;
                         await _unitOfWork.RepositoryFarmTask.Commit();
 
                         foreach (var employeeEffortTime in employeeEffortTimes)
@@ -247,6 +246,7 @@ namespace SomoTaskManagement.Services.Imp
 
                             existingSubTask.ActualEfforMinutes = employeeEffortTime.ActualEfforMinutes;
                             existingSubTask.ActualEffortHour = employeeEffortTime.ActualEffortHour;
+                            existingSubTask.DaySubmit = employeeEffortTime.DaySubmit;
 
                             _unitOfWork.RepositoryEmployee_Task.Update(existingSubTask);
                             await _unitOfWork.RepositoryEmployee_Task.Commit();

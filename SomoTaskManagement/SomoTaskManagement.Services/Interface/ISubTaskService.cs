@@ -20,7 +20,7 @@ namespace SomoTaskManagement.Services.Interface
         Task<IEnumerable<SubTaskModel>> SubtaskByTask(int taskId);
         Task UpdateEffortOfSubtask(int subtaskId, EmployeeEffortUpdate employeeEffortTime);
         Task UpdateEffortTime(int taskId, List<EmployeeEffortUpdate> employeeEffortTimes);
-        Task UpdateEffortTimeAndStatusTask(int taskId, List<EmployeeEffortUpdate> employeeEffortTimes, int statusTask);
+        Task UpdateEffortTimeAndStatusTask(int taskId, List<EmployeeEffortUpdateAndChangeStatus> employeeEffortTimes);
         Task UpdateSubTasks(int subtaskId, SubTaskUpdateModel subTask);
     }
 }

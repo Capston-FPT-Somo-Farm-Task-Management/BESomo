@@ -74,6 +74,7 @@ namespace SomoTaskManagement.Services.Imp
                     SubmitDate = vietnamTime,
                     Description = taskEvidence.Description,
                     TaskId = taskEvidence.TaskId,
+                    EvidenceType = 0,
                 };
                 await _unitOfWork.RepositoryTaskEvidence.Add(taskEvidenceCreate);
                 await _unitOfWork.RepositoryTaskEvidence.Commit();
@@ -294,6 +295,7 @@ namespace SomoTaskManagement.Services.Imp
                 SubmitDate = DateTime.Now,
                 Description = description,
                 TaskId = id,
+                EvidenceType =1
             };
 
             await _unitOfWork.RepositoryTaskEvidence.Add(taskEvidence);

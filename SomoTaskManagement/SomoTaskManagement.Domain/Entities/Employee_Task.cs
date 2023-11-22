@@ -24,8 +24,7 @@ namespace SomoTaskManagement.Domain.Entities
         public int ActualEfforMinutes { set; get; }
         public int ActualEffortHour { set; get; }
         public string? Code { get; set; }
-        public DateTime? StartDay { get; set; }
-        public DateTime? EndDay { get; set; }
+        public DateTime? DaySubmit { get; set; }
 
         public string? Description { set; get; }
 

@@ -24,8 +24,7 @@ namespace SomoTaskManagement.Domain.Model.SubTask
        
 
         public string Name { set; get; }
-        public DateTime? StartDay { get; set; }
-        public DateTime? EndDay { get; set; }
+        public DateTime? DaySubmit { get; set; }
         public string? Code { get; set; }
     }
 }

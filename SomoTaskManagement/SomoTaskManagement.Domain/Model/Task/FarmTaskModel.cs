@@ -78,5 +78,6 @@ namespace SomoTaskManagement.Domain.Model.Task
         public List<DateTime>? DateRepeate { set; get; }
         public bool? IsPlant { get; set; }
         public bool IsSpecific { get; set; }
+        public bool IsHaveSubtask { get; set; }
     }
 }

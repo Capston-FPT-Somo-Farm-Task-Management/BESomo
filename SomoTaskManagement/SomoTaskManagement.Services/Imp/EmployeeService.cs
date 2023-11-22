@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using SomoTaskManagement.Data;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
@@ -16,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -99,7 +101,7 @@ namespace SomoTaskManagement.Services.Imp
                 {
                     employeeNew.Avatar = "default_image_url";
                 }
-                
+
                 for (int i = 0; i < employeeModel.TaskTypeIds.Count; i++)
                 {
                     var taskTypeId = employeeModel.TaskTypeIds[i];
@@ -293,61 +295,86 @@ namespace SomoTaskManagement.Services.Imp
             return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : status.ToString();
         }
 
-        public async Task<byte[]> ExportEmployeesEffortToExcel(int farmId, DateTime startDay, DateTime endDay)
+        public async Task<byte[]> ExportEmployeesEffortToExcel(int farmId, int month, int year)
         {
+            var numberOfDaysInMonth = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+
             using (var package = new ExcelPackage())
             {
-                var worksheet = package.Workbook.Worksheets.Add("Employees");
+                var worksheet = package.Workbook.Worksheets.Add("EmployeeImportTemplate");
 
-                worksheet.Cells[1, 6].Value = $"Thời gian :{startDay} - {endDay}";
-                worksheet.Cells[2, 1].Value = "Mã nhân viên";
-                worksheet.Cells[2, 2].Value = "Họ tên";
-                worksheet.Cells[2, 3].Value = " Số điện thoại";
-                worksheet.Cells[2, 4].Value = "Địa chỉ";
-                worksheet.Cells[2, 5].Value = "Trang trại";
-                worksheet.Cells[2, 6].Value = "Giới tính";
-                worksheet.Cells[2, 7].Value = "Ngày sinh";
-                worksheet.Cells[2, 8].Value = "Kỹ năng";
-                worksheet.Cells[2, 9].Value = "Hình ảnh";
-                worksheet.Cells[2, 10].Value = "Chấm công";
-                worksheet.Cells[2, 11].Value = "Nhiệm vụ đã làm";
+                worksheet.Cells["D1:N1"].Merge = true;
+                worksheet.Cells[1, 4].Value = $"BẢNG CHẤM CÔNG THÁNG {month} NĂM {year}";
+                worksheet.Cells[1, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
-                var employees = await _unitOfWork.RepositoryEmployee.GetData(e => e.FarmId == farmId && e.Status == 1);
-                int row = 3;
-                foreach (var employee in employees)
+
+                using (var range = worksheet.Cells["A1:L1"])
                 {
-                    var effortOfEmployee = await GetTotalEffortEmployee(employee.Id, startDay, endDay);
-                    worksheet.Cells[row, 1].Value = employee.Code;
-                    worksheet.Cells[row, 2].Value = employee.Name;
-                    worksheet.Cells[row, 3].Value = employee.PhoneNumber;
-                    worksheet.Cells[row, 4].Value = employee.Address;
+                    range.Style.Font.Bold = true;
+                    range.Style.Font.Size = 18;
+                    range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                }
+                worksheet.Cells["A2:A3"].Merge = true;
+                worksheet.Cells["B2:B3"].Merge = true;
+                worksheet.Cells["C2:C3"].Merge = true;
+                worksheet.Cells[2, 1].Value = "STT";
+                worksheet.Cells[2, 2].Value = "Mã nhân viên";
+                worksheet.Cells[2, 3].Value = "Họ tên";
+                worksheet.Cells[2, 4, 2, 3 + numberOfDaysInMonth].Merge = true;
+                worksheet.Cells[2, 4, 2, 3 + numberOfDaysInMonth].Value = "NGÀY CÔNG";
+                worksheet.Cells[2, 4, 2, 3 + numberOfDaysInMonth].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
-                    var farm = await _unitOfWork.RepositoryFarm.GetById(farmId);
-                    worksheet.Cells[row, 5].Value = farm.Name;
 
-                    var gender = (bool)employee.Gender ? EmployeeGenderEnum.Male : EmployeeGenderEnum.Female;
-                    var genderString = GetGenderDescription(gender);
-                    worksheet.Cells[row, 6].Value = genderString;
-                    worksheet.Cells[row, 7].Value = employee.DateOfBirth;
-                    worksheet.Cells[row, 7].Style.Numberformat.Format = "yyyy-mm-dd";
-
-                    var employee_taskType = await _unitOfWork.RepositoryEmployee_TaskType.GetData(et => et.EmployeeId == employee.Id);
-                    var taskTypeIds = employee_taskType.Select(t => t.TaskTypeId).ToList();
-                    var taskTypeOfEmployee = await _unitOfWork.RepositoryTaskTaskType.GetData(et => taskTypeIds.Contains(et.Id));
-                    var taskTypeName = taskTypeOfEmployee.Select(t => t.Name).ToList();
-                    worksheet.Cells[row, 8].Value = string.Join(",", taskTypeName);
-
-                    worksheet.Cells[row, 9].Value = employee.Avatar;
-                    worksheet.Cells[row, 10].Value = $"{effortOfEmployee.ActualEffortHour} giờ {effortOfEmployee.ActualEfforMinutes} phút";
-                    worksheet.Cells[row, 11].Value = effortOfEmployee.TotalTask;
-                    row++;
+                using (var range = worksheet.Cells["A2:M2"])
+                {
+                    range.Style.Font.Bold = true;
+                    range.Style.Font.Size = 12;
+                    range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                 }
 
+                int currentColumn = 4;
+                for (int day = 1; day <= numberOfDaysInMonth; day++)
+                {
+                    worksheet.Cells[3, currentColumn].Value = $"{day:00}";
+
+                    currentColumn++;
+                }
+
+                //worksheet.Row(3).Height = 35;
+
+                worksheet.Column(1).Width = 10;
+                worksheet.Column(2).Width = 20;
+                worksheet.Column(3).Width = 30;
+                for (int col = 4; col <= numberOfDaysInMonth + 2; col++)
+                {
+                    worksheet.Column(col).Width = 10;
+                }
+                int currentColumnEffort = 4;
+                var employees = await _unitOfWork.RepositoryEmployee.GetData(e => e.FarmId == farmId && e.Status == 1);
+                int row = 4;
+                foreach (var employee in employees)
+                {
+                    worksheet.Cells[row, 1].Value = row - 3;
+                    worksheet.Cells[row, 2].Value = employee.Code;
+                    worksheet.Cells[row, 3].Value = employee.Name;
+
+                    var totalEffortList = await GetTotalEffortEmployee(employee.Id, month, year);
+
+                    foreach (var totalEffort in totalEffortList)
+                    {
+                        worksheet.Cells[row, currentColumnEffort].Value = totalEffort.EffortHour;
+                        currentColumnEffort++;
+                    }
+                    currentColumnEffort = 4;
+                    row++;
+                }
+                worksheet.View.FreezePanes(5, 4);
                 return package.GetAsByteArray();
             }
         }
 
-        private async Task<TotalEffortModel> GetTotalEffortEmployee(int id, DateTime? startDay, DateTime? endDay)
+
+        public async Task<List<EmployeeEffortInMonthModel>> GetTotalEffortEmployee(int id, int month, int year)
         {
             var employee = await _unitOfWork.RepositoryEmployee.GetById(id);
             if (employee == null)
@@ -355,44 +382,118 @@ namespace SomoTaskManagement.Services.Imp
                 throw new Exception("Không tìm thấy nhân viên");
             }
 
-            var subtasks = await _unitOfWork.RepositoryEmployee_Task.GetData(expression: s => s.EmployeeId == id);
+            var subtasks = await _unitOfWork.RepositoryEmployee_Task.GetData(t => t.EmployeeId == id &&
+                                                t.DaySubmit.HasValue && t.DaySubmit.Value.Month == month && t.DaySubmit.Value.Year == year);
 
-            var taskIds = subtasks.Select(s => s.TaskId);
+            var totalEffortList = new List<EmployeeEffortInMonthModel>();
 
-            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id) && (t.Status == 2 || t.Status == 3) &&
-                                                 (!startDay.HasValue || !endDay.HasValue || (
-                                                               (startDay.Value.Year <= t.StartDate.Value.Year &&
-                                                                endDay.Value.Year >= t.StartDate.Value.Year) &&
-                                                               (startDay.Value.Month <= t.StartDate.Value.Month &&
-                                                                endDay.Value.Month >= t.StartDate.Value.Month) &&
-                                                               (startDay.Value.Day <= t.StartDate.Value.Day &&
-                                                                endDay.Value.Day >= t.StartDate.Value.Day)
-                                                            ))
-                                                );
-
-
-
-            var totalTask = tasks.Count();
-
-            var taskEffortIds = tasks.Select(t => t.Id);
-
-            var subtaskEffort = await _unitOfWork.RepositoryEmployee_Task.GetData(s => taskEffortIds.Contains(s.TaskId) && s.EmployeeId == id);
-
-            var effortMinutes = subtaskEffort.Sum(s => s.ActualEfforMinutes);
-            var effortHours = subtaskEffort.Sum(s => s.ActualEffortHour);
-
-            var totalEffortEmployee = new TotalEffortModel
+            for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
             {
-                EmployeeId = id,
-                EmployeeName = employee.Name,
-                EmployeeCode = employee.Code,
-                TotalTask = totalTask,
-                ActualEfforMinutes = effortMinutes,
-                ActualEffortHour = effortHours
-            };
+                var subtasksOfDay = subtasks.Where(t => t.DaySubmit?.Day == day).ToList();
 
-            return totalEffortEmployee;
+                if (subtasksOfDay.Any())
+                {
+                    var totalEffortOfDay = 0.0;
+
+                    foreach (var subtask in subtasksOfDay)
+                    {
+                        var subtaskEffort = await _unitOfWork.RepositoryEmployee_Task.GetSingleByCondition(s => s.SubtaskId == subtask.SubtaskId && s.EmployeeId == id);
+                        totalEffortOfDay += subtaskEffort.ActualEfforMinutes / 60.0 + subtaskEffort.ActualEffortHour;
+                    }
+
+                    var totalEffortEmployee = new EmployeeEffortInMonthModel
+                    {
+                        Day = day,
+                        EndDate = subtasksOfDay.Max(t => t.DaySubmit),
+                        EffortHour = totalEffortOfDay
+                    };
+
+                    totalEffortList.Add(totalEffortEmployee);
+                }
+                else
+                {
+                    // If no effort on this day, add an entry with zero effort
+                    var totalEffortEmployee = new EmployeeEffortInMonthModel
+                    {
+                        Day = day,
+                        EndDate = null, // You might want to set this to an appropriate value
+                        EffortHour = 0.0
+                    };
+
+                    totalEffortList.Add(totalEffortEmployee);
+                }
+            }
+
+            return totalEffortList;
         }
+
+        public async Task<List<EmployeeEffortInTask>> GetEffortEmployeeInTask(int id, int month, int year)
+        {
+            var employee = await _unitOfWork.RepositoryEmployee.GetById(id);
+            if (employee == null)
+            {
+                throw new Exception("Không tìm thấy nhân viên");
+            }
+
+            var subtasks = await _unitOfWork.RepositoryEmployee_Task.GetData(t => t.EmployeeId == id &&
+                                                t.DaySubmit.HasValue && t.DaySubmit.Value.Month == month && t.DaySubmit.Value.Year == year);
+
+            var taskIds = subtasks.Select(t => t.TaskId);
+
+            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id));
+
+            var totalEffortList = new List<EmployeeEffortInTask>();
+
+            for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
+            {
+                var subtasksOfDay = subtasks.Where(t => t.DaySubmit?.Day == day).ToList();
+                var taskOfDay = tasks.Where(t => t.StartDate.HasValue && t.StartDate.Value.Day == day).ToList();
+
+                if (subtasksOfDay.Any())
+                {
+                    var tasksAndEffortsOfDay = new List<TaskEffort>();
+
+                    foreach (var subtask in subtasksOfDay)
+                    {
+                        var subtaskEffort = await _unitOfWork.RepositoryEmployee_Task.GetSingleByCondition(s => s.SubtaskId == subtask.SubtaskId && s.EmployeeId == id);
+                        var taskEmployeeOfDay = taskOfDay.FirstOrDefault(t => t.Id == subtask.TaskId);
+
+                        if (taskEmployeeOfDay != null)
+                        {
+                            var taskEffort = new TaskEffort
+                            {
+                                CodeTask = taskEmployeeOfDay.Code,
+                                EffortHour = subtaskEffort.ActualEfforMinutes / 60.0 + subtaskEffort.ActualEffortHour
+                            };
+
+                            tasksAndEffortsOfDay.Add(taskEffort);
+                        }
+                    }
+
+                    var totalEffortEmployee = new EmployeeEffortInTask
+                    {
+                        Day = day,
+                        TaskEfforts = tasksAndEffortsOfDay
+                    };
+
+                    totalEffortList.Add(totalEffortEmployee);
+                }
+                else
+                {
+                    var totalEffortEmployee = new EmployeeEffortInTask
+                    {
+                        Day = day,
+                        TaskEfforts = new List<TaskEffort>()
+                    };
+
+                    totalEffortList.Add(totalEffortEmployee);
+                }
+            }
+
+            return totalEffortList;
+        }
+
+
 
         private async Task<string> UploadImageToFirebaseAsync(Employee employee, IFormFile imageFile)
         {
@@ -695,6 +796,9 @@ namespace SomoTaskManagement.Services.Imp
             await _unitOfWork.RepositoryLiveStock.Commit();
         }
 
-
+        public Task<byte[]> ExportEmployeesEffortToExcel(int farmId, DateTime startDay, DateTime endDay)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -19,14 +19,24 @@ namespace SomoTaskManagement.Infrastructure.Quart
         }
         public async Task Execute(IJobExecutionContext context)
         {
-            int taskId = int.Parse(context.JobDetail.Description);
+            TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
-            var task = await _unitOfWork.RepositoryFarmTask.GetSingleByCondition(f => f.Id == taskId);
-            if (task != null)
+            DateTime currentDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => t.IsExpired == false && t.EndDate <= currentDate);
+            if (tasks.Any())
             {
-                task.Status = 2;
-                await _unitOfWork.RepositoryFarmTask.Commit();
+                foreach (var task in tasks)
+                {
+                    task.IsExpired = true;
+                    _unitOfWork.RepositoryFarmTask.Update(task);
+                    await _unitOfWork.RepositoryFarmTask.Commit();
+                }
             }
+
         }
+
+
+
     }
 }

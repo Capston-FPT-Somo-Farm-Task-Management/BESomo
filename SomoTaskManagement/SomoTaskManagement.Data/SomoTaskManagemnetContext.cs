@@ -281,8 +281,7 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.Code);
                 entity.Property(e => e.EmployeeId);
                 entity.Property(e => e.TaskId);
-                entity.Property(e => e.StartDay);
-                entity.Property(e => e.EndDay);
+                entity.Property(e => e.DaySubmit);
                 entity.Property(e => e.Description);
                 entity.Property(e => e.Name);
                 entity.Property(e => e.Status);
@@ -403,6 +402,7 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.Status).IsRequired();
                 entity.Property(e => e.SubmitDate).IsRequired();
                 entity.Property(e => e.Description).IsRequired();
+                entity.Property(e => e.EvidenceType);
 
                 entity.HasOne(d => d.Task).WithMany(p => p.TaskEvidences).HasForeignKey(d => d.TaskId).HasConstraintName("FK_Task_TaskEvidence");
             });
