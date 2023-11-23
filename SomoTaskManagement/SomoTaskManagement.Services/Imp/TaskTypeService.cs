@@ -171,7 +171,7 @@ namespace SomoTaskManagement.Services.Imp
                             taskTypeNew.Status = (int)statusEnum;
                             await _unitOfWork.RepositoryTaskTaskType.Add(taskTypeNew);
                         }
-                        else
+                        else 
                         {
                             existingTaskType.Name = taskTypeImport.Name;
                             existingTaskType.Description = taskTypeImport.Description;

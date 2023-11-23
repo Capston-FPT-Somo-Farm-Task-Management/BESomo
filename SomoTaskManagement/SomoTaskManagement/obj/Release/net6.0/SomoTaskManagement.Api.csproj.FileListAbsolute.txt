@@ -372,3 +372,6 @@ C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskMan
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\SomoTaskManagement.Api.pdb
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\SomoTaskManagement.Api.genruntimeconfig.cache
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\obj\Release\net6.0\ref\SomoTaskManagement.Api.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\System.Net.WebSockets.WebSocketProtocol.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\SomoTaskManagement.Socket.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\SomoTaskManagement.Socket.pdb

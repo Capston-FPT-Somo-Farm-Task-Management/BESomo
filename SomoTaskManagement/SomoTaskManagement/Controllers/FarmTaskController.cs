@@ -232,7 +232,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpGet("PageIndex({pageIndex})/PageSize({pageSize})/Done/Employee({employeeId})")]
-        public async Task<IActionResult> GetTaskByEmployeeDates(int employeeId, DateTime? startDay, DateTime? endDay, int pageIndex, int pageSize, [FromQuery] int? status)
+        public async Task<IActionResult> GetTaskByEmployeeDates(int employeeId, DateTime? startDay, DateTime? endDay, int pageIndex, int pageSize)
         {
             if (!User.IsInRole("Manager") && !User.IsInRole("Admin") && !User.IsInRole("Supervisor"))
             {
@@ -240,7 +240,7 @@ namespace SomoTaskManagement.Api.Controllers
             }
             try
             {
-                var area = await _farmTaskService.GetTaskByEmployeeDates(employeeId, startDay, endDay, pageIndex, pageSize, status);
+                var area = await _farmTaskService.GetTaskByEmployeeDates(employeeId, startDay, endDay, pageIndex, pageSize);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
@@ -380,7 +380,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPut("Task({id})/Refuse")]
-        public async Task<IActionResult> DisDisagreeTask(int id, string description)
+        public async Task<IActionResult> DisDisagreeTask(int id)
         {
             if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
             {
@@ -389,7 +389,7 @@ namespace SomoTaskManagement.Api.Controllers
             try
             {
 
-                await _farmTaskService.DisDisagreeTask(id,description);
+                await _farmTaskService.DisDisagreeTask(id);
 
                 return Ok(new ApiResponseModel
                 {
@@ -438,6 +438,37 @@ namespace SomoTaskManagement.Api.Controllers
                 });
             }
         }
+
+        [HttpPut("({id})/ChangeStatusToDone")]
+        public async Task<IActionResult> ChangeStatusToDone(int id)
+        {
+            if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+
+                await _farmTaskService.ChangeStatusToDone(id);
+
+                return Ok(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
         [HttpGet("PageIndex({pageIndex})/PageSize({pageSize})/Manager({id})/Status({status})/Date")]
         public async Task<IActionResult> GetTaskByStatusMemberDate(int id, int status, [FromQuery] DateTime? date, int pageIndex, int pageSize, [FromQuery] int? checkTaskParent, [FromQuery] string? taskName)
         {
@@ -712,6 +743,35 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+        [HttpPut("({taskId})/UpdateTaskDisagreeAndChangeToToDo")]
+        public async Task<IActionResult> UpdateTaskDisagreeAndChangeToToDo(int taskId, UpdateTaskDraftAndToPrePare taskToDoModel)
+        {
+            if (!User.IsInRole("Manager"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+                await _farmTaskService.UpdateTaskDisagreeAndChangeToToDo(taskId, taskToDoModel.TaskModel, taskToDoModel.Dates, taskToDoModel.MaterialIds);
+
+                return Ok(new ApiResponseModel
+                {
+                    Data = taskToDoModel,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
         [HttpPost("CreateTaskDraft")]
         public async Task<IActionResult> CreateTaskDraft(TaskDraftRequest taskDraftModel)
         {
@@ -939,7 +999,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPut("({id})/ChangeStatusToPendingAndCancel")]
-        public async Task<IActionResult> ChangeStatusToPendingAndCancel(int id, [FromForm]EvidenceCreateUpdateModel taskEvidence, int status, int evidenceType)
+        public async Task<IActionResult> ChangeStatusToPendingAndCancel(int id, [FromForm] EvidencePendingAndCancel taskEvidence, int status,int? managerId)
         {
             if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
             {
@@ -948,7 +1008,7 @@ namespace SomoTaskManagement.Api.Controllers
             try
             {
 
-                await _farmTaskService.ChangeStatusToPendingAndCancel(id, taskEvidence,status, evidenceType);
+                await _farmTaskService.ChangeStatusToPendingAndCancel(id, taskEvidence,status, managerId);
 
                 var responseData = new ApiResponseModel
                 {
@@ -972,7 +1032,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPut("({id})/ChangeStatusFromDoneToDoing")]
-        public async Task<IActionResult> ChangeStatusFromDoneToDoing(int id, string description)
+        public async Task<IActionResult> ChangeStatusFromDoneToDoing(int id,[FromBody] string reason, int managerId)
         {
             if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
             {
@@ -981,7 +1041,7 @@ namespace SomoTaskManagement.Api.Controllers
             try
             {
 
-                await _farmTaskService.ChangeStatusFromDoneToDoing(id, description);
+                await _farmTaskService.ChangeStatusFromDoneToDoing(id, reason, managerId);
 
                 var responseData = new ApiResponseModel
                 {

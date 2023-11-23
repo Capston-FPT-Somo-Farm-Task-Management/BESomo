@@ -422,6 +422,14 @@
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0"
         }
       },
+      "Microsoft.AspNetCore.WebSockets/2.2.1": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Http.Extensions": "2.2.0",
+          "Microsoft.Extensions.Logging.Abstractions": "6.0.0",
+          "Microsoft.Extensions.Options": "6.0.0",
+          "System.Net.WebSockets.WebSocketProtocol": "4.5.3"
+        }
+      },
       "Microsoft.AspNetCore.WebUtilities/2.2.0": {
         "dependencies": {
           "Microsoft.Net.Http.Headers": "2.2.0",
@@ -1354,6 +1362,14 @@
           "System.Threading.Tasks": "4.3.0"
         }
       },
+      "System.Net.WebSockets.WebSocketProtocol/4.5.3": {
+        "runtime": {
+          "lib/netcoreapp2.1/System.Net.WebSockets.WebSocketProtocol.dll": {
+            "assemblyVersion": "4.0.0.2",
+            "fileVersion": "4.6.27129.4"
+          }
+        }
+      },
       "System.ObjectModel/4.3.0": {
         "dependencies": {
           "System.Collections": "4.3.0",
@@ -1824,7 +1840,8 @@
           "Quartz.Extensions.Hosting": "3.7.0",
           "SomoTaskManagement.Authentication": "1.0.0",
           "SomoTaskManagement.Cache": "1.0.0",
-          "SomoTaskManagement.Data": "1.0.0"
+          "SomoTaskManagement.Data": "1.0.0",
+          "SomoTaskManagement.Socket": "1.0.0"
         },
         "runtime": {
           "SomoTaskManagement.Infrastructure.dll": {}
@@ -1838,10 +1855,19 @@
           "Microsoft.AspNetCore.Http": "2.2.2",
           "Quartz": "3.7.0",
           "SomoTaskManagement.Data": "1.0.0",
+          "SomoTaskManagement.Socket": "1.0.0",
           "UnidecodeSharpFork": "1.0.0"
         },
         "runtime": {
           "SomoTaskManagement.Services.dll": {}
+        }
+      },
+      "SomoTaskManagement.Socket/1.0.0": {
+        "dependencies": {
+          "Microsoft.AspNetCore.WebSockets": "2.2.1"
+        },
+        "runtime": {
+          "SomoTaskManagement.Socket.dll": {}
         }
       }
     }
@@ -2124,6 +2150,13 @@
       "sha512": "sha512-lRRaPN7jDlUCVCp9i0W+PB0trFaKB0bgMJD7hEJS9Uo4R9MXaMC8X2tJhPLmeVE3SGDdYI4QNKdVmhNvMJGgPQ==",
       "path": "microsoft.aspnetcore.routing.abstractions/2.2.0",
       "hashPath": "microsoft.aspnetcore.routing.abstractions.2.2.0.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.WebSockets/2.2.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Ilk4fQ0xdVpJk1a+72thHv2LglUZPWL+vECOG3mw+gOesNx0/p56HNJXZw8k1pj8ff1cVHn8KtfvyRZxdplNQA==",
+      "path": "microsoft.aspnetcore.websockets/2.2.1",
+      "hashPath": "microsoft.aspnetcore.websockets.2.2.1.nupkg.sha512"
     },
     "Microsoft.AspNetCore.WebUtilities/2.2.0": {
       "type": "package",
@@ -2853,6 +2886,13 @@
       "path": "system.net.sockets/4.3.0",
       "hashPath": "system.net.sockets.4.3.0.nupkg.sha512"
     },
+    "System.Net.WebSockets.WebSocketProtocol/4.5.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-O8RIMEVeOFzT8fscu6MDc4y+0LfnlXdqGovb0rJHBNVKhwn6BsNJmTY1oYUZPPsMfcc5OP20WpX4vj/aK8n98g==",
+      "path": "system.net.websockets.websocketprotocol/4.5.3",
+      "hashPath": "system.net.websockets.websocketprotocol.4.5.3.nupkg.sha512"
+    },
     "System.ObjectModel/4.3.0": {
       "type": "package",
       "serviceable": true,
@@ -3180,6 +3220,11 @@
       "sha512": ""
     },
     "SomoTaskManagement.Services/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SomoTaskManagement.Socket/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

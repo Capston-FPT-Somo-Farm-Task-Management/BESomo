@@ -1,15 +1,19 @@
 ﻿using AutoMapper;
 using Firebase.Storage;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
+using SomoTaskManagement.Domain.Enum;
 using SomoTaskManagement.Domain.Model.Employee;
 using SomoTaskManagement.Domain.Model.EvidenceImage;
 using SomoTaskManagement.Domain.Model.TaskEvidence;
 using SomoTaskManagement.Services.Interface;
+using SomoTaskManagement.Socket;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,12 +25,14 @@ namespace SomoTaskManagement.Services.Imp
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
+        private readonly IServiceProvider _serviceProvider;
 
-        public TaskEvidenceService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration)
+        public TaskEvidenceService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, IServiceProvider serviceProvider)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _configuration = configuration;
+            _serviceProvider = serviceProvider;
         }
         public Task<IEnumerable<TaskEvidence>> ListTaskEvidence()
         {
@@ -88,13 +94,13 @@ namespace SomoTaskManagement.Services.Imp
                 _unitOfWork.CommitTransaction();
                 await _unitOfWork.RepositoryEvidenceImage.Add(uploadedImages);
                 await _unitOfWork.RepositoryEvidenceImage.Commit();
+                //var evidenceCount = await CountEvidenceOfTask(taskEvidence.TaskId);
             }
             catch (Exception ex)
             {
                 _unitOfWork.RollbackTransaction();
                 throw new Exception(ex.Message);
             }
-
         }
 
 
@@ -246,9 +252,35 @@ namespace SomoTaskManagement.Services.Imp
                 {
                     map[evidence].Time = time;
                 }
+
+                if (evidence.ManagerId.HasValue)
+                {
+                    var manager = await _unitOfWork.RepositoryMember.GetById(evidence.ManagerId.Value);
+
+                    if (manager != null && map.ContainsKey(evidence))
+                    {
+                        map[evidence].ManagerName = manager.Name;
+                        map[evidence].AvatarManager = manager.Avatar;
+                    }
+                }
+                else
+                {
+                    if (map.ContainsKey(evidence))
+                    {
+                        map[evidence].ManagerName = "";
+                        map[evidence].AvatarManager = "";
+                    }
+                }
+
             }
 
             return map.Values;
+        }
+
+        public async Task<int> CountEvidenceOfTask()
+        {
+            var taskEvidence = await _unitOfWork.RepositoryTaskEvidence.GetData(null);
+            return taskEvidence.Count();
         }
 
         public string FormatTimeDifference(DateTime startTime)
@@ -300,6 +332,33 @@ namespace SomoTaskManagement.Services.Imp
 
             await _unitOfWork.RepositoryTaskEvidence.Add(taskEvidence);
             await _unitOfWork.RepositoryTaskEvidence.Commit();
+        }
+
+        public List<object> GetStatusEvidenceDescriptions()
+        {
+            var results = new List<object>();
+
+            foreach (EvidenceTypeEnum status in Enum.GetValues(typeof(EvidenceTypeEnum)))
+            {
+                results.Add(new
+                {
+                    Status = (int)status,
+                    Description = GetTaskStatusDescription(status)
+                });
+            }
+
+            return results;
+        }
+
+        public static string GetTaskStatusDescription(EvidenceTypeEnum status)
+        {
+            var fieldInfo = status.GetType().GetField(status.ToString());
+
+            if (fieldInfo == null) return string.Empty;
+
+            var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+
+            return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : status.ToString();
         }
     }
 }

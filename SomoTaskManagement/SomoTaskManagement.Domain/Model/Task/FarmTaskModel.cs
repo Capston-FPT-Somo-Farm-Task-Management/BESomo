@@ -79,5 +79,6 @@ namespace SomoTaskManagement.Domain.Model.Task
         public bool? IsPlant { get; set; }
         public bool IsSpecific { get; set; }
         public bool IsHaveSubtask { get; set; }
+        public bool IsExpired { set; get; }
     }
 }

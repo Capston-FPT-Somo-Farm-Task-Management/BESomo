@@ -25,6 +25,8 @@ namespace SomoTaskManagement.Domain.Model.TaskEvidence
 
         public string Time {  get; set; }
 
-        public string EvidenceType {  get; set; }
+        public int? EvidenceType {  get; set; }
+        public string? AvatarManager {  get; set; }
+        public string? ManagerName {  get; set; }
     }
 }

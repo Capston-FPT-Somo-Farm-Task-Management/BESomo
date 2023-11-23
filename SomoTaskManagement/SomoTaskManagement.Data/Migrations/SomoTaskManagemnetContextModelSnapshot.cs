@@ -775,6 +775,9 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<int?>("EvidenceType")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ManagerId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 

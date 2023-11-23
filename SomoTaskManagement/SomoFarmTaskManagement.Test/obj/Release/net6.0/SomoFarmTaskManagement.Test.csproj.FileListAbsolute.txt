@@ -196,3 +196,7 @@ C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoFarmTas
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoFarmTaskManagement.Test\obj\Release\net6.0\SomoFarmTaskManagement.Test.pdb
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoFarmTaskManagement.Test\obj\Release\net6.0\SomoFarmTaskManagement.Test.genruntimeconfig.cache
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoFarmTaskManagement.Test\obj\Release\net6.0\ref\SomoFarmTaskManagement.Test.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoFarmTaskManagement.Test\bin\Release\net6.0\Microsoft.AspNetCore.WebSockets.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoFarmTaskManagement.Test\bin\Release\net6.0\System.Net.WebSockets.WebSocketProtocol.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoFarmTaskManagement.Test\bin\Release\net6.0\SomoTaskManagement.Socket.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoFarmTaskManagement.Test\bin\Release\net6.0\SomoTaskManagement.Socket.pdb

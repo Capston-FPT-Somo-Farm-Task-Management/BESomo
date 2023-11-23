@@ -3,49 +3,48 @@
 }
 
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Sign In</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="row" style="margin-top:5%;">
-        <div class="col-md-12 text-center">
-            <h3>Signal R with Entity Framework</h3>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h3>Signal R with Entity Framework</h3>
+                <p id="evidenceCount">Evidence count: Loading...</p>
+            </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-4 text-center">
-            <img src="~/images/inventory-management.png" height="40%" width="30%" />
-        </div>
-        <div class="col-md-4">
-            <form asp-action="SignIn" style="margin-top:40%;" asp-controller="Login">
-                <div asp-validation-summary="All" class="text-danger"></div>
-                <div class="row">
-                    <div class="col-3">UserName</div>
-                    <div class="col-6">
-                        <input type="text" name="userName" class="form-control" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-3">Password</div>
-                    <div class="col-6">
-                        <input type="password" name="password" class="form-control" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-3"></div>
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary">Sign-In</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div>
-    </div>
+
+    <script>
+        const socket = new WebSocket('wss://localhost:7103/ws/countEvidence');
+
+        socket.addEventListener('open', (event) => {
+            console.log('WebSocket connection opened.');
+        });
+
+        socket.addEventListener('message', (event) => {
+            console.log('Received message from server:', event.data);
+
+            const message = JSON.parse(event.data);
+
+            document.getElementById('evidenceCount').textContent = 'Evidence count: ' + evidenceCount;
+        });
+
+        socket.addEventListener('close', (event) => {
+            console.log('WebSocket connection closed.');
+        });
+
+        socket.addEventListener('error', (event) => {
+            console.error('WebSocket error:', event);
+        });
+    </script>
+
+
 </body>
 </html>
+

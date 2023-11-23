@@ -1,0 +1,12 @@
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagerment.WebSocket\bin\Release\net6.0\SomoTaskManagerment.WebSocket.deps.json
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagerment.WebSocket\bin\Release\net6.0\SomoTaskManagerment.WebSocket.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagerment.WebSocket\bin\Release\net6.0\SomoTaskManagerment.WebSocket.pdb
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagerment.WebSocket\obj\Release\net6.0\SomoTaskManagerment.WebSocket.csproj.AssemblyReference.cache
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagerment.WebSocket\obj\Release\net6.0\SomoTaskManagerment.WebSocket.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagerment.WebSocket\obj\Release\net6.0\SomoTaskManagerment.WebSocket.AssemblyInfoInputs.cache
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagerment.WebSocket\obj\Release\net6.0\SomoTaskManagerment.WebSocket.AssemblyInfo.cs
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagerment.WebSocket\obj\Release\net6.0\SomoTaskManagerment.WebSocket.csproj.CoreCompileInputs.cache
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagerment.WebSocket\obj\Release\net6.0\SomoTaskManagerment.WebSocket.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagerment.WebSocket\obj\Release\net6.0\refint\SomoTaskManagerment.WebSocket.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagerment.WebSocket\obj\Release\net6.0\SomoTaskManagerment.WebSocket.pdb
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagerment.WebSocket\obj\Release\net6.0\ref\SomoTaskManagerment.WebSocket.dll

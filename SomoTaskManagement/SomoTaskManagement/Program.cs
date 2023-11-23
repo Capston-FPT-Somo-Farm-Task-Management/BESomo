@@ -46,7 +46,6 @@ builder.Services.RegisterContextDb(builder.Configuration);
 builder.Services.RegisterDI();
 builder.Services.RegisterTokenBear(builder.Configuration);
 builder.Services.AddAuthorization();
-builder.Services.AddSignalR();
 
 builder.Services.RegisterCache(builder.Configuration);
 
@@ -71,12 +70,7 @@ if (app.Environment.IsDevelopment())
 }
 ;
 
-app.UseWebSockets();
-
-//app.Use(async (context, next) =>
-//{
-//    var unitOfWork = context.RequestServices.GetRequiredService<IUnitOfWork>();
-//});
+app.RegisterWebSocket();
 
 
 app.UseSwaggerUI();

@@ -461,6 +461,28 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+        [HttpGet("Effort/Employee({employeeId})")]
+        public async Task<IActionResult> ExportEmployeeEffort(int employeeId, int month, int year)
+        {
+            try
+            {
+                var excelData = await _employeeService.ExportEmployeeEffort(employeeId, month, year);
+
+                var stream = new MemoryStream(excelData);
+
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "EmployeeEffort.xlsx");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromForm] EmployeeCreateModel employeeUpdateRequest)
         {

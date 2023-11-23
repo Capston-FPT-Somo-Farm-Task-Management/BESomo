@@ -132,8 +132,6 @@ namespace SomoTaskManagement.Services.Impf
             return map;
         }
 
-
-
         public async Task<IEnumerable<FarmTaskModel>> GetList()
         {
             var includes = new Expression<Func<FarmTask, object>>[]
@@ -297,7 +295,7 @@ namespace SomoTaskManagement.Services.Impf
 
             var receiver = await _unitOfWork.RepositoryMember.GetById(farmTask.SuppervisorId);
             var supervisorName = receiver != null ? $"{receiver.Code} - {receiver.Name}" : null;
-
+            var supervisorAvatar = receiver != null ? $"{receiver.Avatar} - {receiver.Avatar}" : null;
 
             var farmTaskModel = new GetFarmTaskModel
             {
@@ -339,13 +337,26 @@ namespace SomoTaskManagement.Services.Impf
                 OverallEffortHour = farmTask.OverallEffortHour.HasValue ? farmTask.OverallEffortHour.Value : 0,
                 AddressDetail = farmTask.AddressDetail,
                 IsPlant = farmTask.IsPlant,
-                IsSpecific = farmTask.IsSpecific
+                IsSpecific = farmTask.IsSpecific,
+                IsExpired = farmTask.IsExpired,
+                AvatarSupervisor = supervisorAvatar,
+                AvatarManager = member != null ? member.Avatar : null,
             };
             if (farmTask.OriginalTaskId == 0)
             {
                 farmTaskModel.IsParent = true;
             }
-
+            var evidence = await _unitOfWork.RepositoryTaskEvidence.GetData(f => f.TaskId == farmTask.Id);
+            var totalEvidence = evidence.Count();
+            if (totalEvidence > 0)
+            {
+                farmTaskModel.IsHaveEvidence = true;
+            }
+            var subtask = await _unitOfWork.RepositoryEmployee_Task.GetData(s => s.TaskId == farmTask.Id && s.Status == true);
+            if (subtask.Any())
+            {
+                farmTaskModel.IsHaveSubtask = true;
+            }
 
             return farmTaskModel;
         }
@@ -778,6 +789,36 @@ namespace SomoTaskManagement.Services.Impf
             else
             {
                 throw new Exception("Chỉ thêm được nhân viên trong trạng thái chuẩn bị và đang thực hiện");
+            }
+        }
+
+        public async Task UpdateTaskDisagreeAndChangeToToDo(int taskId, TaskDraftModelUpdate taskModel, List<DateTime>? dates, List<int> materialIds)
+        {
+            var task = await _unitOfWork.RepositoryFarmTask.GetById(taskId);
+            if (task != null)
+            {
+                if (task.Status == 6)
+                {
+                    await UpdateTask(taskId, taskModel, dates, materialIds);
+                    task.Status = 1;
+                    _unitOfWork.RepositoryFarmTask.Update(task);
+                    await _unitOfWork.RepositoryFarmTask.Commit();
+
+                }
+                else
+                {
+                    throw new Exception("Không thể từ chối");
+                }
+            }
+            else
+            {
+                throw new Exception("Không tìm thấy nhiệm vụ ");
+            }
+            var evidences = await _unitOfWork.RepositoryTaskEvidence.GetData(e => e.TaskId == taskId);
+            foreach (var evidence in evidences)
+            {
+                _unitOfWork.RepositoryTaskEvidence.Delete(evidence);
+                await _unitOfWork.RepositoryTaskEvidence.Commit();
             }
         }
 
@@ -1722,71 +1763,116 @@ namespace SomoTaskManagement.Services.Impf
                 throw new Exception("Không tìm thấy nhiệm vụ");
             }
         }
-        public async Task ChangeStatusFromDoneToDoing(int id, string description)
+        public async Task ChangeStatusFromDoneToDoing(int id, string description, int managerId)
         {
-            var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
-            if (task != null)
+            await _unitOfWork.BeginTransactionAsync();
+            try
             {
-                if (task.Status == 4)
-                {
-                    task.Status = 3;
-                    _unitOfWork.RepositoryFarmTask.Update(task);
-                    await _unitOfWork.RepositoryFarmTask.Commit();
+                var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
 
-                    var taskEvidence = new TaskEvidence
+                if (task != null)
+                {
+                    if (task.Status == 4)
                     {
-                        Status = 1,
-                        SubmitDate = DateTime.Now,
-                        Description = description,
-                        TaskId = id,
-                        EvidenceType = 4,
-                    };
+                        task.Status = 3;
+                        _unitOfWork.RepositoryFarmTask.Update(task);
+                        await _unitOfWork.RepositoryFarmTask.Commit();
 
-                    await _unitOfWork.RepositoryTaskEvidence.Add(taskEvidence);
-                    await _unitOfWork.RepositoryTaskEvidence.Commit();
-                }
-                else
-                {
-                    throw new Exception("Không thể từ chối");
-                }
+                        var taskEvidence = new TaskEvidence
+                        {
+                            Status = 1,
+                            SubmitDate = DateTime.Now,
+                            Description = description,
+                            TaskId = id,
+                            EvidenceType = 4,
+                            ManagerId = managerId
+                        };
 
-            }
-            else
-            {
-                throw new Exception("Không tìm thấy nhiệm vụ");
-            }
-        }
-
-        public async Task ChangeStatusToPendingAndCancel(int id, EvidenceCreateUpdateModel taskEvidence, int status, int evidenceType)
-        {
-            var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
-            if (task != null)
-            {
-                if (task.Status == 3)
-                {
-                    if (status != 5 && status != 7)
-                    {
-                        throw new Exception("Trạng thái truyền vào chỉ được tạm hoãn hoặc hủy bỏ");
+                        await _unitOfWork.RepositoryTaskEvidence.Add(taskEvidence);
+                        await _unitOfWork.RepositoryTaskEvidence.Commit();
                     }
-                    task.Status = status;
-                    _unitOfWork.RepositoryFarmTask.Update(task);
-                    await _unitOfWork.RepositoryFarmTask.Commit();
+                    else
+                    {
+                        throw new Exception("Không thể từ chối");
+                    }
 
-                    await AddTaskEvidenceeWithImage(taskEvidence, evidenceType);
                 }
                 else
                 {
-                    throw new Exception("Không thể từ chối");
+                    throw new Exception("Không tìm thấy nhiệm vụ");
                 }
-
+                _unitOfWork.CommitTransaction();
             }
-            else
+            catch (Exception ex)
             {
-                throw new Exception("Không tìm thấy nhiệm vụ");
+                _unitOfWork.RollbackTransaction();
+                throw new Exception($"Lỗi: {ex.Message}");
             }
+
         }
 
-        public async Task AddTaskEvidenceeWithImage(EvidenceCreateUpdateModel taskEvidence, int evidenceType)
+        public async Task ChangeStatusToPendingAndCancel(int id, EvidencePendingAndCancel taskEvidence, int status, int? managerId)
+        {
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
+
+                if (task != null)
+                {
+                    if (task.Status == 3)
+                    {
+                        if (status != 5 && status != 7)
+                        {
+                            throw new Exception("Trạng thái truyền vào chỉ được tạm hoãn hoặc hủy bỏ");
+                        }
+                        task.Status = status;
+                        _unitOfWork.RepositoryFarmTask.Update(task);
+                        await _unitOfWork.RepositoryFarmTask.Commit();
+
+                        var taskEvidenceType = 0;
+                        if (status == 5)
+                        {
+                            taskEvidenceType = 3;
+                        }
+                        else if (status == 7)
+                        {
+                            taskEvidenceType = 2;
+                        }
+
+                        if (managerId.HasValue)
+                        {
+                            var member = await _unitOfWork.RepositoryMember.GetById(managerId.Value);
+                            if (member.RoleId != 1) throw new Exception("Truyền sai id của manager");
+
+                            await AddTaskEvidenceeWithImage(taskEvidence, taskEvidenceType, managerId.Value, id);
+                        }
+                        else
+                        {
+                            await AddTaskEvidenceeWithImage(taskEvidence, taskEvidenceType, null, id);
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("Không thể từ chối");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Không tìm thấy nhiệm vụ");
+                }
+                _unitOfWork.CommitTransaction();
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.RollbackTransaction();
+                throw new Exception(ex.Message);
+            }
+
+        }
+
+
+        public async Task AddTaskEvidenceeWithImage(EvidencePendingAndCancel taskEvidence, int evidenceType, int? managerId, int taskId)
         {
             await _unitOfWork.BeginTransactionAsync();
             try
@@ -1795,7 +1881,7 @@ namespace SomoTaskManagement.Services.Impf
 
                 DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
 
-                if(evidenceType!= 2 && evidenceType != 3)
+                if (evidenceType != 2 && evidenceType != 3)
                 {
                     throw new Exception("Chỉ được ở trạng thái cancel(2) và pending(3)");
                 }
@@ -1805,8 +1891,9 @@ namespace SomoTaskManagement.Services.Impf
                     Status = 1,
                     SubmitDate = vietnamTime,
                     Description = taskEvidence.Description,
-                    TaskId = taskEvidence.TaskId,
+                    TaskId = taskId,
                     EvidenceType = evidenceType,
+                    ManagerId = managerId
                 };
                 await _unitOfWork.RepositoryTaskEvidence.Add(taskEvidenceCreate);
                 await _unitOfWork.RepositoryTaskEvidence.Commit();
@@ -1829,7 +1916,7 @@ namespace SomoTaskManagement.Services.Impf
 
         }
 
-        public async Task<List<EvidenceImage>> UploadEvidenceImages(int id, EvidenceCreateUpdateModel evidenceCreateUpdateModel)
+        public async Task<List<EvidenceImage>> UploadEvidenceImages(int id, EvidencePendingAndCancel evidenceCreateUpdateModel)
         {
             var uploadedImages = new List<EvidenceImage>();
 
@@ -1879,18 +1966,9 @@ namespace SomoTaskManagement.Services.Impf
             var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
             if (task != null)
             {
-                if (task.Status == 2)
-                {
-                    task.Status = 3;
-                    _unitOfWork.RepositoryFarmTask.Update(task);
-                    await _unitOfWork.RepositoryFarmTask.Commit();
-
-                }
-                else
-                {
-                    throw new Exception("Không thể chuyển trạng thái sang đang thực hiện");
-                }
-
+                task.Status = 3;
+                _unitOfWork.RepositoryFarmTask.Update(task);
+                await _unitOfWork.RepositoryFarmTask.Commit();
             }
             else
             {
@@ -1899,26 +1977,23 @@ namespace SomoTaskManagement.Services.Impf
         }
 
 
-        public async Task DisDisagreeTask(int id, string description)
+        public async Task DisDisagreeTask(int id)
         {
+
             var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
             if (task != null)
             {
-                task.Status = 1;
-                _unitOfWork.RepositoryFarmTask.Update(task);
-                await _unitOfWork.RepositoryFarmTask.Commit();
-
-                var taskEvidence = new TaskEvidence
+                if (task.Status == 6)
                 {
-                    Status = 1,
-                    SubmitDate = DateTime.Now,
-                    Description = description,
-                    TaskId = id,
-                    EvidenceType = 5,
-                };
+                    task.Status = 1;
+                    _unitOfWork.RepositoryFarmTask.Update(task);
+                    await _unitOfWork.RepositoryFarmTask.Commit();
 
-                await _unitOfWork.RepositoryTaskEvidence.Add(taskEvidence);
-                await _unitOfWork.RepositoryTaskEvidence.Commit();
+                }
+                else
+                {
+                    throw new Exception("Không thể từ chối");
+                }
             }
             else
             {
@@ -1930,7 +2005,9 @@ namespace SomoTaskManagement.Services.Impf
                 _unitOfWork.RepositoryTaskEvidence.Delete(evidence);
                 await _unitOfWork.RepositoryTaskEvidence.Commit();
             }
+
         }
+
         public async Task ChangeStatusToClose(int id)
         {
             var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
@@ -1946,7 +2023,30 @@ namespace SomoTaskManagement.Services.Impf
             }
         }
 
-        public async Task<TaskByEmployeeDatesEffort> GetTaskByEmployeeDates(int employeeId, DateTime? startDay, DateTime? endDay, int pageIndex, int pageSize, int? status)
+        public async Task ChangeStatusToDone(int id)
+        {
+            var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
+            if (task != null)
+            {
+                var subtask = await _unitOfWork.RepositoryEmployee_Task.GetData(s => s.TaskId == id && s.Status == true);
+                if (subtask.Any())
+                {
+                    task.Status = 4;
+                    _unitOfWork.RepositoryFarmTask.Update(task);
+                    await _unitOfWork.RepositoryFarmTask.Commit();
+                }
+                else
+                {
+                    throw new Exception("Phải ghi nhận giờ làm trước khi chuyển đổi trạng thái sang hoàn thành ");
+                }
+            }
+            else
+            {
+                throw new Exception("Không tìm thấy nhiệm vụ ");
+            }
+        }
+
+        public async Task<TaskByEmployeeDatesEffort> GetTaskByEmployeeDates(int employeeId, DateTime? startDay, DateTime? endDay, int pageIndex, int pageSize)
         {
             var includes = new Expression<Func<FarmTask, object>>[]
             {
@@ -1963,37 +2063,34 @@ namespace SomoTaskManagement.Services.Impf
             {
                 throw new Exception("Không tìm thấy nhân viên");
             }
-            var subtask = await _unitOfWork.RepositoryEmployee_Task.GetData(expression: s => s.EmployeeId == employeeId);
-            var taskIds = subtask.Select(s => s.TaskId);
-            var task = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id) &&
-                                                                        (!startDay.HasValue || !endDay.HasValue || (
-                                                               (startDay.Value.Year <= t.StartDate.Value.Year &&
-                                                                endDay.Value.Year >= t.StartDate.Value.Year) &&
-                                                               (startDay.Value.Month <= t.StartDate.Value.Month &&
-                                                                endDay.Value.Month >= t.StartDate.Value.Month) &&
-                                                               (startDay.Value.Day <= t.StartDate.Value.Day &&
-                                                                endDay.Value.Day >= t.StartDate.Value.Day)
-                                                                        )), includes: includes);
+            var subtasks = await _unitOfWork.RepositoryEmployee_Task.GetData(expression: s => s.EmployeeId == employeeId &&
+                                                     (!startDay.HasValue || !endDay.HasValue || (
+                                                                (startDay.Value.Year <= s.DaySubmit.Value.Year &&
+                                                                 endDay.Value.Year >= s.DaySubmit.Value.Year) &&
+                                                                (startDay.Value.Month <= s.DaySubmit.Value.Month &&
+                                                                 endDay.Value.Month >= s.DaySubmit.Value.Month) &&
+                                                                (startDay.Value.Day <= s.DaySubmit.Value.Day &&
+                                                                 endDay.Value.Day >= s.DaySubmit.Value.Day)
+                                                             )));
 
-            if (status.HasValue)
-            {
-                task = task.Where(t => t.Status == status.Value);
-            }
+            var taskIds = subtasks.Select(s => s.TaskId);
 
-            var totalTaskCount = task.Count();
+            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(expression: t => taskIds.Contains(t.Id) && t.Status == 8,includes:includes);
+
+            var totalTaskCount = tasks.Count();
 
             var totalPages = (int)Math.Ceiling((double)totalTaskCount / pageSize);
 
             var map = new Dictionary<FarmTask, TaskByEmployeeDates>();
 
-            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<TaskByEmployeeDates>>(task);
+            var farmTaskModels = _mapper.Map<IEnumerable<FarmTask>, IEnumerable<TaskByEmployeeDates>>(tasks);
 
-            foreach (var pair in task.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
+            foreach (var pair in tasks.Zip(farmTaskModels, (ft, ftModel) => new { ft, ftModel }))
             {
                 map.Add(pair.ft, pair.ftModel);
             }
 
-            foreach (var farmTask in task)
+            foreach (var farmTask in tasks)
             {
                 var member = await _unitOfWork.RepositoryMember.GetById(farmTask.SuppervisorId);
 
@@ -2013,6 +2110,18 @@ namespace SomoTaskManagement.Services.Impf
                 if (effortHours != null && map.ContainsKey(farmTask))
                 {
                     map[farmTask].ActualEffortHour = effortHours;
+                }
+
+                var evidence = await _unitOfWork.RepositoryTaskEvidence.GetData(f => f.TaskId == farmTask.Id);
+                var totalEvidence = evidence.Count();
+                if (totalEvidence > 0 && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].IsHaveEvidence = true;
+                }
+                var subtask = await _unitOfWork.RepositoryEmployee_Task.GetData(s => s.TaskId == farmTask.Id && s.Status == true);
+                if (subtask.Any() && map.ContainsKey(farmTask))
+                {
+                    map[farmTask].IsHaveSubtask = true;
                 }
             }
 

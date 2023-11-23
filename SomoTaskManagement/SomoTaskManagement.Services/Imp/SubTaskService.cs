@@ -61,7 +61,7 @@ namespace SomoTaskManagement.Services.Imp
             if (!subtask.Any())
             {
                 throw new Exception("Nhiệm vụ con rỗng");
-            } 
+            }
             return _mapper.Map<IEnumerable<Employee_Task>, IEnumerable<SubTaskModel>>(subtask);
         }
 
@@ -103,7 +103,7 @@ namespace SomoTaskManagement.Services.Imp
                 DaySubmit = subTask.DaySubmit,
                 Code = taskCode,
                 Status = true,
-                ActualEfforMinutes =subTask.OverallEfforMinutes,
+                ActualEfforMinutes = subTask.OverallEfforMinutes,
                 ActualEffortHour = subTask.OverallEffortHour
             };
 
@@ -285,7 +285,7 @@ namespace SomoTaskManagement.Services.Imp
             {
                 checkSubtask = true;
             }
-            var groupedSubtasks = subtasks.GroupBy(s => new { s.TaskId, s.EmployeeId});
+            var groupedSubtasks = subtasks.GroupBy(s => new { s.TaskId, s.EmployeeId });
 
             var subtaskEffortModels = groupedSubtasks.Select(group =>
             {
@@ -322,22 +322,19 @@ namespace SomoTaskManagement.Services.Imp
                 throw new Exception("Không tìm thấy nhân viên");
             }
 
-            var subtasks = await _unitOfWork.RepositoryEmployee_Task.GetData(expression: s => s.EmployeeId == id);
+            var subtasks = await _unitOfWork.RepositoryEmployee_Task.GetData(expression: s => s.EmployeeId == id &&
+                                                    (!startDay.HasValue || !endDay.HasValue || (
+                                                               (startDay.Value.Year <= s.DaySubmit.Value.Year &&
+                                                                endDay.Value.Year >= s.DaySubmit.Value.Year) &&
+                                                               (startDay.Value.Month <= s.DaySubmit.Value.Month &&
+                                                                endDay.Value.Month >= s.DaySubmit.Value.Month) &&
+                                                               (startDay.Value.Day <= s.DaySubmit.Value.Day &&
+                                                                endDay.Value.Day >= s.DaySubmit.Value.Day)
+                                                            )));
 
             var taskIds = subtasks.Select(s => s.TaskId);
 
-            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id) && (t.Status == 2 || t.Status == 3) &&
-                                                 (!startDay.HasValue || !endDay.HasValue || (
-                                                               (startDay.Value.Year <= t.StartDate.Value.Year &&
-                                                                endDay.Value.Year >= t.StartDate.Value.Year) &&
-                                                               (startDay.Value.Month <= t.StartDate.Value.Month &&
-                                                                endDay.Value.Month >= t.StartDate.Value.Month) &&
-                                                               (startDay.Value.Day <= t.StartDate.Value.Day &&
-                                                                endDay.Value.Day >= t.StartDate.Value.Day)
-                                                            ))
-                                                );
-
-
+            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id) && t.Status == 8);
 
             var totalTask = tasks.Count();
 

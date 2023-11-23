@@ -27,8 +27,8 @@ namespace SomoTaskManagement.Services.Interface
         Task<int> CheckRoleMember(int id);
         Task CreateAsignTask(TaskCreateAsignModel taskModel, List<int>? materialIds, List<int>? employeeIds);
         Task CreateDisagreeTask(int id, string description);
-        Task DisDisagreeTask(int id, string description);
-        Task<TaskByEmployeeDatesEffort> GetTaskByEmployeeDates(int employeeId, DateTime? startDay, DateTime? endDay, int pageIndex, int pageSize, int? status);
+        Task DisDisagreeTask(int id);
+        Task<TaskByEmployeeDatesEffort> GetTaskByEmployeeDates(int employeeId, DateTime? startDay, DateTime? endDay, int pageIndex, int pageSize);
         Task<FarmTaskPageResult> GetAllTaskByMemberDate(int id, DateTime? date, int pageIndex, int pageSize, int? checkTaskParent, string? taskName);
         Task DeleteTask(int farmTaskId);
         Task<IEnumerable<FarmTaskModel>> GetTaskPrepareAndDoing(int id);
@@ -41,8 +41,10 @@ namespace SomoTaskManagement.Services.Interface
         Task DeleteTaskTodoAndDraft(int taskId);
         Task AddEmployeeToTaskAsign(int taskId, List<int>? employeeIds, int? overallEfforMinutes, int? overallEffortHour);
         Task ChangeStatusToDoing(int id);
-        Task ChangeStatusToPendingAndCancel(int id, EvidenceCreateUpdateModel taskEvidence, int status, int isCancel);
-        Task ChangeStatusFromDoneToDoing(int id, string description);
+        Task ChangeStatusToPendingAndCancel(int id, EvidencePendingAndCancel taskEvidence, int status, int? managerId);
+        Task ChangeStatusFromDoneToDoing(int id, string description, int managerId);
         Task ChangeStatusToClose(int id);
+        Task ChangeStatusToDone(int id);
+        Task UpdateTaskDisagreeAndChangeToToDo(int taskId, TaskDraftModelUpdate taskModel, List<DateTime>? dates, List<int> materialIds);
     }
 }

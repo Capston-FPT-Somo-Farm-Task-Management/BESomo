@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SomoTaskManagement.Data\SomoTaskManagement.Data.csproj" />
+    <ProjectReference Include="..\SomoTaskManagement.WebSocket\SomoTaskManagement.Socket.csproj" />
   </ItemGroup>
 
 </Project>

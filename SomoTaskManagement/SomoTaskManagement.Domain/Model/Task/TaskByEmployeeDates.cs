@@ -59,5 +59,10 @@ namespace SomoTaskManagement.Domain.Model.Task
         public int AreaId { set; get; }
         public int ActualEfforMinutes { set; get; }
         public int ActualEffortHour { set; get; }
+        public bool? IsPlant { get; set; }
+        public bool IsSpecific { get; set; }
+        public bool IsHaveSubtask { get; set; }
+        public bool IsHaveEvidence { get; set; }
+        public bool IsExpired { set; get; }
     }
 }

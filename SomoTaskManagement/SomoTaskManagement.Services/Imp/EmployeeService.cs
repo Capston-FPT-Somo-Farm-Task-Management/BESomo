@@ -19,9 +19,11 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace SomoTaskManagement.Services.Imp
 {
@@ -151,9 +153,9 @@ namespace SomoTaskManagement.Services.Imp
                     var worksheet = package.Workbook.Worksheets[0];
                     int rowCount = worksheet.Dimension.Rows;
 
-                    for (int row = 2; row <= rowCount; row++)
+                    for (int row = 4; row <= rowCount; row++)
                     {
-                        var taskTypeIdsString = worksheet.Cells[row, 8].Value?.ToString();
+                        var taskTypeIdsString = worksheet.Cells[row, 7].Value?.ToString();
 
                         var taskTypeIds = new List<int>();
 
@@ -176,52 +178,98 @@ namespace SomoTaskManagement.Services.Imp
                             Name = worksheet.Cells[row, 2].Value?.ToString(),
                             PhoneNumber = worksheet.Cells[row, 3].Value?.ToString(),
                             Address = worksheet.Cells[row, 4].Value?.ToString(),
-                            FarmId = Convert.ToInt32(worksheet.Cells[row, 5].Value),
-                            Gender = worksheet.Cells[row, 6].Value != null ? (bool)worksheet.Cells[row, 5].Value : false,
-                            DateOfBirth = Convert.ToDateTime(worksheet.Cells[row, 7].Value),
+                            Gender = worksheet.Cells[row, 5].Value?.ToString(),
                             TaskTypeIds = taskTypeIds,
-                            ImageUrl = worksheet.Cells[row, 9].Value?.ToString()
+                            ImageUrl = worksheet.Cells[row, 8].Value?.ToString()
                         };
+                        object dateOfBirthValue = worksheet.Cells[row, 6].Value;
+                        DateTime dateOfBirth;
+
+                        if (dateOfBirthValue != null && double.TryParse(dateOfBirthValue.ToString(), out double dateAsDouble))
+                        {
+                            dateOfBirth = DateTime.FromOADate(dateAsDouble);
+                        }
+                        else
+                        {
+                            throw new Exception("Invalid date format in Excel.");
+                        }
+
+                        employeeModel.DateOfBirth = dateOfBirth;
 
                         var existCode = await _unitOfWork.RepositoryEmployee.GetSingleByCondition(a => a.Code == employeeModel.Code);
+
                         if (existCode != null)
                         {
-                            throw new Exception($"Duplicate code found: {employeeModel.Code}");
-                        }
+                            existCode.PhoneNumber = employeeModel.PhoneNumber;
+                            existCode.Address = employeeModel.Address;
+                            existCode.Name = employeeModel.Name;
+                            existCode.Gender = string.Equals(worksheet.Cells[row, 5].Value?.ToString(), "Nam", StringComparison.OrdinalIgnoreCase);
+                            existCode.Status = 1;
+                            existCode.DateOfBirth = employeeModel.DateOfBirth;
+                            existCode.Avatar = employeeModel.ImageUrl;
 
-                        var employeeNew = new Employee
-                        {
-                            PhoneNumber = employeeModel.PhoneNumber,
-                            Address = employeeModel.Address,
-                            Name = employeeModel.Name,
-                            FarmId = employeeModel.FarmId,
-                            Gender = employeeModel.Gender,
-                            Code = employeeModel.Code,
-                            Status = 1,
-                            DateOfBirth = employeeModel.DateOfBirth,
-                            Avatar = employeeModel.ImageUrl
-                        };
+                            _unitOfWork.RepositoryEmployee.Update(existCode);
 
-                        foreach (var taskTypeId in employeeModel.TaskTypeIds)
-                        {
-                            var taskType = await _unitOfWork.RepositoryTaskTaskType.GetById(taskTypeId);
-
-                            if (taskType == null)
+                            _unitOfWork.RepositoryEmployee_TaskType.Delete(expression: t => t.EmployeeId == existCode.Id);
+                            for (int i = 0; i < employeeModel.TaskTypeIds.Count; i++)
                             {
-                                throw new Exception($"Task type with ID '{taskTypeId}' not found.");
+                                var taskTypeId = employeeModel.TaskTypeIds[i];
+
+                                var taskType = await _unitOfWork.RepositoryTaskTaskType.GetById(taskTypeId);
+
+                                if (taskType == null)
+                                {
+                                    throw new Exception($"Task type with ID '{taskTypeId}' not found.");
+                                }
+
+                                var employee_TaskType = new Employee_TaskType
+                                {
+                                    EmployeeId = existCode.Id,
+                                    TaskTypeId = taskType.Id,
+                                    Status = true,
+                                };
+
+                                existCode.Employee_TaskTypes.Add(employee_TaskType);
                             }
-
-                            var employee_TaskType = new Employee_TaskType
+                            await _unitOfWork.RepositoryEmployee.Commit();
+                        }
+                        else
+                        {
+                            var employeeNew = new Employee
                             {
-                                EmployeeId = employeeNew.Id,
-                                TaskTypeId = taskType.Id,
-                                Status = true,
+                                PhoneNumber = employeeModel.PhoneNumber,
+                                Address = employeeModel.Address,
+                                Name = employeeModel.Name,
+                                FarmId = 1,
+                                Gender = string.Equals(worksheet.Cells[row, 5].Value?.ToString(), "Nam", StringComparison.OrdinalIgnoreCase),
+                                Code = employeeModel.Code,
+                                Status = 1,
+                                DateOfBirth = employeeModel.DateOfBirth,
+                                Avatar = employeeModel.ImageUrl
                             };
 
-                            employeeNew.Employee_TaskTypes.Add(employee_TaskType);
+                            foreach (var taskTypeId in employeeModel.TaskTypeIds)
+                            {
+                                var taskType = await _unitOfWork.RepositoryTaskTaskType.GetById(taskTypeId);
+
+                                if (taskType == null)
+                                {
+                                    throw new Exception($"Task type with ID '{taskTypeId}' not found.");
+                                }
+
+                                var employee_TaskType = new Employee_TaskType
+                                {
+                                    EmployeeId = employeeNew.Id,
+                                    TaskTypeId = taskType.Id,
+                                    Status = true,
+                                };
+
+                                employeeNew.Employee_TaskTypes.Add(employee_TaskType);
+                            }
+
+                            await _unitOfWork.RepositoryEmployee.Add(employeeNew);
                         }
 
-                        await _unitOfWork.RepositoryEmployee.Add(employeeNew);
                     }
 
                     await _unitOfWork.RepositoryEmployee.Commit();
@@ -239,51 +287,85 @@ namespace SomoTaskManagement.Services.Imp
         {
             using (var package = new ExcelPackage())
             {
-                var worksheet = package.Workbook.Worksheets.Add("Employees");
+                var worksheetEmployee = package.Workbook.Worksheets.Add("Employees");
+                var farm = await _unitOfWork.RepositoryFarm.GetById(farmId);
+                worksheetEmployee.Cells[1, 1].Value = $"Thông tin nhân viên của trang trại {farm.Name}";
 
-                worksheet.Cells[1, 1].Value = "Mã nhân viên";
-                worksheet.Cells[1, 2].Value = "Họ tên";
-                worksheet.Cells[1, 3].Value = " Số điện thoại";
-                worksheet.Cells[1, 4].Value = "Địa chỉ";
-                worksheet.Cells[1, 5].Value = "Trang trại";
-                worksheet.Cells[1, 6].Value = "Giới tính";
-                worksheet.Cells[1, 7].Value = "Ngày sinh";
-                worksheet.Cells[1, 8].Value = "Kỹ năng";
-                worksheet.Cells[1, 9].Value = "Hình ảnh";
+                worksheetEmployee.Cells[3, 1].Value = "Mã nhân viên";
+                worksheetEmployee.Cells[3, 2].Value = "Họ tên";
+                worksheetEmployee.Cells[3, 3].Value = "Số điện thoại";
+                worksheetEmployee.Cells[3, 4].Value = "Địa chỉ";
+                worksheetEmployee.Cells[3, 5].Value = "Giới tính";
+                worksheetEmployee.Cells[3, 6].Value = "Ngày sinh";
+                worksheetEmployee.Cells[3, 7].Value = "Mã kỹ năng";
+                worksheetEmployee.Cells[3, 8].Value = "Hình ảnh";
 
                 var employees = await _unitOfWork.RepositoryEmployee.GetData(e => e.FarmId == farmId && e.Status == 1);
 
-                int row = 2;
+                int row = 4;
                 foreach (var employee in employees)
                 {
-                    worksheet.Cells[row, 1].Value = employee.Code;
-                    worksheet.Cells[row, 2].Value = employee.Name;
-                    worksheet.Cells[row, 3].Value = employee.PhoneNumber;
-                    worksheet.Cells[row, 4].Value = employee.Address;
-
-                    var farm = await _unitOfWork.RepositoryFarm.GetById(farmId);
-                    worksheet.Cells[row, 5].Value = farm.Name;
+                    worksheetEmployee.Cells[row, 1].Value = employee.Code;
+                    worksheetEmployee.Cells[row, 2].Value = employee.Name;
+                    worksheetEmployee.Cells[row, 3].Value = employee.PhoneNumber;
+                    worksheetEmployee.Cells[row, 4].Value = employee.Address;
 
                     var gender = (bool)employee.Gender ? EmployeeGenderEnum.Male : EmployeeGenderEnum.Female;
                     var genderString = GetGenderDescription(gender);
-                    worksheet.Cells[row, 6].Value = genderString;
-                    worksheet.Cells[row, 7].Value = employee.DateOfBirth;
-                    worksheet.Cells[row, 7].Style.Numberformat.Format = "yyyy-mm-dd";
+                    worksheetEmployee.Cells[row, 5].Value = genderString;
+                    worksheetEmployee.Cells[row, 6].Value = employee.DateOfBirth;
+                    worksheetEmployee.Cells[row, 6].Style.Numberformat.Format = "yyyy-mm-dd";
 
                     var employee_taskType = await _unitOfWork.RepositoryEmployee_TaskType.GetData(et => et.EmployeeId == employee.Id);
                     var taskTypeIds = employee_taskType.Select(t => t.TaskTypeId).ToList();
-                    var taskTypeOfEmployee = await _unitOfWork.RepositoryTaskTaskType.GetData(et => taskTypeIds.Contains(et.Id));
-                    var taskTypeName = taskTypeOfEmployee.Select(t => t.Name).ToList();
-                    worksheet.Cells[row, 8].Value = string.Join(",", taskTypeName);
+                    worksheetEmployee.Cells[row, 7].Value = string.Join(",", taskTypeIds);
 
-                    worksheet.Cells[row, 9].Value = employee.Avatar;
+                    worksheetEmployee.Cells[row, 8].Value = employee.Avatar;
 
                     row++;
                 }
+                worksheetEmployee.Cells.AutoFitColumns();
 
+                var worksheetTaskType = package.Workbook.Worksheets.Add("TaskTypes");
+
+                worksheetTaskType.Cells[1, 1].Value = "STT";
+                worksheetTaskType.Cells[1, 2].Value = "Mã";
+                worksheetTaskType.Cells[1, 3].Value = "Tên";
+                worksheetTaskType.Cells[1, 4].Value = "Loại công việc";
+                worksheetTaskType.Cells[1, 5].Value = "Mô tả";
+
+                var taskTypes = await _unitOfWork.RepositoryTaskTaskType.GetData(e => e.IsDelete == false);
+
+                int rowTaskType = 2;
+                int sequence = 1;
+                taskTypes.OrderBy(t => t.Status);
+                foreach (var taskType in taskTypes)
+                {
+                    worksheetTaskType.Cells[rowTaskType, 1].Value = sequence;
+                    worksheetTaskType.Cells[rowTaskType, 2].Value = taskType.Id;
+                    worksheetTaskType.Cells[rowTaskType, 3].Value = taskType.Name;
+                    worksheetTaskType.Cells[rowTaskType, 4].Value = GetEnumDescription((PlantLivestockEnum)taskType.Status);
+                    worksheetTaskType.Cells[rowTaskType, 5].Value = taskType.Description;
+
+                    rowTaskType++;
+                    sequence++;
+                }
+
+                worksheetTaskType.Cells.AutoFitColumns();
                 return package.GetAsByteArray();
             }
         }
+        public static string GetEnumDescription<T>(T enumValue)
+        {
+            var fieldInfo = enumValue.GetType().GetField(enumValue.ToString());
+
+            if (fieldInfo == null) return string.Empty;
+
+            var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+
+            return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : enumValue.ToString();
+        }
+
         public static string GetGenderDescription(EmployeeGenderEnum status)
         {
             var fieldInfo = status.GetType().GetField(status.ToString());
@@ -373,6 +455,147 @@ namespace SomoTaskManagement.Services.Imp
             }
         }
 
+        public async Task<byte[]> ExportEmployeeEffort(int emplopyeeId, int month, int year)
+        {
+            var numberOfDaysInMonth = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+
+            using (var package = new ExcelPackage())
+            {
+                var employee = await _unitOfWork.RepositoryEmployee.GetById(emplopyeeId);
+                var worksheet = package.Workbook.Worksheets.Add("EmployeeImportTemplate");
+
+                worksheet.Cells["D1:N1"].Merge = true;
+                worksheet.Cells[1, 4].Value = $"BẢNG CHẤM CÔNG THÁNG {month} NĂM {year} của nhân viên {employee.Name}";
+                worksheet.Cells[1, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+
+                using (var range = worksheet.Cells["A1:L1"])
+                {
+                    range.Style.Font.Bold = true;
+                    range.Style.Font.Size = 18;
+                    range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                }
+                worksheet.Cells["A2:A3"].Merge = true;
+                worksheet.Cells["B2:B3"].Merge = true;
+                worksheet.Cells["C2:C3"].Merge = true;
+                worksheet.Cells[2, 1].Value = "STT";
+                worksheet.Cells[2, 2].Value = "Mã nhiệm vụ";
+                worksheet.Cells[2, 3].Value = "Tên nhiệm vụ";
+                worksheet.Cells[2, 4, 2, 3 + numberOfDaysInMonth].Merge = true;
+                worksheet.Cells[2, 4, 2, 3 + numberOfDaysInMonth].Value = "NGÀY CÔNG";
+                worksheet.Cells[2, 4, 2, 3 + numberOfDaysInMonth].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+
+                using (var range = worksheet.Cells["A2:M2"])
+                {
+                    range.Style.Font.Bold = true;
+                    range.Style.Font.Size = 12;
+                    range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                }
+
+                int currentColumn = 4;
+                for (int day = 1; day <= numberOfDaysInMonth; day++)
+                {
+                    worksheet.Cells[3, currentColumn].Value = $"{day:00}";
+
+                    currentColumn++;
+                }
+
+                //worksheet.Row(3).Height = 35;
+
+                worksheet.Column(1).Width = 10;
+                worksheet.Column(2).Width = 20;
+                worksheet.Column(3).Width = 30;
+                for (int col = 4; col <= numberOfDaysInMonth + 2; col++)
+                {
+                    worksheet.Column(col).Width = 10;
+                }
+                int currentColumnEffort = 4;
+                var taskOfEmployees = await GetEffortEmployeeInTask(emplopyeeId, month, year);
+                int row = 4;
+                var subtasks = await _unitOfWork.RepositoryEmployee_Task.GetData(t => t.EmployeeId == emplopyeeId &&
+                                          t.DaySubmit.HasValue && t.DaySubmit.Value.Month == month && t.DaySubmit.Value.Year == year);
+
+                var taskIds = subtasks.Select(t => t.TaskId);
+
+                var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id));
+                foreach (var taskInDay in tasks)
+                {
+                    worksheet.Cells[row, 1].Value = row - 3;
+                    worksheet.Cells[row, 2].Value = taskInDay.Code;
+                    worksheet.Cells[row, 3].Value = taskInDay.Name;
+
+                    foreach (var taskOfEmployee in taskOfEmployees)
+                    {
+                        var effortTask = taskOfEmployee.TaskEfforts.FirstOrDefault(te => te.CodeTask == taskInDay.Code);
+
+                        if (effortTask != null)
+                        {
+                            worksheet.Cells[row, currentColumnEffort].Value = effortTask.EffortHour;
+                        }
+
+                        currentColumnEffort++;
+                    }
+
+                    currentColumnEffort = 4;
+                    row++;
+                }
+
+
+                worksheet.View.FreezePanes(5, 4);
+                return package.GetAsByteArray();
+            }
+        }
+        public async Task<List<EmployeeEffortInTask>> GetEffortEmployeeInTask(int id, int month, int year)
+        {
+            var employee = await _unitOfWork.RepositoryEmployee.GetById(id);
+            if (employee == null)
+            {
+                throw new Exception("Không tìm thấy nhân viên");
+            }
+
+            var subtasks = await _unitOfWork.RepositoryEmployee_Task.GetData(t => t.EmployeeId == id &&
+                                                t.DaySubmit.HasValue && t.DaySubmit.Value.Month == month && t.DaySubmit.Value.Year == year);
+
+
+
+            var totalEffortList = new List<EmployeeEffortInTask>();
+
+            for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
+            {
+                var subtasksOfDay = subtasks.Where(t => t.DaySubmit?.Day == day).ToList();
+                var taskIds = subtasksOfDay.Select(t => t.TaskId);
+
+                var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id) && t.Status == 8);
+
+                var tasksAndEffortsOfDay = new List<TaskEffort>();
+
+                foreach (var subtask in subtasks)
+                {
+                    var taskEmployeeOfDay = tasks.FirstOrDefault(t => t.Id == subtask.TaskId);
+
+                    if (taskEmployeeOfDay != null)
+                    {
+                        var taskEffort = new TaskEffort
+                        {
+                            CodeTask = taskEmployeeOfDay.Code,
+                            EffortHour = subtask.ActualEfforMinutes / 60.0 + subtask.ActualEffortHour
+                        };
+
+                        tasksAndEffortsOfDay.Add(taskEffort);
+                    }
+                }
+
+                var totalEffortEmployee = new EmployeeEffortInTask
+                {
+                    Day = day,
+                    TaskEfforts = tasksAndEffortsOfDay
+                };
+
+                totalEffortList.Add(totalEffortEmployee);
+            }
+            return totalEffortList;
+        }
 
         public async Task<List<EmployeeEffortInMonthModel>> GetTotalEffortEmployee(int id, int month, int year)
         {
@@ -418,72 +641,6 @@ namespace SomoTaskManagement.Services.Imp
                         Day = day,
                         EndDate = null, // You might want to set this to an appropriate value
                         EffortHour = 0.0
-                    };
-
-                    totalEffortList.Add(totalEffortEmployee);
-                }
-            }
-
-            return totalEffortList;
-        }
-
-        public async Task<List<EmployeeEffortInTask>> GetEffortEmployeeInTask(int id, int month, int year)
-        {
-            var employee = await _unitOfWork.RepositoryEmployee.GetById(id);
-            if (employee == null)
-            {
-                throw new Exception("Không tìm thấy nhân viên");
-            }
-
-            var subtasks = await _unitOfWork.RepositoryEmployee_Task.GetData(t => t.EmployeeId == id &&
-                                                t.DaySubmit.HasValue && t.DaySubmit.Value.Month == month && t.DaySubmit.Value.Year == year);
-
-            var taskIds = subtasks.Select(t => t.TaskId);
-
-            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id));
-
-            var totalEffortList = new List<EmployeeEffortInTask>();
-
-            for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
-            {
-                var subtasksOfDay = subtasks.Where(t => t.DaySubmit?.Day == day).ToList();
-                var taskOfDay = tasks.Where(t => t.StartDate.HasValue && t.StartDate.Value.Day == day).ToList();
-
-                if (subtasksOfDay.Any())
-                {
-                    var tasksAndEffortsOfDay = new List<TaskEffort>();
-
-                    foreach (var subtask in subtasksOfDay)
-                    {
-                        var subtaskEffort = await _unitOfWork.RepositoryEmployee_Task.GetSingleByCondition(s => s.SubtaskId == subtask.SubtaskId && s.EmployeeId == id);
-                        var taskEmployeeOfDay = taskOfDay.FirstOrDefault(t => t.Id == subtask.TaskId);
-
-                        if (taskEmployeeOfDay != null)
-                        {
-                            var taskEffort = new TaskEffort
-                            {
-                                CodeTask = taskEmployeeOfDay.Code,
-                                EffortHour = subtaskEffort.ActualEfforMinutes / 60.0 + subtaskEffort.ActualEffortHour
-                            };
-
-                            tasksAndEffortsOfDay.Add(taskEffort);
-                        }
-                    }
-
-                    var totalEffortEmployee = new EmployeeEffortInTask
-                    {
-                        Day = day,
-                        TaskEfforts = tasksAndEffortsOfDay
-                    };
-
-                    totalEffortList.Add(totalEffortEmployee);
-                }
-                else
-                {
-                    var totalEffortEmployee = new EmployeeEffortInTask
-                    {
-                        Day = day,
-                        TaskEfforts = new List<TaskEffort>()
                     };
 
                     totalEffortList.Add(totalEffortEmployee);

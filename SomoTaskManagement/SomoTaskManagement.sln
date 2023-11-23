@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SomoFarmTaskManagement.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SomoTaskManagement.Cache", "SomoTaskManagement.Cache\SomoTaskManagement.Cache.csproj", "{9E007E13-C786-43E5-85B1-686D0FFE0A4E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SomoTaskManagement.Socket", "SomoTaskManagement.WebSocket\SomoTaskManagement.Socket.csproj", "{390A5B92-5032-4CE5-AEEA-667832246910}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{9E007E13-C786-43E5-85B1-686D0FFE0A4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E007E13-C786-43E5-85B1-686D0FFE0A4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E007E13-C786-43E5-85B1-686D0FFE0A4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{390A5B92-5032-4CE5-AEEA-667832246910}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{390A5B92-5032-4CE5-AEEA-667832246910}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{390A5B92-5032-4CE5-AEEA-667832246910}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{390A5B92-5032-4CE5-AEEA-667832246910}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

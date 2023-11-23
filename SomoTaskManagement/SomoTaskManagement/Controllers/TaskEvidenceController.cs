@@ -6,6 +6,7 @@ using SomoTaskManagement.Domain.Model;
 using SomoTaskManagement.Domain.Model.EvidenceImage;
 using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Domain.Model.TaskEvidence;
+using SomoTaskManagement.Services.Impf;
 using SomoTaskManagement.Services.Interface;
 
 namespace SomoTaskManagement.Api.Controllers
@@ -88,6 +89,39 @@ namespace SomoTaskManagement.Api.Controllers
             {
                 return BadRequest(e.Message);
 
+            }
+        }
+
+        [HttpGet("countEvidence")]
+        public async Task<IActionResult> CountEvidence()
+        {
+            var evidenceCount = await _taskEvidenceService.CountEvidenceOfTask();
+            return Ok(new { EvidenceCount = evidenceCount });
+        }
+
+        [HttpGet("Status")]
+        public async Task<IActionResult> GetStatusEvidenceDescriptions()
+        {
+
+            try
+            {
+                var task = _taskEvidenceService.GetStatusEvidenceDescriptions();
+
+                return Ok(new ApiResponseModel
+                {
+                    Data = task,
+                    Message = "Danh sách trạng thái ",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
             }
         }
 

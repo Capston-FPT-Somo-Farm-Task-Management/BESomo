@@ -13,9 +13,11 @@ namespace SomoTaskManagement.Services.Interface
     {
         Task AddTaskEvidencee(TaskEvidence taskEvidence);
         Task AddTaskEvidenceeWithImage(EvidenceCreateUpdateModel evidenceCreateUpdateModel);
+        Task<int> CountEvidenceOfTask();
         Task CreateDisagreeTask(int id, string description);
         Task DeleteTaskEvidence(int id);
         Task<IEnumerable<TaskEvidenceModel>> GetEvidenceByTask(int taskId);
+        List<object> GetStatusEvidenceDescriptions();
         Task<TaskEvidenceModel> GetTaskEvidence(int id);
         Task<IEnumerable<TaskEvidence>> ListTaskEvidence();
         Task UpdateTaskEvidence(int id, EvidenceCreateUpdateModel taskEvidence, List<string> oldUrlImages);

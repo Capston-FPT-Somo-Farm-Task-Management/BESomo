@@ -18,6 +18,11 @@
     <ProjectReference Include="..\SomoTaskManagement.Authentication\SomoTaskManagement.Authentication.csproj" />
     <ProjectReference Include="..\SomoTaskManagement.Cache\SomoTaskManagement.Cache.csproj" />
     <ProjectReference Include="..\SomoTaskManagement.Data\SomoTaskManagement.Data.csproj" />
+    <ProjectReference Include="..\SomoTaskManagement.WebSocket\SomoTaskManagement.Socket.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="WebSocketMessage\" />
   </ItemGroup>
 
 </Project>

@@ -90,3 +90,5 @@ C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskMan
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\refint\SomoTaskManagement.Infrastructure.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\SomoTaskManagement.Infrastructure.pdb
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\obj\Release\net6.0\ref\SomoTaskManagement.Infrastructure.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Socket.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement.Infrastructure\bin\Release\net6.0\SomoTaskManagement.Socket.pdb

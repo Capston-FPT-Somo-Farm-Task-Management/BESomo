@@ -21,7 +21,7 @@ namespace SomoTaskManagement.Domain.Model.Employee
         [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters.")]
         public string Address { get; set; }
         [Required]
-        public bool Gender { get; set; }
+        public string Gender { get; set; }
         public string ImageUrl { get; set; }
         public int FarmId { get; set; }
         public DateTime DateOfBirth { get; set; }

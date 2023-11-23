@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using FirebaseAdmin.Messaging;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,11 +15,7 @@ using SomoTaskManagement.Services.Imp;
 using SomoTaskManagement.Services.Impf;
 using SomoTaskManagement.Services.Interface;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SomoTaskManagement.Socket;
 
 namespace SomoTaskManagement.Infrastructure.Configuration
 {
@@ -58,7 +55,7 @@ namespace SomoTaskManagement.Infrastructure.Configuration
             services.AddScoped<ISubTaskService, SubTaskService>();
             services.AddScoped<IHubConnection, HubConnectionService>();
             services.AddScoped<INotificationService, NotificationService>();
-
+            services.AddSingleton<WebSocketManager>();
 
         }
 
@@ -98,6 +95,12 @@ namespace SomoTaskManagement.Infrastructure.Configuration
                 option.WaitForJobsToComplete = true;
             });
         }
+        public static void RegisterWebSocket(this IApplicationBuilder app)
+        {
+            app.UseWebSockets();
+            app.UseWebSocketManager("/ws/countEvidence");
+        }
+
     }
 
 

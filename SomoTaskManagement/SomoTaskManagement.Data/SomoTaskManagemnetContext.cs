@@ -403,6 +403,7 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.SubmitDate).IsRequired();
                 entity.Property(e => e.Description).IsRequired();
                 entity.Property(e => e.EvidenceType);
+                entity.Property(e => e.ManagerId);
 
                 entity.HasOne(d => d.Task).WithMany(p => p.TaskEvidences).HasForeignKey(d => d.TaskId).HasConstraintName("FK_Task_TaskEvidence");
             });
