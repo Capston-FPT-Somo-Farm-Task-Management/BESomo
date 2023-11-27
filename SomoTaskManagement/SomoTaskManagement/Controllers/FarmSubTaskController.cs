@@ -23,11 +23,11 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpGet("Task({taskId})")]
-        public async Task<IActionResult> SubtaskByTask(int taskId)
+        public async Task<IActionResult> SubtaskByTask(int taskId,[FromQuery]int? employeeId)
         {
             try
             {
-                var subtask = await _subTaskService.SubtaskByTask(taskId);
+                var subtask = await _subTaskService.SubtaskByTask(taskId, employeeId);
                 return Ok(new ApiResponseModel
                 {
                     Data = subtask,

@@ -46,6 +46,30 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+        [HttpGet("HashPassword")]
+        public async Task<IActionResult> HashPassword()
+        {
+            try
+            {
+                await _memberService.HashPassword();
+                return Ok(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "List member success",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMember(int id)
         {

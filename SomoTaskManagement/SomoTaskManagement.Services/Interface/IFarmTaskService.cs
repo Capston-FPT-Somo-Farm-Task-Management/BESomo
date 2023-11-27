@@ -38,7 +38,7 @@ namespace SomoTaskManagement.Services.Interface
         Task CreateTaskDraft(TaskDraftModel taskDraftModel, List<DateTime>? Dates, List<int>? materialIds);
         Task UpdateTask(int taskId, TaskDraftModelUpdate taskModel, List<DateTime>? dates, List<int> materialIds);
         Task UpdateTaskDraftAndToPrePare(int taskId, TaskDraftModelUpdate taskModel, List<DateTime>? dates, List<int>? materialIds);
-        Task DeleteTaskTodoAndDraft(int taskId);
+        Task DeleteTaskTodoDraftAssign(int taskId);
         Task AddEmployeeToTaskAsign(int taskId, List<int>? employeeIds, int? overallEfforMinutes, int? overallEffortHour);
         Task ChangeStatusToDoing(int id);
         Task ChangeStatusToPendingAndCancel(int id, EvidencePendingAndCancel taskEvidence, int status, int? managerId);
@@ -46,5 +46,7 @@ namespace SomoTaskManagement.Services.Interface
         Task ChangeStatusToClose(int id);
         Task ChangeStatusToDone(int id);
         Task UpdateTaskDisagreeAndChangeToToDo(int taskId, TaskDraftModelUpdate taskModel, List<DateTime>? dates, List<int> materialIds);
+        Task UpdateTaskAsign(int taskId, TaskUpdateAsignModel taskModel, List<int>? materialIds, List<int>? employeeIds);
+        Task DeleteTaskAssign(int taskId);
     }
 }

@@ -64,5 +64,8 @@ namespace SomoTaskManagement.Domain.Model.Task
         public bool IsHaveSubtask { get; set; }
         public bool IsHaveEvidence { get; set; }
         public bool IsExpired { set; get; }
+        public string? AddressDetail { get; set; }
+        public string EffortOfTask {  set; get; }
+        public string TotaslEmployee { set; get; }
     }
 }

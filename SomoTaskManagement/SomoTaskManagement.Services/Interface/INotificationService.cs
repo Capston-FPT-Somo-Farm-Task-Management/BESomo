@@ -21,5 +21,7 @@ namespace SomoTaskManagement.Services.Interface
         Task<IEnumerable<Notification>> ListByMemberRead(int id);
         Task<NotificationPageResult> ListByMember(int id, int pageIndex, int pageSize);
         Task UpdateAllIsRead(int id);
+        Task DeleteNotificationByMember(int id);
+        Task DeleteNotificationById(int notificaitonId, int memberId);
     }
 }

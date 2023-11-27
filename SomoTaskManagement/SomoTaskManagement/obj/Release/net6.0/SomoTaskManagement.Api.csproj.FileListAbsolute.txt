@@ -375,3 +375,10 @@ C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskMan
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\System.Net.WebSockets.WebSocketProtocol.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\SomoTaskManagement.Socket.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\SomoTaskManagement.Socket.pdb
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\Twilio.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\DocumentFormat.OpenXml.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\DocumentFormat.OpenXml.Framework.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\System.IO.Packaging.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\BouncyCastle.Crypto.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\BCrypt.Net-Next.dll

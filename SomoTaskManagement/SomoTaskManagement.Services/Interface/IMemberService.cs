@@ -18,6 +18,7 @@ namespace SomoTaskManagement.Services.Interface
         Task<Member> FindByUserName(string userName);
         Task<GetMemberModel> GetById(int memberId);
         Task<Member> GetByUser(string userName, string password);
+        Task HashPassword();
         Task<IEnumerable<MemberModel>> List();
         Task<IEnumerable<MemberModel>> ListMemberByFarm(int farmId);
         Task<IEnumerable<MemberModel>> ListSupervisor(int id);

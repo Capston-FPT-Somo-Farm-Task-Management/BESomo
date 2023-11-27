@@ -17,7 +17,7 @@ namespace SomoTaskManagement.Services.Interface
         Task<IEnumerable<EmployeeListModel>> GetEmployeesNoSubtask(int taskId);
         Task<TotalEffortModel> GetTotalEffortEmployee(int id, DateTime? startDay, DateTime? endDay);
         Task<IEnumerable<SubTaskModel>> NonSubtaskByTask(int taskId);
-        Task<IEnumerable<SubTaskModel>> SubtaskByTask(int taskId);
+        Task<IEnumerable<SubTaskModel>> SubtaskByTask(int taskId, int? employeeId);
         Task UpdateEffortOfSubtask(int subtaskId, EmployeeEffortUpdate employeeEffortTime);
         Task UpdateEffortTime(int taskId, List<EmployeeEffortUpdate> employeeEffortTimes);
         Task UpdateEffortTimeAndStatusTask(int taskId, List<EmployeeEffortUpdateAndChangeStatus> employeeEffortTimes);

@@ -302,6 +302,14 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
+            "DocumentFormat.OpenXml": {
+              "target": "Package",
+              "version": "[3.0.0, )"
+            },
             "EPPlus": {
               "target": "Package",
               "version": "[6.2.12, )"
@@ -318,9 +326,17 @@
               "target": "Package",
               "version": "[2.2.2, )"
             },
+            "Portable.BouncyCastle": {
+              "target": "Package",
+              "version": "[1.9.0, )"
+            },
             "Quartz": {
               "target": "Package",
               "version": "[3.7.0, )"
+            },
+            "Twilio": {
+              "target": "Package",
+              "version": "[6.15.1, )"
             },
             "UnidecodeSharpFork": {
               "target": "Package",

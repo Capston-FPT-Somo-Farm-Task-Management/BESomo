@@ -53,6 +53,7 @@ builder.Services.AddCors();
 builder.Services.AddAutoMapper(typeof(MapperApplication));
 
 builder.Services.RegisterQuartz();
+builder.Services.RegisterTwilio(builder.Configuration);
 
 string filePath = "SecretKey/somotaskmanagement-firebase-adminsdk-z13iv-aa59ff5b48.json";
 

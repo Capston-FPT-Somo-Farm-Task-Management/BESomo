@@ -37,7 +37,31 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task<Member> CheckLogin(string userName, string password)
         {
-            return await _context.Member.SingleOrDefaultAsync(m => m.UserName == userName && m.Password == password && m.Status ==1);
+            var member = await _context.Member.SingleOrDefaultAsync(m => m.UserName == userName && m.Status == 1);
+
+            if (member != null && BCrypt.Net.BCrypt.Verify(password, member.Password))
+            {
+                return member; 
+            }
+
+            return null;
+        }
+
+        public async Task HashPassword()
+        {
+            var members = await _unitOfWork.RepositoryMember.GetData(null);
+
+            foreach (var member in members)
+            {
+                string currentPassword = member.Password;
+
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(currentPassword);
+
+                member.Password = hashedPassword;
+
+                await _unitOfWork.RepositoryMember.Commit();
+            }
+
         }
 
         public async Task<Member> GetByUser(string userName, string password)
@@ -238,5 +262,9 @@ namespace SomoTaskManagement.Services.Imp
             _unitOfWork.RepositoryMember.Delete(m => m.Id == memberId);
             await _unitOfWork.RepositoryMember.Commit();
         }
+
+        
+
+
     }
 }

@@ -4,12 +4,14 @@ using Firebase.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using SomoTaskManagement.Data;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Enum;
+using SomoTaskManagement.Domain.Model.City;
 using SomoTaskManagement.Domain.Model.Employee;
 using SomoTaskManagement.Domain.Model.SubTask;
 using SomoTaskManagement.Services.Interface;
@@ -287,6 +289,24 @@ namespace SomoTaskManagement.Services.Imp
         {
             using (var package = new ExcelPackage())
             {
+                var httpClient = new HttpClient();
+                var apiResponse = await httpClient.GetStringAsync("https://provinces.open-api.vn/api/?depth=1");
+                var cities = JsonConvert.DeserializeObject<List<City>>(apiResponse);
+                // Add city-related information to the Excel file
+                var worksheetCity = package.Workbook.Worksheets.Add("Cities");
+                worksheetCity.Cells[1, 1].Value = "City ID";
+                worksheetCity.Cells[1, 2].Value = "City Name";
+
+                int cityRow = 2;
+                foreach (var city in cities)
+                {
+                    worksheetCity.Cells[cityRow, 1].Value = city.Id;
+                    worksheetCity.Cells[cityRow, 2].Value = city.Name;
+                    cityRow++;
+                }
+
+                List<string> provinceNames = cities.Select(city => city.Name).ToList();
+
                 var worksheetEmployee = package.Workbook.Worksheets.Add("Employees");
                 var farm = await _unitOfWork.RepositoryFarm.GetById(farmId);
                 worksheetEmployee.Cells[1, 1].Value = $"Thông tin nhân viên của trang trại {farm.Name}";
@@ -295,10 +315,11 @@ namespace SomoTaskManagement.Services.Imp
                 worksheetEmployee.Cells[3, 2].Value = "Họ tên";
                 worksheetEmployee.Cells[3, 3].Value = "Số điện thoại";
                 worksheetEmployee.Cells[3, 4].Value = "Địa chỉ";
-                worksheetEmployee.Cells[3, 5].Value = "Giới tính";
-                worksheetEmployee.Cells[3, 6].Value = "Ngày sinh";
-                worksheetEmployee.Cells[3, 7].Value = "Mã kỹ năng";
-                worksheetEmployee.Cells[3, 8].Value = "Hình ảnh";
+                worksheetEmployee.Cells[3, 5].Value = "Tỉnh";
+                worksheetEmployee.Cells[3, 6].Value = "Giới tính";
+                worksheetEmployee.Cells[3, 7].Value = "Ngày sinh";
+                worksheetEmployee.Cells[3, 8].Value = "Mã kỹ năng"; 
+                worksheetEmployee.Cells[3, 9].Value = "Hình ảnh";
 
                 var employees = await _unitOfWork.RepositoryEmployee.GetData(e => e.FarmId == farmId && e.Status == 1);
 
@@ -310,24 +331,44 @@ namespace SomoTaskManagement.Services.Imp
                     worksheetEmployee.Cells[row, 3].Value = employee.PhoneNumber;
                     worksheetEmployee.Cells[row, 4].Value = employee.Address;
 
+                    string[] addressParts = employee.Address.Split(',');
+                    if (addressParts.Length >= 3)
+                    {
+                        string province = addressParts[2].Trim();
+
+                        worksheetEmployee.Cells[row, 5].Value = province;
+
+                        var validationCell = worksheetEmployee.DataValidations.AddListValidation($"E{row}");
+
+                        string namedRange = $"ProvinceNames_{row}";
+
+                        var rangeForNames = worksheetEmployee.Cells[$"F{row}:F{row + provinceNames.Count - 1}"];
+                        rangeForNames.LoadFromCollection(provinceNames);
+
+                        worksheetEmployee.Names.Add(namedRange, rangeForNames);
+
+                        validationCell.Formula.ExcelFormula = $"='{worksheetEmployee.Name}'!{namedRange}";
+                    }
+
+
+
                     var gender = (bool)employee.Gender ? EmployeeGenderEnum.Male : EmployeeGenderEnum.Female;
                     var genderString = GetGenderDescription(gender);
-                    worksheetEmployee.Cells[row, 5].Value = genderString;
-                    worksheetEmployee.Cells[row, 6].Value = employee.DateOfBirth;
-                    worksheetEmployee.Cells[row, 6].Style.Numberformat.Format = "yyyy-mm-dd";
+                    worksheetEmployee.Cells[row, 6].Value = genderString;
+                    worksheetEmployee.Cells[row, 7].Value = employee.DateOfBirth;
+                    worksheetEmployee.Cells[row, 7].Style.Numberformat.Format = "yyyy-mm-dd";
 
                     var employee_taskType = await _unitOfWork.RepositoryEmployee_TaskType.GetData(et => et.EmployeeId == employee.Id);
                     var taskTypeIds = employee_taskType.Select(t => t.TaskTypeId).ToList();
-                    worksheetEmployee.Cells[row, 7].Value = string.Join(",", taskTypeIds);
+                    worksheetEmployee.Cells[row, 8].Value = string.Join(",", taskTypeIds);
 
-                    worksheetEmployee.Cells[row, 8].Value = employee.Avatar;
+                    worksheetEmployee.Cells[row, 9].Value = employee.Avatar;
 
                     row++;
                 }
                 worksheetEmployee.Cells.AutoFitColumns();
 
                 var worksheetTaskType = package.Workbook.Worksheets.Add("TaskTypes");
-
                 worksheetTaskType.Cells[1, 1].Value = "STT";
                 worksheetTaskType.Cells[1, 2].Value = "Mã";
                 worksheetTaskType.Cells[1, 3].Value = "Tên";
@@ -351,6 +392,9 @@ namespace SomoTaskManagement.Services.Imp
                     sequence++;
                 }
 
+                
+
+                worksheetCity.Cells.AutoFitColumns();
                 worksheetTaskType.Cells.AutoFitColumns();
                 return package.GetAsByteArray();
             }
@@ -386,7 +430,7 @@ namespace SomoTaskManagement.Services.Imp
                 var worksheet = package.Workbook.Worksheets.Add("EmployeeImportTemplate");
 
                 worksheet.Cells["D1:N1"].Merge = true;
-                worksheet.Cells[1, 4].Value = $"BẢNG CHẤM CÔNG THÁNG {month} NĂM {year}";
+                worksheet.Cells[1, 4].Value = $"BẢNG GHI NHẬN GIỜ LÀM THỰC TẾ THÁNG {month} NĂM {year}";
                 worksheet.Cells[1, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
 
@@ -465,7 +509,7 @@ namespace SomoTaskManagement.Services.Imp
                 var worksheet = package.Workbook.Worksheets.Add("EmployeeImportTemplate");
 
                 worksheet.Cells["D1:N1"].Merge = true;
-                worksheet.Cells[1, 4].Value = $"BẢNG CHẤM CÔNG THÁNG {month} NĂM {year} của nhân viên {employee.Name}";
+                worksheet.Cells[1, 4].Value = $"BẢNG GHI NHẬN GIỜ LÀM CỦA THÁNG {month} NĂM {year} CỦA NHÂN VIÊN {employee.Name}";
                 worksheet.Cells[1, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
 
@@ -482,7 +526,7 @@ namespace SomoTaskManagement.Services.Imp
                 worksheet.Cells[2, 2].Value = "Mã nhiệm vụ";
                 worksheet.Cells[2, 3].Value = "Tên nhiệm vụ";
                 worksheet.Cells[2, 4, 2, 3 + numberOfDaysInMonth].Merge = true;
-                worksheet.Cells[2, 4, 2, 3 + numberOfDaysInMonth].Value = "NGÀY CÔNG";
+                worksheet.Cells[2, 4, 2, 3 + numberOfDaysInMonth].Value = "NGÀY THỰC HIỆN";
                 worksheet.Cells[2, 4, 2, 3 + numberOfDaysInMonth].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
 

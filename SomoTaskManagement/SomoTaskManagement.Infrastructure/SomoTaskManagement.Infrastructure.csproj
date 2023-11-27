@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="6.0.24" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.7.0" />
+    <PackageReference Include="Twilio" Version="6.15.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,10 +20,6 @@
     <ProjectReference Include="..\SomoTaskManagement.Cache\SomoTaskManagement.Cache.csproj" />
     <ProjectReference Include="..\SomoTaskManagement.Data\SomoTaskManagement.Data.csproj" />
     <ProjectReference Include="..\SomoTaskManagement.WebSocket\SomoTaskManagement.Socket.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="WebSocketMessage\" />
   </ItemGroup>
 
 </Project>

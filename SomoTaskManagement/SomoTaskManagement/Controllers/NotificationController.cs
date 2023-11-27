@@ -42,6 +42,55 @@ namespace SomoTaskManagement.Api.Controllers
                 });
             }
         }
+
+        [HttpDelete("Member({memberId})")]
+        public async Task<IActionResult> DeleteNotificationByMember(int memberId)
+        {
+            try
+            {
+              await  _notificationService.DeleteNotificationByMember(memberId);
+                return Ok(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Xóa thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+        [HttpDelete("{notificaitonId}/Member({memberId})")]
+        public async Task<IActionResult> DeleteNotificationById(int notificaitonId, int memberId)
+        {
+            try
+            {
+                await _notificationService.DeleteNotificationById(notificaitonId, memberId);
+                return Ok(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Xóa thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
         [HttpGet("Read/Member{id}")]
         public async Task<IActionResult> ListByMemberRead(int id)
         {

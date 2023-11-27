@@ -12,6 +12,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Twilio.Types;
+using Twilio;
+using Microsoft.Extensions.Configuration;
+using System.Configuration;
+using Twilio.Rest.Api.V2010.Account;
 
 namespace SomoTaskManagement.Services.Imp
 {
@@ -19,32 +24,46 @@ namespace SomoTaskManagement.Services.Imp
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
         private static int taskCounter = 1;
-        public SubTaskService(IUnitOfWork unitOfWork, IMapper mapper)
+        public SubTaskService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _configuration = configuration;
         }
 
 
-        public async Task<IEnumerable<SubTaskModel>> SubtaskByTask(int taskId)
+        public async Task<IEnumerable<SubTaskModel>> SubtaskByTask(int taskId, int? employeeId)
         {
             var task = await _unitOfWork.RepositoryFarmTask.GetById(taskId);
             if (task == null)
             {
                 throw new Exception("Nhiệm vụ không tìm thấy");
             }
+
             var includes = new Expression<Func<Employee_Task, object>>[]
             {
                 t => t.Employee,
             };
+
             var subtask = await _unitOfWork.RepositoryEmployee_Task.GetData(expression: s => s.TaskId == taskId && s.Status == true, includes: includes);
+
+
+            if (employeeId.HasValue)
+            {
+                subtask = subtask.Where(s => s.EmployeeId == employeeId.Value).ToList();
+            }
+            subtask = subtask.OrderBy(s => s.DaySubmit).ToList();
+
             if (!subtask.Any())
             {
                 throw new Exception("Nhiệm vụ con rỗng");
             }
+
             return _mapper.Map<IEnumerable<Employee_Task>, IEnumerable<SubTaskModel>>(subtask);
         }
+
 
         public async Task<IEnumerable<SubTaskModel>> NonSubtaskByTask(int taskId)
         {
@@ -67,9 +86,7 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task UpdateSubTasks(int subtaskId, SubTaskUpdateModel subTask)
         {
-            TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
-            string taskCode = GenerateTaskCode();
+
             var subtaskUpdate = await _unitOfWork.RepositoryEmployee_Task.GetById(subtaskId);
 
             if (subtaskUpdate == null)
@@ -81,7 +98,6 @@ namespace SomoTaskManagement.Services.Imp
             subtaskUpdate.Name = subTask.Name;
             subtaskUpdate.Status = true;
             subtaskUpdate.DaySubmit = subTask.DaySubmit;
-            subtaskUpdate.Code = taskCode;
             subtaskUpdate.ActualEffortHour = subTask.OverallEffortHour;
             subtaskUpdate.ActualEfforMinutes = subTask.OverallEfforMinutes;
 
@@ -114,10 +130,46 @@ namespace SomoTaskManagement.Services.Imp
                 throw new Exception("EmployeeId không nằm trong danh sách của task");
             }
 
-            taskCounter++;
             await _unitOfWork.RepositoryEmployee_Task.Add(subTaskNew);
             await _unitOfWork.RepositoryEmployee_Task.Commit();
+
+            var toPhoneNumbers = new List<string>
+            {
+                "+84394044324",
+                "+84777767130"
+            };
+
+            foreach (var toPhoneNumber in toPhoneNumbers)
+            {
+                try
+                {
+                    var twilioAccountSid = _configuration["Twilio:AccountSid"];
+                    var twilioAuthToken = _configuration["Twilio:AuthToken"];
+                    var twilioPhoneNumber = _configuration["Twilio:PhoneNumber"];
+
+                    TwilioClient.Init(twilioAccountSid, twilioAuthToken);
+
+                    var messageBody = $"Công việc mới đã được tạo: {subTask.Name}";
+
+                    var from = new PhoneNumber(twilioPhoneNumber);
+                    var to = new PhoneNumber(toPhoneNumber);
+
+                    var message = MessageResource.Create(
+                        body: messageBody,
+                        from: from,
+                        to: to
+                    );
+
+                    Console.WriteLine($"Message sent with SID: {message.Sid}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending message to {toPhoneNumber}: {ex.Message}");
+                }
+            }
         }
+
+
 
         private string GenerateTaskCode()
         {

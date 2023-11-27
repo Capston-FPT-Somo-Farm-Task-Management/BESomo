@@ -84,10 +84,8 @@ namespace SomoTaskManagement.Infrastructure.Configuration
                 var jobKey = JobKey.Create(nameof(FarmTaskBackgroundJob));
 
                 options.AddJob<FarmTaskBackgroundJob>(jobKey)
-                        .AddTrigger(trigger => trigger.ForJob(jobKey).WithSimpleSchedule(schedule =>
-                        {
-                            schedule.WithIntervalInHours(1).RepeatForever();
-                        }));
+                        .AddTrigger(trigger => trigger.ForJob(jobKey).WithCronSchedule("0 0 0/12 * * ?")); 
+
             });
 
             services.AddQuartzHostedService(option =>
@@ -95,10 +93,26 @@ namespace SomoTaskManagement.Infrastructure.Configuration
                 option.WaitForJobsToComplete = true;
             });
         }
+
         public static void RegisterWebSocket(this IApplicationBuilder app)
         {
             app.UseWebSockets();
             app.UseWebSocketManager("/ws/countEvidence");
+        }
+
+
+        public static void RegisterTwilio(this IServiceCollection services, IConfiguration configuration)
+        {
+            var twilioAccountSid = configuration["Twilio:AccountSid"];
+            var twilioAuthToken = configuration["Twilio:AuthToken"];
+            var twilioPhoneNumber = configuration["Twilio:PhoneNumber"];
+
+            if (string.IsNullOrEmpty(twilioAccountSid) || string.IsNullOrEmpty(twilioAuthToken) || string.IsNullOrEmpty(twilioPhoneNumber))
+            {
+                throw new InvalidOperationException("Missing Twilio configuration");
+            }
+
+            services.AddSingleton(new TwilioService(twilioAccountSid, twilioAuthToken, twilioPhoneNumber));
         }
 
     }

@@ -743,6 +743,65 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+
+        [HttpPut("({taskId})/UpdateTaskAsign")]
+        public async Task<IActionResult> UpdateTaskAsign(int taskId, UpdateTaskAsignRequest taskToDoModel)
+        {
+            if (!User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+                await _farmTaskService.UpdateTaskAsign(taskId, taskToDoModel.TaskModel, taskToDoModel.MaterialIds, taskToDoModel.EmployeeIds);
+
+                return Ok(new ApiResponseModel
+                {
+                    Data = taskToDoModel,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+        [HttpDelete("({taskId})/DeleteTaskAssign")]
+        public async Task<IActionResult> DeleteTaskAssign(int taskId)
+        {
+            if (!User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+                await _farmTaskService.DeleteTaskAssign(taskId );
+
+                return Ok(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Xóa thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
         [HttpPut("({taskId})/UpdateTaskDisagreeAndChangeToToDo")]
         public async Task<IActionResult> UpdateTaskDisagreeAndChangeToToDo(int taskId, UpdateTaskDraftAndToPrePare taskToDoModel)
         {
@@ -900,7 +959,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpDelete("({id})")]
-        public async Task<IActionResult> DeleteTaskTodoAndDraft(int id)
+        public async Task<IActionResult> DeleteTaskTodoDraftAssign(int id)
         {
             if (!User.IsInRole("Manager"))
             {
@@ -909,7 +968,7 @@ namespace SomoTaskManagement.Api.Controllers
             try
             {
 
-                await _farmTaskService.DeleteTaskTodoAndDraft(id);
+                await _farmTaskService.DeleteTaskTodoDraftAssign(id);
 
                 var responseData = new ApiResponseModel
                 {
@@ -931,6 +990,8 @@ namespace SomoTaskManagement.Api.Controllers
             }
 
         }
+
+
 
         [HttpPut("({id})/AddEmployeeToTaskAsign")]
         public async Task<IActionResult> AddEmployeeToTaskAsign(int id, AddEmployeeToTaskAsign employeeToTaskAsign)

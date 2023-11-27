@@ -95,6 +95,8 @@ namespace SomoTaskManagement.Services.Imp
                 await _unitOfWork.RepositoryEvidenceImage.Add(uploadedImages);
                 await _unitOfWork.RepositoryEvidenceImage.Commit();
                 //var evidenceCount = await CountEvidenceOfTask(taskEvidence.TaskId);
+
+
             }
             catch (Exception ex)
             {
@@ -360,5 +362,6 @@ namespace SomoTaskManagement.Services.Imp
 
             return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : status.ToString();
         }
+
     }
 }

@@ -98,6 +98,7 @@ namespace SomoTaskManagement.Services.Imp
             };
         }
 
+       
         public async Task<IEnumerable<Notification>> ListByMemberRead(int id)
         {
             var member = await _unitOfWork.RepositoryMember.GetById(id);
@@ -115,6 +116,20 @@ namespace SomoTaskManagement.Services.Imp
 
             return notifications;
         }
+        public async Task DeleteNotificationByMember(int id)
+        {
+            var member = await _unitOfWork.RepositoryMember.GetById(id);
+            if (member == null)
+            {
+                throw new Exception("Không tìm thấy người dùng");
+            }
+
+             _unitOfWork.RepositoryNotifycation_Member.Delete(n=>n.MemberId == id);
+            await _unitOfWork.RepositoryNotifycation_Member.Commit();
+        }
+
+        
+
 
         public async Task<int> GetCount(int id)
         {
@@ -162,6 +177,19 @@ namespace SomoTaskManagement.Services.Imp
             notification.IsRead = true;
             await _unitOfWork.RepositoryNotifycation.Commit();
         }
+
+        public async Task DeleteNotificationById(int notificaitonId, int memberId)
+        {
+            var member = await _unitOfWork.RepositoryNotifycation_Member.GetSingleByCondition(n => n.NotificationId == notificaitonId && n.MemberId == memberId);
+            if (member == null)
+            {
+                throw new Exception("Không tìm thấy người dùng");
+            }
+
+            _unitOfWork.RepositoryNotifycation_Member.Delete(n => n.NotificationId == notificaitonId && n.MemberId == memberId);
+            await _unitOfWork.RepositoryNotifycation_Member.Commit();
+        }
+
 
         public async Task UpdateAllIsRead(int id)
         {
