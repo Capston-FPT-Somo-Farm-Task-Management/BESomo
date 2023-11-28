@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.Execution;
 using AutoMapper.Internal;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Firebase.Storage;
 using FirebaseAdmin.Messaging;
@@ -176,7 +177,10 @@ namespace SomoTaskManagement.Services.Impf
 
             var farmTasks = await _unitOfWork.RepositoryFarmTask
                                         .GetData(
-                                            expression: t => t.ManagerId == memberId && (t.StartDate >= startOfWeek || t.StartDate <= endOfWeek), includes: includes
+                                            expression: t => (t.ManagerId == memberId || t.ManagerId == null)
+                                                && (t.StartDate >= startOfWeek || t.StartDate <= endOfWeek)
+                                                && t.Status != 0,
+                                          includes: includes
                                         );
 
             var taskCounts = allDaysOfWeek
@@ -186,7 +190,11 @@ namespace SomoTaskManagement.Services.Impf
                     TaskCount = farmTasks.Count(f => f.StartDate.Value.Date == day.Date),
                     TotalTaskOfLivestock = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Field != null && f.FieldId.HasValue && f.Field.Status == 1)),
                     TotalTaskOfPlant = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Field != null && f.FieldId.HasValue && f.Field.Status == 0)),
-                    TotalTaskOfOther = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Field == null && !f.FieldId.HasValue))
+                    TotalTaskOfOther = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Field == null && !f.FieldId.HasValue)),
+                    TotalTaskAsign = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Status == 2)),
+                    TotalTaskToDo = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Status == 1)),
+                    TotalTaskDone = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Status == 4)),
+                    TotalTaskPending = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Status == 5)),
                 })
                 .ToList();
 
@@ -201,26 +209,27 @@ namespace SomoTaskManagement.Services.Impf
             DateTime currentDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
             var includes = new Expression<Func<FarmTask, object>>[]
             {
-                t => t.Field,
+                  t => t.Field,
             };
             var startOfWeek = currentDate.AddDays(-(int)currentDate.DayOfWeek);
             var endOfWeek = startOfWeek.AddDays(6);
 
-            var farmTasks = await _unitOfWork.RepositoryFarmTask
-                                       .GetData(
-                                           expression: t => t.ManagerId == memberId && t.StartDate >= startOfWeek && t.EndDate <= endOfWeek,
-                                            includes: includes
-                                       );
+            var farmTasks = await _unitOfWork.RepositoryFarmTask.GetData(
+                expression: t => (t.ManagerId == null),
+                //&& t.StartDate.HasValue && t.StartDate.Value.Date >= startOfWeek.Date
+                //&& t.EndDate.HasValue && t.EndDate.Value.Date <= endOfWeek.Date,
+                includes: includes
+            );
 
-            var totalTaskOfLivestock = farmTasks.Count(f => (f.Field != null && f.FieldId.HasValue && f.Field.Status == 1));
-            var totalTaskOfPlant = farmTasks.Count(f => (f.Field != null && f.FieldId.HasValue && f.Field.Status == 0));
-            int totalTaskOfOther = farmTasks.Count(f => (f.Field == null && !f.FieldId.HasValue));
+            var totalTaskOfLivestock = farmTasks.Count(f => f.IsPlant == false);
+            var totalTaskOfPlant = farmTasks.Count(f => f.IsPlant == true);
+            int totalTaskOfOther = farmTasks.Count(f => f.IsPlant == null);
 
             return new TotalTypeOfTaskInWeek
             {
                 TotalTaskOfLivestock = totalTaskOfLivestock,
                 TotalTaskOfPlant = totalTaskOfPlant,
-                TotalTaskOfOther = totalTaskOfOther,
+                TotalTaskOfOther = totalTaskOfOther
             };
         }
 
@@ -764,6 +773,25 @@ namespace SomoTaskManagement.Services.Impf
             var task = await _unitOfWork.RepositoryFarmTask.GetById(taskId) ?? throw new Exception("Không tìm thấy nhiệm vụ");
             if (task.Status == 1 || task.Status == 2 || task.Status == 3)
             {
+                if (task.StartDate.HasValue && task.EndDate.HasValue)
+                {
+                    TimeSpan totalDuration = task.EndDate.Value - task.StartDate.Value;
+                    double totalHours = totalDuration.TotalHours;
+
+                    var totalEffortHour = overallEffortHour + overallEfforMinutes / 60;
+
+                    if (totalEffortHour > totalHours)
+                    {
+                        throw new Exception("Giờ dự kiến không được lớn hơn tổng thời gian giữa ngày bắt đầu và ngày kết thúc");
+                    }
+
+
+                }
+                else
+                {
+                    throw new Exception("Ngày bắt đầu hoặc ngày kết thúc không có giá trị");
+                }
+
                 if (task.Status == 1 || task.Status == 2)
                 {
                     task.Status = 2;
@@ -808,14 +836,7 @@ namespace SomoTaskManagement.Services.Impf
                 _unitOfWork.RepositoryEmployee_Task.Delete(et => !employeeIds.Contains(et.EmployeeId) && et.TaskId == taskId);
                 await _unitOfWork.RepositoryMaterial_Task.Commit();
 
-                string message = $"Công việc {task.Name} đã được giao cho bạn";
-                List<int> memberIds = new List<int>();
-                if (task.SuppervisorId.HasValue)
-                {
-                    memberIds.Add(task.SuppervisorId.Value);
-                    var managerTokens = await GetTokenByMemberId(task.SuppervisorId.Value);
-                    await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
-                }
+
 
             }
             else
@@ -1143,7 +1164,10 @@ namespace SomoTaskManagement.Services.Impf
                 {
                     throw new Exception("Ngày truyền vào không được nhỏ hơn ngày bắt đầu (startDate).");
                 }
-                if (startDate > endDate) throw new Exception("Ngày bắt đầu không được lớn hơn ngày kết thúc");
+                if (startDate.Value > endDate.Value)
+                {
+                    throw new Exception("Ngày bắt đầu không được lớn hơn ngày kết thúc");
+                }
                 var plant = await _unitOfWork.RepositoryPlant.GetById(taskToDoModel.PlantId);
                 if (plant?.Status == 0)
                 {
@@ -1380,6 +1404,20 @@ namespace SomoTaskManagement.Services.Impf
                 {
                     throw new Exception("Ngày bắt đầu không được lớn hơn ngày kết thúc");
                 }
+
+
+                TimeSpan totalDuration = taskModel.EndDate - taskModel.StartDate;
+                int totalDays = totalDuration.Days;
+
+                var totalEffortHour = taskModel.OverallEffortHour + taskModel.OverallEfforMinutes / 60;
+
+                if (totalEffortHour > totalDays)
+                {
+                    throw new Exception("Giờ dự kiến không được lớn hơn khoảng cách giữa ngày bắt đầu và ngày kết thúc");
+                }
+
+
+
                 string taskCode = GenerateTaskCode();
                 var farmTaskNew = new FarmTask
                 {
@@ -1454,6 +1492,14 @@ namespace SomoTaskManagement.Services.Impf
                         timer.Start();
                     }
 
+                    string message = $"Công việc '{farmTaskNew.Name}' đã được tạo";
+                    List<int> memberIds = new List<int>();
+                    if (farmTaskNew.ManagerId.HasValue)
+                    {
+                        memberIds.Add(farmTaskNew.SuppervisorId.Value);
+                        var managerTokens = await GetTokenByMemberId(farmTaskNew.SuppervisorId.Value);
+                        await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, farmTaskNew.Id);
+                    }
                 }
                 await CreateEmployeeMaterialForTask(farmTaskNew, materialIds, employeeIds);
                 _unitOfWork.CommitTransaction();
@@ -1476,10 +1522,32 @@ namespace SomoTaskManagement.Services.Impf
                 var currentDateTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
 
                 if (task.Status != 2) throw new Exception("Chỉ được cập nhật công việc đã giao");
-                if (task.StartDate.Value > task.EndDate.Value)
+                if (taskModel.StartDate > taskModel.EndDate)
                 {
                     throw new Exception("Ngày bắt đầu không được lớn hơn ngày kết thúc");
                 }
+
+
+
+                if (task.StartDate.HasValue && task.EndDate.HasValue)
+                {
+                    TimeSpan totalDuration = task.EndDate.Value - task.StartDate.Value;
+                    double totalHours = totalDuration.TotalHours;
+
+                    var totalEffortHour = taskModel.OverallEffortHour + taskModel.OverallEfforMinutes / 60;
+
+                    if (totalEffortHour > totalHours)
+                    {
+                        throw new Exception("Giờ dự kiến không được lớn hơn tổng thời gian giữa ngày bắt đầu và ngày kết thúc");
+                    }
+
+
+                }
+                else
+                {
+                    throw new Exception("Ngày bắt đầu hoặc ngày kết thúc không có giá trị");
+                }
+
 
                 task.Name = taskModel.Name;
                 task.Description = taskModel.Description?.Trim();
@@ -1493,6 +1561,11 @@ namespace SomoTaskManagement.Services.Impf
                 task.AddressDetail = taskModel.AddressDetail?.Trim();
                 task.OverallEfforMinutes = taskModel.OverallEfforMinutes;
                 task.OverallEffortHour = taskModel.OverallEffortHour;
+
+                if (task.EndDate != taskModel.EndDate)
+                {
+                    task.IsExpired = false;
+                }
 
                 if (!employeeIds.Any())
                 {
@@ -2127,11 +2200,16 @@ namespace SomoTaskManagement.Services.Impf
                         }
                         else
                         {
-                            memberIds.Add(task.ManagerId.Value);
+                            var managerIds = await GetManagerId();
+
+                            memberIds = new List<int>(managerIds);
+
                             await AddTaskEvidenceeWithImage(taskEvidence, taskEvidenceType, null, id);
 
-                            var managerTokens = await GetTokenByMemberId(task.ManagerId.Value);
+                            var managerTokens = await GetTokenAllManger();
+
                             await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+
                         }
                     }
                     else
@@ -2153,6 +2231,25 @@ namespace SomoTaskManagement.Services.Impf
 
         }
 
+
+        public async Task<List<string>> GetTokenAllManger()
+        {
+            var managers = await _unitOfWork.RepositoryMember.GetData(m => m.RoleId == 1);
+            foreach (var manager in managers)
+            {
+                var hubConnections = await _unitOfWork.RepositoryHubConnection.GetData(h => h.MemberId == manager.Id);
+
+                if (hubConnections == null)
+                {
+                    throw new Exception("Không tìm thấy kết nối");
+                }
+
+                var connectionIds = hubConnections.Select(h => h.ConnectionId).ToList();
+                return connectionIds;
+            }
+
+            return null;
+        }
 
         public async Task AddTaskEvidenceeWithImage(EvidencePendingAndCancel taskEvidence, int evidenceType, int? managerId, int taskId)
         {
@@ -2320,7 +2417,7 @@ namespace SomoTaskManagement.Services.Impf
             var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
             if (task != null)
             {
-                var subtask = await _unitOfWork.RepositoryEmployee_Task.GetData(s => s.TaskId == id && s.Status == true);
+                var subtask = await _unitOfWork.RepositoryEmployee_Task.GetData(s => s.TaskId == id && (s.ActualEfforMinutes != 0 || s.ActualEffortHour != 0));
                 if (subtask.Any())
                 {
                     task.Status = 4;

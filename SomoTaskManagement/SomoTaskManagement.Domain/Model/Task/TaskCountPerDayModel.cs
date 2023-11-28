@@ -13,5 +13,9 @@ namespace SomoTaskManagement.Domain.Model.Task
         public int? TotalTaskOfLivestock { get; set; }
         public int? TotalTaskOfPlant { get; set; }
         public int? TotalTaskOfOther { get; set; }
+        public int? TotalTaskToDo { get; set; }
+        public int? TotalTaskAsign { get; set; }
+        public int? TotalTaskDone { get; set; }
+        public int? TotalTaskPending { get; set; }
     }
 }
