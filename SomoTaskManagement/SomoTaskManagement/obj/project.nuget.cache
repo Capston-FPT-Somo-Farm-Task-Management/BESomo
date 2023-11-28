@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "bNcxPJ2gz5Vm0p9un+mkNm55Bhzft0ccLNVjaIdY2aIoJxD0qhwLio1V+DAFNe6v8KlJ5sw+r2PcjE1EIPN8rA==",
+  "dgSpecHash": "x7gXqgFu0erEO0dgW9oOaJ3FR3jMDN0+K1yaCb2G7JlBPoh2CcPtffNEurwITgREzsvKkdgrg3VRg2pUbJeZhg==",
   "success": true,
   "projectFilePath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement\\SomoTaskManagement.Api.csproj",
   "expectedPackageFiles": [
@@ -30,6 +30,7 @@
     "C:\\Users\\Admin\\.nuget\\packages\\grpc.core.api\\2.53.0\\grpc.core.api.2.53.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\grpc.net.client\\2.53.0\\grpc.net.client.2.53.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\grpc.net.common\\2.53.0\\grpc.net.common.2.53.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\libphonenumber-csharp\\8.13.25\\libphonenumber-csharp.8.13.25.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.authentication.abstractions\\2.2.0\\microsoft.aspnetcore.authentication.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.authentication.core\\2.2.0\\microsoft.aspnetcore.authentication.core.2.2.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\6.0.22\\microsoft.aspnetcore.authentication.jwtbearer.6.0.22.nupkg.sha512",

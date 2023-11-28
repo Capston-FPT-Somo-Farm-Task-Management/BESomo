@@ -388,23 +388,34 @@ namespace SomoTaskManagement.Api.Controllers
 
 
 
-        [HttpPost("ImortExcel")]
-        public async Task<IActionResult> ImportEmployeesFromExcel([FromForm] EmployeeImportModel employee)
+        [HttpPost("ImportExcel")]
+        public async Task<IActionResult> ImportEmployeesFromExcelAsync([FromForm] EmployeeImportModel employee)
         {
             try
             {
+                if (!employee.ExcelFile.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new ApiResponseModel
+                    {
+                        Data = null,
+                        Message = "Invalid file format. Please upload an Excel file.",
+                        Success = false,
+                    });
+                }
+
                 using (var stream = employee.ExcelFile.OpenReadStream())
                 {
                     await _employeeService.ImportEmployeesFromExcel(stream);
                 }
+
                 var responseData = new ApiResponseModel
                 {
                     Data = employee,
                     Message = "Employee is added",
                     Success = true,
                 };
-                return Ok(responseData);
 
+                return Ok(responseData);
             }
             catch (Exception e)
             {
@@ -412,10 +423,11 @@ namespace SomoTaskManagement.Api.Controllers
                 {
                     Data = null,
                     Message = e.Message,
-                    Success = true,
+                    Success = false,
                 });
             }
         }
+
 
         [HttpGet("Export/{farmId}")]
         public async Task<IActionResult> ExportEmployeesToExcel(int farmId)

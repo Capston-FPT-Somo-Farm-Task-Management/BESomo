@@ -420,6 +420,19 @@
           }
         }
       },
+      "libphonenumber-csharp/8.13.25": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/PhoneNumbers.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/PhoneNumbers.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.AspNetCore.Authentication.Abstractions/2.2.0": {
         "type": "package",
         "dependencies": {
@@ -3507,7 +3520,8 @@
           "SomoTaskManagement.Cache": "1.0.0",
           "SomoTaskManagement.Data": "1.0.0",
           "SomoTaskManagement.Socket": "1.0.0",
-          "Twilio": "6.15.1"
+          "Twilio": "6.15.1",
+          "libphonenumber-csharp": "8.13.25"
         },
         "compile": {
           "bin/placeholder/SomoTaskManagement.Infrastructure.dll": {}
@@ -4099,6 +4113,25 @@
         "lib/netstandard2.1/Grpc.Net.Common.pdb",
         "lib/netstandard2.1/Grpc.Net.Common.xml",
         "packageIcon.png"
+      ]
+    },
+    "libphonenumber-csharp/8.13.25": {
+      "sha512": "1eGQBPL9pPH9SlW9YLFZbLstVlcPZDRJ9FbfZntsy2iffbf6uxVyJ3kfiuorZJ2rk2bJ0Ufddt1SN6oYQA+qJw==",
+      "type": "package",
+      "path": "libphonenumber-csharp/8.13.25",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "icon.png",
+        "lib/net6.0/PhoneNumbers.dll",
+        "lib/net6.0/PhoneNumbers.xml",
+        "lib/net7.0/PhoneNumbers.dll",
+        "lib/net7.0/PhoneNumbers.xml",
+        "lib/netstandard2.0/PhoneNumbers.dll",
+        "lib/netstandard2.0/PhoneNumbers.xml",
+        "libphonenumber-csharp.8.13.25.nupkg.sha512",
+        "libphonenumber-csharp.nuspec"
       ]
     },
     "Microsoft.AspNetCore.Authentication.Abstractions/2.2.0": {

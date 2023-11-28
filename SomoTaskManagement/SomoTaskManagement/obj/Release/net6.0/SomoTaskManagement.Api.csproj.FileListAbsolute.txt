@@ -382,3 +382,4 @@ C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskMan
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\System.IO.Packaging.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\BouncyCastle.Crypto.dll
 C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\BCrypt.Net-Next.dll
+C:\Users\Admin\Documents\HOC\1\ProjectSOMO\BESomo\SomoTaskManagement\SomoTaskManagement\bin\Release\net6.0\PhoneNumbers.dll

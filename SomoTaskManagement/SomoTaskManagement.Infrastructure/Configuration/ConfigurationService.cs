@@ -81,10 +81,18 @@ namespace SomoTaskManagement.Infrastructure.Configuration
             {
                 options.UseMicrosoftDependencyInjectionJobFactory();
 
-                var jobKey = JobKey.Create(nameof(FarmTaskBackgroundJob));
+                var farmTaskJobKey = new JobKey(nameof(FarmTaskBackgroundJob));
+                var subTaskJobKey = new JobKey(nameof(SubTaskBackGroundJob));
 
-                options.AddJob<FarmTaskBackgroundJob>(jobKey)
-                        .AddTrigger(trigger => trigger.ForJob(jobKey).WithCronSchedule("0 0 0/12 * * ?")); 
+                options.AddJob<FarmTaskBackgroundJob>(farmTaskJobKey)
+                    .AddTrigger(trigger => trigger
+                        .ForJob(farmTaskJobKey)
+                        .WithCronSchedule("0 0 0/12 * * ?"));
+
+                options.AddJob<SubTaskBackGroundJob>(subTaskJobKey)
+                    .AddTrigger(trigger => trigger
+                        .ForJob(subTaskJobKey)
+                        .WithCronSchedule("0 0 * * * ?"));
 
             });
 
@@ -93,6 +101,8 @@ namespace SomoTaskManagement.Infrastructure.Configuration
                 option.WaitForJobsToComplete = true;
             });
         }
+
+
 
         public static void RegisterWebSocket(this IApplicationBuilder app)
         {

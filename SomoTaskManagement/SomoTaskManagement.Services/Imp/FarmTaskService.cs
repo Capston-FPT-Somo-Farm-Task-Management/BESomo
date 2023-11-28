@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using AutoMapper.Execution;
 using AutoMapper.Internal;
+using DocumentFormat.OpenXml.ExtendedProperties;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Firebase.Storage;
 using FirebaseAdmin.Messaging;
@@ -191,9 +193,9 @@ namespace SomoTaskManagement.Services.Impf
                     TotalTaskOfLivestock = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Field != null && f.FieldId.HasValue && f.Field.Status == 1)),
                     TotalTaskOfPlant = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Field != null && f.FieldId.HasValue && f.Field.Status == 0)),
                     TotalTaskOfOther = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Field == null && !f.FieldId.HasValue)),
-                    TotalTaskAsign = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Status == 2)),
+                    TotalTaskDoing = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Status == 3)),
                     TotalTaskToDo = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Status == 1)),
-                    TotalTaskDone = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Status == 4)),
+                    TotalTaskClose = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Status == 8)),
                     TotalTaskPending = farmTasks.Count(f => f.StartDate.Value.Date == day.Date && (f.Status == 5)),
                 })
                 .ToList();
@@ -441,12 +443,12 @@ namespace SomoTaskManagement.Services.Impf
             int skipCount = (pageIndex - 1) * pageSize;
 
             var farmTasks = (await _unitOfWork.RepositoryFarmTask.GetData(
-        expression: t => (t.ManagerId == id || t.ManagerId == null) &&
-                         t.Status == status &&
-                         (!date.HasValue ||
-                          (!t.StartDate.HasValue ||
-                           (date.Value.Date >= t.StartDate.Value.Date && date.Value.Date <= t.EndDate.Value.Date))),
-        includes: includes)).ToList();
+            expression: t => (t.ManagerId == id || t.ManagerId == null) &&
+                             t.Status == status &&
+                             (!date.HasValue ||
+                              (!t.StartDate.HasValue ||
+                               (date.Value.Date >= t.StartDate.Value.Date && date.Value.Date <= t.EndDate.Value.Date))),
+            includes: includes)).ToList();
 
             if (checkTaskParent == 0)
             {
@@ -468,15 +470,17 @@ namespace SomoTaskManagement.Services.Impf
             }
 
 
-
-            farmTasks = farmTasks.OrderByDescending(t => t.Priority).ThenBy(t => t.StartDate).ThenByDescending(t => t.CreateDate)
+            if (status == 8 || status == 7)
+            {
+                farmTasks = farmTasks.OrderByDescending(t => t.StartDate).ToList();
+            }
+            else
+            {
+                farmTasks = farmTasks.OrderByDescending(t => t.Priority).ThenBy(t => t.StartDate).ThenByDescending(t => t.CreateDate)
                 .Skip(skipCount)
                 .Take(pageSize)
                 .ToList();
 
-            if (status == 8 || status == 7)
-            {
-                farmTasks = farmTasks.OrderByDescending(t => t.StartDate).ToList();
             }
 
             var map = await MapFarmTasks(farmTasks);
@@ -1527,11 +1531,9 @@ namespace SomoTaskManagement.Services.Impf
                     throw new Exception("Ngày bắt đầu không được lớn hơn ngày kết thúc");
                 }
 
-
-
                 if (task.StartDate.HasValue && task.EndDate.HasValue)
                 {
-                    TimeSpan totalDuration = task.EndDate.Value - task.StartDate.Value;
+                    TimeSpan totalDuration = taskModel.EndDate - taskModel.StartDate;
                     double totalHours = totalDuration.TotalHours;
 
                     var totalEffortHour = taskModel.OverallEffortHour + taskModel.OverallEfforMinutes / 60;
@@ -2349,14 +2351,17 @@ namespace SomoTaskManagement.Services.Impf
                 _unitOfWork.RepositoryFarmTask.Update(task);
                 await _unitOfWork.RepositoryFarmTask.Commit();
 
-                //string message = $"Công việc {task.Name} được chuyển sang đang thực hiện";
-                //List<int> memberIds = new List<int>();
-                //if (task.ManagerId.HasValue)
-                //{
-                //    memberIds.Add(task.ManagerId.Value);
-                //    var managerTokens = await GetTokenByMemberId(task.ManagerId.Value);
-                //    await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
-                //}
+                string message = $"Công việc '{task.Name}' đã bị chuyển sang đang thực hiện";
+                if (task.ManagerId.HasValue)
+                {
+                    var managerIds = await GetManagerId();
+
+                    var memberIds = new List<int>(managerIds);
+
+                    var managerTokens = await GetTokenAllManger();
+
+                    await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+                }
             }
             else
             {
@@ -2423,6 +2428,18 @@ namespace SomoTaskManagement.Services.Impf
                     task.Status = 4;
                     _unitOfWork.RepositoryFarmTask.Update(task);
                     await _unitOfWork.RepositoryFarmTask.Commit();
+
+                    string message = $"Công việc '{task.Name}' đã hoàn thành";
+                    if (task.ManagerId.HasValue)
+                    {
+                        var managerIds = await GetManagerId();
+
+                        var memberIds = new List<int>(managerIds);
+
+                        var managerTokens = await GetTokenAllManger();
+
+                        await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+                    }
                 }
                 else
                 {

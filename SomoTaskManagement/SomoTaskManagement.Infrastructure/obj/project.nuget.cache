@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "7CSFr7ZsxikFK4RRbrIBTsHx2+hsgmaINgfWtSTt1ts9BovJI/u2N+H8MYZlOolTvCsblz0Ywj5JQ9TkwnVgGA==",
+  "dgSpecHash": "V3TIsUbwRhc4vyeEPO4NW7S4/yxAslQZg5fYHxu0jA26rnFrQFDUIT5s+CkthvLc4fr0LeOImrm+E3h0MMpcnQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\Admin\\Documents\\HOC\\1\\ProjectSOMO\\BESomo\\SomoTaskManagement\\SomoTaskManagement.Infrastructure\\SomoTaskManagement.Infrastructure.csproj",
   "expectedPackageFiles": [
@@ -18,6 +18,7 @@
     "C:\\Users\\Admin\\.nuget\\packages\\google.apis\\1.49.0\\google.apis.1.49.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\google.apis.auth\\1.49.0\\google.apis.auth.1.49.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\google.apis.core\\1.49.0\\google.apis.core.1.49.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\libphonenumber-csharp\\8.13.25\\libphonenumber-csharp.8.13.25.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.authentication.abstractions\\2.2.0\\microsoft.aspnetcore.authentication.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.authentication.core\\2.2.0\\microsoft.aspnetcore.authentication.core.2.2.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\6.0.21\\microsoft.aspnetcore.authentication.jwtbearer.6.0.21.nupkg.sha512",

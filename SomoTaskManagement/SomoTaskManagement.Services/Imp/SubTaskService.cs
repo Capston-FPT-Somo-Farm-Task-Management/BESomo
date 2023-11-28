@@ -133,40 +133,40 @@ namespace SomoTaskManagement.Services.Imp
             await _unitOfWork.RepositoryEmployee_Task.Add(subTaskNew);
             await _unitOfWork.RepositoryEmployee_Task.Commit();
 
-            var toPhoneNumbers = new List<string>
-            {
-                "+84394044324",
-                "+84777767130"
-            };
+            //var toPhoneNumbers = new List<string>
+            //{
+            //    "+84394044324",
+            //    "+84777767130"
+            //};
 
-            foreach (var toPhoneNumber in toPhoneNumbers)
-            {
-                try
-                {
-                    var twilioAccountSid = _configuration["Twilio:AccountSid"];
-                    var twilioAuthToken = _configuration["Twilio:AuthToken"];
-                    var twilioPhoneNumber = _configuration["Twilio:PhoneNumber"];
+            //foreach (var toPhoneNumber in toPhoneNumbers)
+            //{
+            //    try
+            //    {
+            //        var twilioAccountSid = _configuration["Twilio:AccountSid"];
+            //        var twilioAuthToken = _configuration["Twilio:AuthToken"];
+            //        var twilioPhoneNumber = _configuration["Twilio:PhoneNumber"];
 
-                    TwilioClient.Init(twilioAccountSid, twilioAuthToken);
+            //        TwilioClient.Init(twilioAccountSid, twilioAuthToken);
 
-                    var messageBody = $"Công việc mới đã được tạo: {subTask.Name}";
+            //        var messageBody = $"Công việc mới đã được tạo: {subTask.Name}";
 
-                    var from = new PhoneNumber(twilioPhoneNumber);
-                    var to = new PhoneNumber(toPhoneNumber);
+            //        var from = new PhoneNumber(twilioPhoneNumber);
+            //        var to = new PhoneNumber(toPhoneNumber);
 
-                    var message = MessageResource.Create(
-                        body: messageBody,
-                        from: from,
-                        to: to
-                    );
+            //        var message = MessageResource.Create(
+            //            body: messageBody,
+            //            from: from,
+            //            to: to
+            //        );
 
-                    Console.WriteLine($"Message sent with SID: {message.Sid}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error sending message to {toPhoneNumber}: {ex.Message}");
-                }
-            }
+            //        Console.WriteLine($"Message sent with SID: {message.Sid}");
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Console.WriteLine($"Error sending message to {toPhoneNumber}: {ex.Message}");
+            //    }
+            //}
         }
 
 

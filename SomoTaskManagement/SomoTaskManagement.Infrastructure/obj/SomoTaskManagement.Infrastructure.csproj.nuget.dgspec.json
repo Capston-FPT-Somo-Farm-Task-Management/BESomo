@@ -400,6 +400,10 @@
             "Twilio": {
               "target": "Package",
               "version": "[6.15.1, )"
+            },
+            "libphonenumber-csharp": {
+              "target": "Package",
+              "version": "[8.13.25, )"
             }
           },
           "imports": [

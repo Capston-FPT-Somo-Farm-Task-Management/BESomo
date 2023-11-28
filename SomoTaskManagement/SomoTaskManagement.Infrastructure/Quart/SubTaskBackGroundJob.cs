@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using PhoneNumbers;
 using Quartz;
 using SomoTaskManagement.Data;
 using SomoTaskManagement.Data.Abtract;
@@ -53,13 +54,19 @@ namespace SomoTaskManagement.Infrastructure.Quart
 
                             TwilioClient.Init(twilioAccountSid, twilioAuthToken);
 
+                            var phoneNumberUtil = PhoneNumberUtil.GetInstance();
+
                             foreach (var phoneNumber in employee.PhoneNumber)
                             {
-                                var toPhoneNumber = phoneNumber.ToString();
+                                var phoneNumberProto = phoneNumberUtil.Parse(phoneNumber.ToString(), "VN");
+
+                                var formattedPhoneNumber = phoneNumberUtil.Format(phoneNumberProto, PhoneNumberFormat.INTERNATIONAL);
+
+                                var toPhoneNumber = formattedPhoneNumber;
                                 var messageBody = $"Công việc mới đã được tạo: {subTask.Name}";
 
-                                var from = new PhoneNumber(twilioPhoneNumber);
-                                var to = new PhoneNumber(toPhoneNumber);
+                                var from = new Twilio.Types.PhoneNumber(twilioPhoneNumber);
+                                var to = new Twilio.Types.PhoneNumber(toPhoneNumber);
 
                                 var message = MessageResource.Create(
                                     body: messageBody,
