@@ -177,13 +177,28 @@ namespace SomoTaskManagement.Services.Impf
 
             var allDaysOfWeek = Enumerable.Range(0, 7).Select(day => startOfWeek.AddDays(day)).ToList();
 
-            var farmTasks = await _unitOfWork.RepositoryFarmTask
-                                        .GetData(
-                                            expression: t => (t.ManagerId == memberId || t.ManagerId == null)
-                                                && (t.StartDate >= startOfWeek || t.StartDate <= endOfWeek)
-                                                && t.Status != 0,
-                                          includes: includes
-                                        );
+            var role = await CheckRoleMember(memberId);
+            var farmTasks = new List<FarmTask>();
+            if (role == 1)
+            {
+                farmTasks = (await _unitOfWork.RepositoryFarmTask.GetData(
+                        expression: t => (t.ManagerId == memberId || t.ManagerId == null)
+                            && (t.StartDate >= startOfWeek || t.StartDate <= endOfWeek)
+                            && t.Status != 0,
+                        includes: includes
+                    )).ToList();
+
+            }
+            else if (role == 3)
+            {
+                farmTasks = (await _unitOfWork.RepositoryFarmTask.GetData(
+                        expression: t => t.SuppervisorId == memberId
+                            && (t.StartDate >= startOfWeek || t.StartDate <= endOfWeek)
+                            && t.Status != 0,
+                        includes: includes
+                    )).ToList();
+
+            }
 
             var taskCounts = allDaysOfWeek
                 .Select(day => new TaskCountPerDayModel
@@ -581,14 +596,16 @@ namespace SomoTaskManagement.Services.Impf
                 var totalTaskCount = farmTasks.Count();
                 var totalPages = (int)Math.Ceiling((double)totalTaskCount / pageSize);
 
-                farmTasks = farmTasks.OrderByDescending(t => t.Priority).ThenBy(t => t.StartDate).ThenByDescending(t => t.CreateDate)
-                                     .Skip((pageIndex - 1) * pageSize)
-                                     .Take(pageSize)
-                                     .ToList();
-
                 if (status == 8 || status == 7)
                 {
                     farmTasks = farmTasks.OrderByDescending(t => t.StartDate).ToList();
+                }
+                else
+                {
+                    farmTasks = farmTasks.OrderByDescending(t => t.Priority).ThenBy(t => t.StartDate).ThenByDescending(t => t.CreateDate)
+                                    .Skip((pageIndex - 1) * pageSize)
+                                    .Take(pageSize)
+                                    .ToList();
                 }
 
                 var map = await MapFarmTasks(farmTasks);
@@ -601,10 +618,7 @@ namespace SomoTaskManagement.Services.Impf
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
-                Console.WriteLine($"StackTrace: {ex.StackTrace}");
-                // Xử lý ngoại lệ hoặc log tùy thuộc vào nhu cầu của bạn.
-                throw; // Đặc biệt quan trọng để giữ nguyên ngoại lệ để có thể xem thông tin chi tiết khi debug.
+                throw;
             }
         }
 
@@ -864,7 +878,7 @@ namespace SomoTaskManagement.Services.Impf
                         _unitOfWork.RepositoryFarmTask.Update(task);
                         await _unitOfWork.RepositoryFarmTask.Commit();
 
-                        string message = $"Công việc '{task.Name}' đã chuyển sang chuẩn bị";
+                        string message = $"Công việc '{task.Name}' đã được giao lại";
                         List<int> memberIds = new List<int>();
                         if (task.SuppervisorId.HasValue)
                         {
@@ -974,6 +988,14 @@ namespace SomoTaskManagement.Services.Impf
             if (task.Status == 1 || task.Status == 0 || task.Status == 2)
             {
                 _unitOfWork.RepositoryFarmTask.Delete(t => t.Id == taskId);
+                if (task.OriginalTaskId == 0)
+                {
+                    var subtasks = await _unitOfWork.RepositoryFarmTask.GetData(s => s.OriginalTaskId == taskId);
+                    foreach (var subtask in subtasks)
+                    {
+                        _unitOfWork.RepositoryFarmTask.Delete(subtask);
+                    }
+                }
                 await _unitOfWork.RepositoryFarmTask.Commit();
             }
             else
@@ -1050,6 +1072,7 @@ namespace SomoTaskManagement.Services.Impf
 
             await UpdateTask(taskId, taskModel, dates, materialIds);
             task.Status = 1;
+            task.IsRepeat = true;
             var existingTasks = await _unitOfWork.RepositoryFarmTask.GetData(t => t.OriginalTaskId == taskId);
 
             if (existingTasks.Any())
@@ -1057,13 +1080,26 @@ namespace SomoTaskManagement.Services.Impf
                 foreach (var existingTask in existingTasks)
                 {
                     existingTask.Status = 1;
+                    existingTask.IsRepeat = false;
                     await _unitOfWork.RepositoryFarmTask.Commit();
                 }
+
+            }
+
+            string message = $"Công việc '{task.Name}' đã được giao";
+            List<int> memberIds = new List<int>();
+            if (task.SuppervisorId.HasValue)
+            {
+                memberIds.Add(task.SuppervisorId.Value);
+                var managerTokens = await GetTokenByMemberId(task.SuppervisorId.Value);
+                await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
 
             }
             await _unitOfWork.RepositoryFarmTask.Commit();
 
         }
+
+
         private async Task UpdateFarmTask(FarmTask farmTask, DateTime? date, TaskDraftModelUpdate taskModel, List<int> materialIds)
         {
             var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
@@ -2055,7 +2091,7 @@ namespace SomoTaskManagement.Services.Impf
                 Token = token,
                 Notification = new FirebaseAdmin.Messaging.Notification
                 {
-                    Title = "Tittle",
+                    Title = $"{task.Name}",
                     Body = message
                 },
                 Data = new Dictionary<string, string>

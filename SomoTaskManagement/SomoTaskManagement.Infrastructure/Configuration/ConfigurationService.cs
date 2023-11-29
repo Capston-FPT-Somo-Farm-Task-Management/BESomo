@@ -55,6 +55,7 @@ namespace SomoTaskManagement.Infrastructure.Configuration
             services.AddScoped<ISubTaskService, SubTaskService>();
             services.AddScoped<IHubConnection, HubConnectionService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IEmailService, EmailService>();
             services.AddSingleton<WebSocketManager>();
 
         }

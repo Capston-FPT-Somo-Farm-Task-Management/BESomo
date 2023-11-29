@@ -77,7 +77,6 @@ namespace SomoTaskManagement.Services.Imp
                 Status = 1,
                 Email = member.Email,
                 UserName = member.UserName,
-                Password = member.Password,
                 Code = member.Code,
                 PhoneNumber = member.PhoneNumber,
                 Birthday = member.Birthday,
@@ -85,6 +84,10 @@ namespace SomoTaskManagement.Services.Imp
                 RoleId = member.RoleId,
                 FarmId = member.FarmId,
             };
+            string currentPassword = member.Password;
+
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(currentPassword);
+            memberNew.Password = hashedPassword;
             var urlImage = await UploadImageToFirebaseAsync(memberNew, member.ImageFile);
             memberNew.Avatar = urlImage;
 
@@ -122,6 +125,23 @@ namespace SomoTaskManagement.Services.Imp
 
             return imageUrl;
         }
+
+        public async Task UpdatePassword(int memberId,UpdatePasswordModel passwordModel)
+        {
+            var member = await _unitOfWork.RepositoryMember.GetById(memberId) ?? throw new Exception("Không tìm thấy nhân viên");
+            if (!passwordModel.Password.Equals(passwordModel.ConfirmPassword))
+            {
+                throw new Exception("Xác nhận lại mật khẩu");
+            }
+
+            string currentPassword = passwordModel.Password;
+
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(currentPassword);
+            member.Password = hashedPassword;
+
+            await _unitOfWork.RepositoryMember.Commit();
+        }
+
 
         public async Task UdateMember(int id, MemberUpdateModel member)
         {

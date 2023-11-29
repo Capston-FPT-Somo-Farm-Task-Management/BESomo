@@ -46,6 +46,30 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+        [HttpPut("{memberId}/UpdatePassword")]
+        public async Task<IActionResult> UpdatePassword(int memberId, UpdatePasswordModel passwordModel)
+        {
+            try
+            {
+                await _memberService.UpdatePassword(memberId, passwordModel);
+                return Ok(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Cập nhật thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
         [HttpGet("HashPassword")]
         public async Task<IActionResult> HashPassword()
         {

@@ -24,5 +24,6 @@ namespace SomoTaskManagement.Services.Interface
         Task<IEnumerable<MemberModel>> ListSupervisor(int id);
         Task<IEnumerable<MemberActiveModel>> ListSupervisorActive(int id);
         Task UdateMember(int id, MemberUpdateModel member);
+        Task UpdatePassword(int memberId, UpdatePasswordModel passwordModel);
     }
 }

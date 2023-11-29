@@ -17,6 +17,7 @@ using Twilio;
 using Microsoft.Extensions.Configuration;
 using System.Configuration;
 using Twilio.Rest.Api.V2010.Account;
+using FirebaseAdmin.Messaging;
 
 namespace SomoTaskManagement.Services.Imp
 {
@@ -304,6 +305,20 @@ namespace SomoTaskManagement.Services.Imp
                             await _unitOfWork.RepositoryEmployee_Task.Commit();
                         }
                     }
+
+                    string message = $"Công việc '{existingTask.Name}' đã hoàn thành";
+                    if (existingTask.ManagerId.HasValue)
+                    {
+                        var managerIds = await GetManagerId();
+
+                        var memberIds = new List<int>(managerIds);
+
+                        var managerTokens = await GetTokenAllManger();
+
+                        await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, existingTask.Id);
+                    }
+
+
                     _unitOfWork.CommitTransaction();
                 }
                 catch (Exception ex)
@@ -318,6 +333,89 @@ namespace SomoTaskManagement.Services.Imp
             }
         }
 
+        public async Task<List<int>> GetManagerId()
+        {
+            var manager = await _unitOfWork.RepositoryMember.GetData(m => m.RoleId == 1);
+            var managerId = manager.Select(m => m.Id).ToList();
+            return managerId;
+        }
+        public async Task<List<string>> GetTokenAllManger()
+        {
+            var managers = await _unitOfWork.RepositoryMember.GetData(m => m.RoleId == 1);
+            foreach (var manager in managers)
+            {
+                var hubConnections = await _unitOfWork.RepositoryHubConnection.GetData(h => h.MemberId == manager.Id);
+
+                if (hubConnections == null)
+                {
+                    throw new Exception("Không tìm thấy kết nối");
+                }
+
+                var connectionIds = hubConnections.Select(h => h.ConnectionId).ToList();
+                return connectionIds;
+            }
+
+            return null;
+        }
+
+        public async Task SendNotificationToDeviceAndMembers(List<string> deviceTokens, string message, List<int> memberIds, int taskId)
+        {
+            TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+            var task = await _unitOfWork.RepositoryFarmTask.GetById(taskId);
+            var deviceMessages = deviceTokens.Select(token => new Message
+            {
+                Token = token,
+                Notification = new FirebaseAdmin.Messaging.Notification
+                {
+                    Title = $"{task.Name}",
+                    Body = message
+                },
+                Data = new Dictionary<string, string>
+                {
+                    { "TaskId", taskId.ToString() }
+                }
+            }).ToList();
+
+            foreach (var deviceMessage in deviceMessages)
+            {
+                await SendNotificationToDevices(new List<string> { deviceMessage.Token }, deviceMessage);
+            }
+
+            foreach (var memberId in memberIds)
+            {
+                var individualNotification = new Domain.Entities.Notification
+                {
+                    Message = message,
+                    MessageType = "Individual",
+                    NotificationDateTime = vietnamTime,
+                    IsRead = false,
+                    IsNew = true,
+                    TaskId = taskId
+                };
+                await _unitOfWork.RepositoryNotifycation.Add(individualNotification);
+                await _unitOfWork.RepositoryNotifycation.Commit();
+
+                var member_notify = new Notification_Member
+                {
+                    NotificationId = individualNotification.Id,
+                    MemberId = memberId,
+                };
+                await _unitOfWork.RepositoryNotifycation_Member.Add(member_notify);
+                await _unitOfWork.RepositoryNotifycation_Member.Commit();
+            }
+        }
+        public async Task SendNotificationToDevices(List<string> deviceTokens, Message message)
+        {
+            foreach (var deviceToken in deviceTokens)
+            {
+                message.Token = deviceToken;
+
+                var messaging = FirebaseMessaging.DefaultInstance;
+                await messaging.SendAsync(message);
+            }
+        }
         public async Task<GetEffortByTaskModel> GetEffortByTask(int taskId)
         {
             var task = await _unitOfWork.RepositoryFarmTask.GetById(taskId);
