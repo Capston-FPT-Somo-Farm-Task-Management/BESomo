@@ -487,7 +487,10 @@ namespace SomoTaskManagement.Services.Impf
 
             if (status == 8 || status == 7)
             {
-                farmTasks = farmTasks.OrderByDescending(t => t.StartDate).ToList();
+                farmTasks = farmTasks.OrderByDescending(t => t.StartDate).ToList()
+                    .Skip(skipCount)
+                .Take(pageSize)
+                .ToList(); ;
             }
             else
             {
@@ -598,7 +601,10 @@ namespace SomoTaskManagement.Services.Impf
 
                 if (status == 8 || status == 7)
                 {
-                    farmTasks = farmTasks.OrderByDescending(t => t.StartDate).ToList();
+                    farmTasks = farmTasks.OrderByDescending(t => t.StartDate).ToList()
+                        .Skip((pageIndex - 1) * pageSize)
+                                    .Take(pageSize)
+                                    .ToList();
                 }
                 else
                 {
@@ -958,6 +964,8 @@ namespace SomoTaskManagement.Services.Impf
                             else
                             {
                                 await UpdateFarmTask(existingTask, date, taskModel, materialIds);
+                                existingTask.IsRepeat = false;
+                                await _unitOfWork.RepositoryFarmTask.Commit();
                             }
                         }
                     }
@@ -968,6 +976,7 @@ namespace SomoTaskManagement.Services.Impf
                 else
                 {
                     await UpdateFarmTask(farmTask, farmTask.StartDate?.Date, taskModel, materialIds);
+                    farmTask.OriginalTaskId = 0;
                     await _unitOfWork.RepositoryFarmTask.Commit();
                 }
                 _unitOfWork.CommitTransaction();
@@ -2199,7 +2208,7 @@ namespace SomoTaskManagement.Services.Impf
 
                 if (task != null)
                 {
-                    if (task.Status == 3)
+                    if (task.Status == 3 || task.Status == 7 || task.Status == 2)
                     {
                         if (status != 5 && status != 7)
                         {
