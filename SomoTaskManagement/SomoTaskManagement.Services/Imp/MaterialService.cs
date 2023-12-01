@@ -2,8 +2,11 @@
 using Firebase.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using OfficeOpenXml.Style;
+using OfficeOpenXml;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
+using SomoTaskManagement.Domain.Enum;
 using SomoTaskManagement.Domain.Model.Material;
 using SomoTaskManagement.Services.Interface;
 using System;
@@ -12,6 +15,8 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
+using SomoTaskManagement.Domain.Model.Employee;
 
 namespace SomoTaskManagement.Services.Imp
 {
@@ -78,7 +83,114 @@ namespace SomoTaskManagement.Services.Imp
             await _unitOfWork.RepositoryMaterial.Commit();
         }
 
+        public async Task<byte[]> ExportEmployeesToExcel(int farmId)
+        {
+            using (var package = new ExcelPackage())
+            {
+                var worksheetMaterial = package.Workbook.Worksheets.Add("Material");
+                var farm = await _unitOfWork.RepositoryFarm.GetById(farmId);
+                worksheetMaterial.Cells["B1:G1"].Merge = true;
+                worksheetMaterial.Cells[1, 2].Value = $"Thông tin dụng cụ trong trang trại {farm.Name}";
+                worksheetMaterial.Cells[1, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
+                worksheetMaterial.Cells[3, 1].Value = "Mã dụng cụ";
+                worksheetMaterial.Cells[3, 2].Value = "Tên";
+                worksheetMaterial.Cells[3, 3].Value = "Hình ảnh";
+
+                var materials = await _unitOfWork.RepositoryMaterial.GetData(e => e.FarmId == farmId);
+
+                int row = 4;
+                foreach (var material in materials)
+                {
+                    worksheetMaterial.Cells[row, 1].Value = material.Id;
+                    worksheetMaterial.Cells[row, 2].Value = material.Name;
+                    worksheetMaterial.Cells[row, 3].Value = material.UrlImage;
+
+                    row++;
+                }
+                worksheetMaterial.Cells.AutoFitColumns();
+
+                return package.GetAsByteArray();
+            }
+        }
+
+
+        public async Task ImportMaterialFromExcel(Stream excelFileStream, int farmId)
+        {
+            await _unitOfWork.BeginTransactionAsync();
+
+            try
+            {
+                using (var package = new ExcelPackage(excelFileStream))
+                {
+                    var farm = await _unitOfWork.RepositoryFarm.GetById(farmId);
+                    var worksheet = package.Workbook.Worksheets[0];
+                    int rowCount = worksheet.Dimension.Rows;
+
+                    if (worksheet == null || worksheet.Dimension == null)
+                    {
+                        throw new Exception("Tài liệu không hợp lệ");
+                    }
+                    for (int row = 4; row <= rowCount; row++)
+                    {
+
+                        var material = new MaterialImportExcelModel
+                        {
+                            MaterialName = worksheet.Cells[row, 2].Value?.ToString(),
+                            UrlIMage = worksheet.Cells[row, 3].Value?.ToString(),
+                        };
+                        object materialId = worksheet.Cells[row, 1].Value;
+
+                        if (materialId != null && int.TryParse(materialId.ToString(), out int materialIdInt))
+                        {
+                            var existMaterial = await _unitOfWork.RepositoryMaterial.GetSingleByCondition(a => a.Id == materialIdInt);
+
+                            if (existMaterial != null)
+                            {
+                                existMaterial.Name = material.MaterialName;
+                                existMaterial.UrlImage = material.UrlIMage;
+
+                                _unitOfWork.RepositoryMaterial.Update(existMaterial);
+
+                                await _unitOfWork.RepositoryEmployee.Commit();
+                            }
+                        }
+                        else
+                        {
+                            var materialNew = new Material
+                            {
+                                Name = material.MaterialName,
+                                UrlImage = material.UrlIMage,
+                                Status = 1,
+                                FarmId = farm.Id
+                            };
+                           
+                            await _unitOfWork.RepositoryMaterial.Add(materialNew);
+                        }
+
+                    }
+
+                    await _unitOfWork.RepositoryMaterial.Commit();
+                    _unitOfWork.CommitTransaction();
+                }
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.RollbackTransaction();
+                throw new Exception($"Error during mat import: {ex.Message}");
+            }
+        }
+
+        public static string GetEnumDescription<T>(T enumValue)
+        {
+            var fieldInfo = enumValue.GetType().GetField(enumValue.ToString());
+
+            if (fieldInfo == null) return string.Empty;
+
+            var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+
+            return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : enumValue.ToString();
+        }
         private async Task<string> UploadImageToFirebaseAsync(Material material, IFormFile imageFile)
         {
             if (imageFile != null)

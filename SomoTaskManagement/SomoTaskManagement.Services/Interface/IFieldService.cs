@@ -1,6 +1,8 @@
 ﻿using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Model.Area;
 using SomoTaskManagement.Domain.Model.Field;
+using SomoTaskManagement.Domain.Model.Livestock;
+using SomoTaskManagement.Domain.Model.Plant;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +20,9 @@ namespace SomoTaskManagement.Services.Interface
         Task<AreaZoneModel> GetAreaZoneByField(int id);
         Task<Field> GetByCode(string code);
         Task<IEnumerable<FieldModel>> GetByZone(int id);
+        Task<IEnumerable<LiveStockModel>> GetLivestockByField(int fieldId);
         Task<IEnumerable<FieldModel>> GetLivestockFieldByFarm(int id);
+        Task<IEnumerable<PlantModel>> GetPlantByField(int fieldId);
         Task<IEnumerable<FieldModel>> GetPlantFieldByFarm(int id);
         Task<FieldModel> GetZoneField(int id);
         Task<IEnumerable<FieldModel>> ListField();

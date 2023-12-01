@@ -181,7 +181,7 @@ namespace SomoTaskManagement.Api.Controllers
             {
                 return BadRequest(new ApiResponseModel
                 {
-                    Message = "Error deleting record: " + e.Message,
+                    Message =  e.Message,
                     Success = false
                 });
             }
@@ -205,7 +205,7 @@ namespace SomoTaskManagement.Api.Controllers
             {
                 return BadRequest(new ApiResponseModel
                 {
-                    Message = "Error deleting record: " + e.Message,
+                    Message = e.Message,
                     Success = false
                 });
             }
@@ -252,6 +252,52 @@ namespace SomoTaskManagement.Api.Controllers
                 return BadRequest(new ApiResponseModel
                 {
                     Message = "Lỗi" + e.Message,
+                    Success = false
+                });
+            }
+        }
+
+        [HttpGet("{id}/GetLivestockByField")]
+        public async Task<IActionResult> GetLivestockByField(int id)
+        {
+            try
+            {
+                var area = await _fieldService.GetLivestockByField(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = e.Message,
+                    Success = false
+                });
+            }
+        }
+
+        [HttpGet("{id}/GetPlantByField")]
+        public async Task<IActionResult> GetPlantByField(int id)
+        {
+            try
+            {
+                var area = await _fieldService.GetPlantByField(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Message = e.Message,
                     Success = false
                 });
             }

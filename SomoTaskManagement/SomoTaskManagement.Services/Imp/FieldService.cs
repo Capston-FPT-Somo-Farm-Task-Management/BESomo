@@ -6,6 +6,8 @@ using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Enum;
 using SomoTaskManagement.Domain.Model.Area;
 using SomoTaskManagement.Domain.Model.Field;
+using SomoTaskManagement.Domain.Model.Livestock;
+using SomoTaskManagement.Domain.Model.Plant;
 using SomoTaskManagement.Services.Interface;
 using System;
 using System.Collections.Generic;
@@ -372,5 +374,40 @@ namespace SomoTaskManagement.Services.Imp
             return await _unitOfWork.RepositoryField.GetSingleByCondition(f => f.Code == code);
         }
 
+        public async Task<IEnumerable<LiveStockModel>> GetLivestockByField(int fieldId)
+        {
+            var field = await _unitOfWork.RepositoryField.GetSingleByCondition(f=>f.Id ==fieldId && f.Status == 1) ?? throw new Exception("Không tìm thấy chuồng");
+
+            var includes = new Expression<Func<LiveStock, object>>[]
+            {
+                t => t.Field,
+                t => t.HabitantType,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area
+            };
+            var liveStocks = await _unitOfWork.RepositoryLiveStock
+                .GetData(expression: l => l.FieldId == fieldId , includes: includes);
+
+            liveStocks = liveStocks.OrderBy(ls => ls.CreateDate).ToList();
+            return _mapper.Map<IEnumerable<LiveStock>, IEnumerable<LiveStockModel>>(liveStocks);
+
+        }
+
+        public async Task<IEnumerable<PlantModel>> GetPlantByField(int fieldId)
+        {
+            var field = await _unitOfWork.RepositoryField.GetSingleByCondition(f => f.Id == fieldId && f.Status == 0) ?? throw new Exception("Không tìm thấy vườn");
+
+            var includes = new Expression<Func<Plant, object>>[]
+            {
+                t => t.Field,
+                t => t.HabitantType,
+                t => t.Field.Zone,
+                t => t.Field.Zone.Area
+            };
+            var plants = await _unitOfWork.RepositoryPlant
+                .GetData(expression: l => l.FieldId == fieldId, includes: includes);
+
+            return _mapper.Map<IEnumerable<Plant>, IEnumerable<PlantModel>>(plants);
+        }
     }
 }

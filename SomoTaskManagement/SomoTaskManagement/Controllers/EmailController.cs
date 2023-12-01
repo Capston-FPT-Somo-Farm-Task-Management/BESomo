@@ -17,12 +17,12 @@ namespace SomoTaskManagement.Api.Controllers
             _emailService= emailService;
         }
 
-        [HttpPost("SendMail")]
-        public async Task<IActionResult>SendMail(int memberId)
+        [HttpPost("ForgotPassword")]
+        public async Task<IActionResult>SendMail(string email)
         {
             try
             {
-                await _emailService.SendPasswordResetEmail(memberId);
+                await _emailService.SendPasswordResetEmail(email);
                 return Ok(new ApiResponseModel
                 {
                     Data = null,

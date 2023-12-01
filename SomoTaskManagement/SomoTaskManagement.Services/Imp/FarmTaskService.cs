@@ -808,8 +808,6 @@ namespace SomoTaskManagement.Services.Impf
                     {
                         throw new Exception("Giờ dự kiến không được lớn hơn tổng thời gian giữa ngày bắt đầu và ngày kết thúc");
                     }
-
-
                 }
                 else
                 {
@@ -1454,18 +1452,15 @@ namespace SomoTaskManagement.Services.Impf
                     throw new Exception("Ngày bắt đầu không được lớn hơn ngày kết thúc");
                 }
 
-
                 TimeSpan totalDuration = taskModel.EndDate - taskModel.StartDate;
-                int totalDays = totalDuration.Days;
+                double totalHours = totalDuration.TotalHours;
 
                 var totalEffortHour = taskModel.OverallEffortHour + taskModel.OverallEfforMinutes / 60;
 
-                if (totalEffortHour > totalDays)
+                if (totalEffortHour > totalHours)
                 {
-                    throw new Exception("Giờ dự kiến không được lớn hơn khoảng cách giữa ngày bắt đầu và ngày kết thúc");
+                    throw new Exception("Giờ dự kiến không được lớn hơn tổng thời gian giữa ngày bắt đầu và ngày kết thúc");
                 }
-
-
 
                 string taskCode = GenerateTaskCode();
                 var farmTaskNew = new FarmTask
@@ -2390,28 +2385,37 @@ namespace SomoTaskManagement.Services.Impf
         public async Task ChangeStatusToDoing(int id)
         {
             var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
-            if (task != null)
+            var employee_task = await _unitOfWork.RepositoryEmployee_Task.GetData(e => e.TaskId == id);
+            if (employee_task.Any())
             {
-                task.Status = 3;
-                _unitOfWork.RepositoryFarmTask.Update(task);
-                await _unitOfWork.RepositoryFarmTask.Commit();
-
-                string message = $"Công việc '{task.Name}' đã bị chuyển sang đang thực hiện";
-                if (task.ManagerId.HasValue)
+                if (task != null)
                 {
-                    var managerIds = await GetManagerId();
+                    task.Status = 3;
+                    _unitOfWork.RepositoryFarmTask.Update(task);
+                    await _unitOfWork.RepositoryFarmTask.Commit();
 
-                    var memberIds = new List<int>(managerIds);
+                    string message = $"Công việc '{task.Name}' đã bị chuyển sang đang thực hiện";
+                    if (task.ManagerId.HasValue)
+                    {
+                        var managerIds = await GetManagerId();
 
-                    var managerTokens = await GetTokenAllManger();
+                        var memberIds = new List<int>(managerIds);
 
-                    await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+                        var managerTokens = await GetTokenAllManger();
+
+                        await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+                    }
+                }
+                else
+                {
+                    throw new Exception("Không tìm thấy nhiệm vụ");
                 }
             }
             else
             {
-                throw new Exception("Không tìm thấy nhiệm vụ");
+                throw new Exception("Cần phải có nhân viên mới đổi được sang thực hiện");
             }
+
         }
 
 
@@ -2527,7 +2531,7 @@ namespace SomoTaskManagement.Services.Impf
 
             var taskIds = subtasks.Select(s => s.TaskId);
 
-            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(expression: t => taskIds.Contains(t.Id) && t.Status == 8, includes: includes);
+            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(expression: t => taskIds.Contains(t.Id) && (t.Status == 8 ||t.Status == 7), includes: includes);
             tasks = tasks.OrderByDescending(t => t.StartDate).ToList();
 
             var totalTaskCount = tasks.Count();

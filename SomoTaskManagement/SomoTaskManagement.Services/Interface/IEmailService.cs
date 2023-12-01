@@ -8,6 +8,6 @@ namespace SomoTaskManagement.Services.Interface
 {
     public interface IEmailService
     {
-        Task SendPasswordResetEmail(int memberId);
+        Task SendPasswordResetEmail(string email);
     }
 }

@@ -325,7 +325,7 @@ namespace SomoTaskManagement.Services.Imp
                 //worksheetEmployee.Cells[3, 5].Value = "Xã";
                 worksheetEmployee.Cells[3, 5].Value = "Giới tính";
                 worksheetEmployee.Cells[3, 6].Value = "Ngày sinh";
-                worksheetEmployee.Cells[3, 7].Value = "Mã kỹ năng"; 
+                worksheetEmployee.Cells[3, 7].Value = "Mã kỹ năng";
                 worksheetEmployee.Cells[3, 8].Value = "Hình ảnh";
 
                 var employees = await _unitOfWork.RepositoryEmployee.GetData(e => e.FarmId == farmId && e.Status == 1);
@@ -337,77 +337,6 @@ namespace SomoTaskManagement.Services.Imp
                     worksheetEmployee.Cells[row, 2].Value = employee.Name;
                     worksheetEmployee.Cells[row, 3].Value = employee.PhoneNumber;
                     worksheetEmployee.Cells[row, 4].Value = employee.Address;
-
-                    //string[] addressParts = employee.Address.Split(',');
-                    //if (addressParts.Length >= 3)
-                    //{
-                    //    string province = addressParts[2].Trim();
-
-                    //    worksheetEmployee.Cells[row, 5].Value = province;
-
-                    //    var validationCell = worksheetEmployee.DataValidations.AddListValidation($"E{row}");
-
-                    //    string namedRange = $"ProvinceNames_{row}";
-
-                    //    var rangeForNames = worksheetEmployee.Cells[$"L{3}:L{3 + provinceNames.Count - 1}"];
-
-                    //    rangeForNames.LoadFromCollection(provinceNames);
-
-                    //    worksheetEmployee.Names.Add(namedRange, rangeForNames);
-
-                    //    validationCell.Formula.ExcelFormula = $"='{worksheetEmployee.Name}'!{namedRange}";
-                    //}
-
-                    //if (addressParts.Length >= 3)
-                    //{
-                    //    string district = addressParts[1].Trim();
-
-                    //    worksheetEmployee.Cells[row, 6].Value = district;
-
-                    //    var selectedDistrict = districts.FirstOrDefault(d => d.Name.Contains(district, StringComparison.OrdinalIgnoreCase));
-
-                    //    var selectedCity = cities.FirstOrDefault(city => city.Id == selectedDistrict.Province_Code);
-
-                    //    if (selectedCity != null)
-                    //    {
-                    //        var filteredDistricts = districts.Where(district => district.Province_Code == selectedCity.Id).ToList();
-
-                    //        List<string> filteredDistrictNames = filteredDistricts.Select(district => district.Name).ToList();
-
-                    //        worksheetEmployee.Cells[row, 6].Value = filteredDistrictNames.FirstOrDefault();
-
-                    //        var validationCell = worksheetEmployee.DataValidations.AddListValidation($"F{row}");
-
-                    //        string namedRange = $"DistrictName_{row}";
-
-                    //        var rangeForNames = worksheetEmployee.Cells[$"M{3}:M{3 + filteredDistrictNames.Count - 1}"];
-
-                    //        rangeForNames.LoadFromCollection(filteredDistrictNames);
-
-                    //        worksheetEmployee.Names.Add(namedRange, rangeForNames);
-
-                    //        validationCell.Formula.ExcelFormula = $"='{worksheetEmployee.Name}'!{namedRange}";
-                    //    }
-                    //}
-
-                    //if (addressParts.Length >= 3)
-                    //{
-                    //    string district = addressParts[0].Trim();
-
-                    //    worksheetEmployee.Cells[row, 7].Value = district;
-
-                    //    var validationCell = worksheetEmployee.DataValidations.AddListValidation($"G{row}");
-
-                    //    string namedRange = $"WardName_{row}";
-
-                    //    var rangeForNames = worksheetEmployee.Cells[$"N{3}:N{3 + wardNames.Count - 1}"];
-
-                    //    rangeForNames.LoadFromCollection(wardNames);
-
-                    //    worksheetEmployee.Names.Add(namedRange, rangeForNames);
-
-                    //    validationCell.Formula.ExcelFormula = $"='{worksheetEmployee.Name}'!{namedRange}";
-                    //}
 
                     var gender = (bool)employee.Gender ? EmployeeGenderEnum.Female : EmployeeGenderEnum.Male;
                     var genderString = GetGenderDescription(gender);
@@ -664,7 +593,7 @@ namespace SomoTaskManagement.Services.Imp
                 var subtasksOfDay = subtasks.Where(t => t.DaySubmit?.Day == day).ToList();
                 var taskIds = subtasksOfDay.Select(t => t.TaskId);
 
-                var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id) && t.Status == 8);
+                var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id) && (t.Status == 8|| t.Status == 7));
 
                 var tasksAndEffortsOfDay = new List<TaskEffort>();
 
@@ -1054,6 +983,26 @@ namespace SomoTaskManagement.Services.Imp
         public Task<byte[]> ExportEmployeesEffortToExcel(int farmId, DateTime startDay, DateTime endDay)
         {
             throw new NotImplementedException();
+        }
+
+        public static bool IsDifferent(object record, object request)
+        {
+            if (record == null || request == null)
+            {
+                return true;
+            }
+
+            foreach (PropertyInfo property in record.GetType().GetProperties())
+            {
+                object recordValue = property.GetValue(record);
+                object requestValue = property.GetValue(request);
+
+                if (recordValue != requestValue || (recordValue == null && requestValue != null) || (recordValue != null && requestValue == null))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

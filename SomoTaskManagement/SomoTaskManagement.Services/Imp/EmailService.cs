@@ -22,22 +22,24 @@ namespace SomoTaskManagement.Services.Imp
             _unitOfWork = unitOfWork;
         }
 
-        public async Task SendPasswordResetEmail(int memberId)
+        public async Task SendPasswordResetEmail(string email)
         {
-            var member = await _unitOfWork.RepositoryMember.GetById(memberId);
-            if (member == null)
-            {
-                throw new Exception("Không tìm thấy người dùng");
-            }
+            var member = await _unitOfWork.RepositoryMember.GetSingleByCondition(m=>m.Email == email)?? throw new Exception("Không tìm thấy người dùng");
+            
+            var newPassword = Random.Shared.Next(600000, 999999).ToString();
+            var emailContent = GeneratePasswordResetEmailContents(member.Name, newPassword);
+            string currentPassword = newPassword;
 
-            var emailContent = GeneratePasswordResetEmailContents(member.Name);
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(currentPassword);
+            member.Password = hashedPassword;
 
+            await _unitOfWork.RepositoryMember.Commit();
             try
             {
                 var message = new MailMessage();
                 message.From = new MailAddress("dohoangvu2001@gmail.com");
                 message.To.Add(member.Email);
-                message.Subject = "Mail chào mừng";
+                message.Subject = "Somo Task Management - Đặt lại mật khẩu";
                 message.Body = emailContent;
                 message.IsBodyHtml = false;
 
@@ -53,15 +55,14 @@ namespace SomoTaskManagement.Services.Imp
             }
         }
 
-        private static string GeneratePasswordResetEmailContents(string memberName)
+        private static string GeneratePasswordResetEmailContents(string memberName, string newPassword)
         {
             //var resetLink = $"https://yourwebsite.com/reset-password?token={resetToken}";
 
             var emailContent = $"Chào {memberName},\n\n";
             emailContent += "Chào mừng bạn đến với Somo.\n\n";
-            //emailContent += $"Please click the following link to reset your password:\n";
-            //emailContent += "If you didn't request this, please ignore this email.\n\n";
-            //emailContent += "Best regards,\nYour Company";
+            emailContent += $"Mật khẩu mới của bạn là {newPassword}.\n";
+            emailContent += $"Cảm ơn bạn đã sử dụng dịch vụ.\n";
 
             return emailContent;
         }

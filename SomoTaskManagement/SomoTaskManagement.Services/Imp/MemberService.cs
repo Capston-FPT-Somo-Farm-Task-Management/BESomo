@@ -2,6 +2,7 @@
 using Firebase.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using SomoTaskManagement.Data;
 using SomoTaskManagement.Data.Abtract;
@@ -71,33 +72,42 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task CreateMember(MemberCreateUpdateModel member)
         {
-            var memberNew = new Member
+            var exitsMember = await _unitOfWork.RepositoryMember.GetSingleByCondition(m=>m.Email == member.Email);
+            if (exitsMember == null)
             {
-                Name = member.Name,
-                Status = 1,
-                Email = member.Email,
-                UserName = member.UserName,
-                Code = member.Code,
-                PhoneNumber = member.PhoneNumber,
-                Birthday = member.Birthday,
-                Address = member.Address,
-                RoleId = member.RoleId,
-                FarmId = member.FarmId,
-            };
-            string currentPassword = member.Password;
+                var memberNew = new Member
+                {
+                    Name = member.Name,
+                    Status = 1,
+                    Email = member.Email,
+                    UserName = member.UserName,
+                    Code = member.Code,
+                    PhoneNumber = member.PhoneNumber,
+                    Birthday = member.Birthday,
+                    Address = member.Address,
+                    RoleId = member.RoleId,
+                    FarmId = member.FarmId,
+                };
+                string currentPassword = member.Password;
 
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(currentPassword);
-            memberNew.Password = hashedPassword;
-            var urlImage = await UploadImageToFirebaseAsync(memberNew, member.ImageFile);
-            memberNew.Avatar = urlImage;
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(currentPassword);
+                memberNew.Password = hashedPassword;
+                var urlImage = await UploadImageToFirebaseAsync(memberNew, member.ImageFile);
+                memberNew.Avatar = urlImage;
 
-            var existingMember = await _unitOfWork.RepositoryMember.GetSingleByCondition(m => m.Code == member.Code);
-            if(existingMember != null)
-            {
-                throw new Exception("Mã người dùng không được trùng");
+                var existingMember = await _unitOfWork.RepositoryMember.GetSingleByCondition(m => m.Code == member.Code || m.Email == member.Email);
+                if (existingMember != null)
+                {
+                    throw new Exception("Mã người dùng, email không được trùng");
+                }
+                await _unitOfWork.RepositoryMember.Add(memberNew);
+                await _unitOfWork.RepositoryMember.Commit();
             }
-            await _unitOfWork.RepositoryMember.Add(memberNew);
-            await _unitOfWork.RepositoryMember.Commit();
+            else
+            {
+                throw new Exception("Email không thể trùng");
+            }
+            
         }
 
         private async Task<string> UploadImageToFirebaseAsync(Member member, IFormFile imageFile)
@@ -129,17 +139,25 @@ namespace SomoTaskManagement.Services.Imp
         public async Task UpdatePassword(int memberId,UpdatePasswordModel passwordModel)
         {
             var member = await _unitOfWork.RepositoryMember.GetById(memberId) ?? throw new Exception("Không tìm thấy nhân viên");
-            if (!passwordModel.Password.Equals(passwordModel.ConfirmPassword))
+
+            if (member != null && BCrypt.Net.BCrypt.Verify(passwordModel.OldPassword, member.Password))
             {
-                throw new Exception("Xác nhận lại mật khẩu");
+                if (!passwordModel.Password.Equals(passwordModel.ConfirmPassword))
+                {
+                    throw new Exception("Xác nhận lại mật khẩu");
+                }
+
+                string currentPassword = passwordModel.Password;
+
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(currentPassword);
+                member.Password = hashedPassword;
+
+                await _unitOfWork.RepositoryMember.Commit();
             }
-
-            string currentPassword = passwordModel.Password;
-
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(currentPassword);
-            member.Password = hashedPassword;
-
-            await _unitOfWork.RepositoryMember.Commit();
+            else
+            {
+                throw new Exception("Sai mật khẩu cũ");
+            }
         }
 
 
