@@ -2519,19 +2519,19 @@ namespace SomoTaskManagement.Services.Impf
                 throw new Exception("Không tìm thấy nhân viên");
             }
             var subtasks = await _unitOfWork.RepositoryEmployee_Task.GetData(expression: s => s.EmployeeId == employeeId &&
-                                                     (!startDay.HasValue || !endDay.HasValue || (
-                                                                (startDay.Value.Year <= s.DaySubmit.Value.Year &&
-                                                                 endDay.Value.Year >= s.DaySubmit.Value.Year) &&
-                                                                (startDay.Value.Month <= s.DaySubmit.Value.Month &&
-                                                                 endDay.Value.Month >= s.DaySubmit.Value.Month) &&
-                                                                (startDay.Value.Day <= s.DaySubmit.Value.Day &&
-                                                                 endDay.Value.Day >= s.DaySubmit.Value.Day)
-                                                             )));
+                                                 (!startDay.HasValue || !endDay.HasValue || (
+                                                            (startDay.Value.Year <= s.DaySubmit.Value.Year &&
+                                                             endDay.Value.Year >= s.DaySubmit.Value.Year) &&
+                                                            (startDay.Value.Month <= s.DaySubmit.Value.Month &&
+                                                             endDay.Value.Month >= s.DaySubmit.Value.Month) &&
+                                                            (startDay.Value.Day <= s.DaySubmit.Value.Day &&
+                                                             endDay.Value.Day >= s.DaySubmit.Value.Day)
+                                                         )));
 
 
             var taskIds = subtasks.Select(s => s.TaskId);
 
-            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(expression: t => taskIds.Contains(t.Id) && (t.Status == 8 ||t.Status == 7), includes: includes);
+            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(expression: t => taskIds.Contains(t.Id) && (t.Status == 8 || t.Status == 7), includes: includes);
             tasks = tasks.OrderByDescending(t => t.StartDate).ToList();
 
             var totalTaskCount = tasks.Count();
