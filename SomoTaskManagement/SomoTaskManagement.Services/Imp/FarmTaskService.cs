@@ -2203,7 +2203,7 @@ namespace SomoTaskManagement.Services.Impf
 
                 if (task != null)
                 {
-                    if (task.Status == 3 || task.Status == 7 || task.Status == 2)
+                    if (task.Status == 3 || task.Status == 5 || task.Status == 2)
                     {
                         if (status != 5 && status != 7)
                         {
