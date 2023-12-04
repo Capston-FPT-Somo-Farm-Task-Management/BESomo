@@ -18,8 +18,8 @@ namespace SomoTaskManagement.Domain.Entities
         }
         public string Code { set; get; }
         
-        [Required(ErrorMessage = "Area is required.")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "FarmArea must be greater than 0.")]
+        [Required(ErrorMessage = "Diện tích bắt buộc nhập")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Diện tích phải lớn hơn 0")]
         public double FArea { get; set; }
 
         public int FarmId { get; set; }

@@ -41,15 +41,11 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                if (id == 0)
-                {
-                    return NotFound("Zone is not found");
-                }
                 var area = await _farmService.GetFarmById(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Area is found",
+                    Message = "Tìm thành công",
                     Success = true,
                 });
             }
@@ -72,7 +68,7 @@ namespace SomoTaskManagement.Api.Controllers
                     var responseData = new ApiResponseModel
                     {
                         Data = farm,
-                        Message = "Farm is added",
+                        Message = "Thêm thành công",
                         Success = true,
                     };
                     return Ok(responseData);
@@ -125,12 +121,12 @@ namespace SomoTaskManagement.Api.Controllers
                 var existingArea = await _farmService.GetFarmById(id);
                 if (existingArea == null)
                 {
-                    response.Message = "Farm not found";
+                    response.Message = "Không tìm thấy trang trại";
                     return NotFound(response);
                 }
 
                 await _farmService.DeleteFarm(existingArea);
-                response.Message = "Farm is deleted";
+                response.Message = "Xóa thành công";
                 response.Success = true;
                 return Ok(response);
             }

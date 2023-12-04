@@ -51,7 +51,7 @@ namespace SomoTaskManagement.Services.Imp
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to send email to {member.Email}. Error: {ex.Message}");
+                Console.WriteLine($"Lỗi khi gửi tới mail {member.Email}. Lỗi: {ex.Message}");
             }
         }
 

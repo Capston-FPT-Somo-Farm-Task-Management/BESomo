@@ -38,7 +38,7 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task<Member> CheckLogin(string userName, string password)
         {
-            var member = await _context.Member.SingleOrDefaultAsync(m => m.UserName == userName && m.Status == 1);
+            var member = await _unitOfWork.RepositoryMember.GetSingleByCondition(m => m.UserName == userName && m.Status == 1);
 
             if (member != null && BCrypt.Net.BCrypt.Verify(password, member.Password))
             {

@@ -14,9 +14,9 @@ namespace SomoTaskManagement.Domain.Entities
         [Key]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Name is required.")]
+        [Required(ErrorMessage = "Tên bắt buộc nhập")]
         //[RegularExpression(@"^[\p{L} ]+$", ErrorMessage = "Name must contain only letters and spaces.")]
-        [StringLength(100, ErrorMessage = "Name must not exceed 100 characters.")]
+        [StringLength(100, ErrorMessage = "Tên không được vượt quá 100 kí tự")]
         public string Name { get; set; }
 
         [Required]

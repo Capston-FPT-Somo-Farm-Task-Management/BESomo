@@ -484,7 +484,7 @@ namespace SomoTaskManagement.Services.Imp
 
             var taskIds = subtasks.Select(s => s.TaskId);
 
-            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id) && t.Status == 8);
+            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id) && (t.Status == 8 ||t.Status == 7));
 
             var totalTask = tasks.Count();
 

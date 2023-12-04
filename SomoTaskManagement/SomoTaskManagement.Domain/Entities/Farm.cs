@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 
 namespace SomoTaskManagement.Domain.Entities
 {
-    
-    public class Farm :BaseEntity
+
+    public class Farm : BaseEntity
     {
         public Farm()
         {
@@ -21,15 +21,18 @@ namespace SomoTaskManagement.Domain.Entities
             Materials = new HashSet<Material>();
         }
 
-        [Required(ErrorMessage = "Area is required.")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "FarmArea must be greater than 0.")]
+        [Required(ErrorMessage = "Diện tích phải nhập.")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Diện tích phải lớn hơn 0")]
         public double FarmArea { get; set; }
 
-        [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters.")]
-        public string Address { get; set; }
+        [Required(ErrorMessage = "Địa chỉ phải nhập")]
 
-        public string UrlImage {  get; set; }
-        public string Description {  get; set; }
+        [StringLength(200, ErrorMessage = "Địa chỉ không được quá 200 kí tự")]
+        public string Address { get; set; }
+        [Required(ErrorMessage = "Hình ảnh phải nhập.")]
+        public string UrlImage { get; set; }
+        [Required(ErrorMessage = "Mô tả phải nhập.")]
+        public string Description { get; set; }
 
         [JsonIgnore]
         public ICollection<Area> Areas { get; set; }

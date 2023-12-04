@@ -149,7 +149,7 @@ namespace SomoTaskManagement.Api.Controllers
                 return Ok(new ApiResponseModel
                 {
                     Data = null,
-                    Message = "Xóa thành công",
+                    Message = "Cập nhật thành công",
                     Success = true,
                 });
             }

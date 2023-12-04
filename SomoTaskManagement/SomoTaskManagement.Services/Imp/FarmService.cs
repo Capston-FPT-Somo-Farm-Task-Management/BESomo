@@ -110,6 +110,9 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task DeleteFarm(Farm farm)
         {
+            var farmDelete= await _unitOfWork.RepositoryFarm.GetById(farm.Id) ?? throw new Exception("KHông tìm thấy trang trại");
+            var areaByFarm = await _unitOfWork.RepositoryArea.GetData(f => f.FarmId == farmDelete.Id);
+            if (areaByFarm.Any()) throw new Exception("Không thể xóa trang trại khi có thực thể bên trong");
             _unitOfWork.RepositoryFarm.Delete(f => f.Id == farm.Id);
             await _unitOfWork.RepositoryFarm.Commit();
         }

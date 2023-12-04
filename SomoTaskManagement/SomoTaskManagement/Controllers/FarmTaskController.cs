@@ -88,33 +88,6 @@ namespace SomoTaskManagement.Api.Controllers
                 });
             }
         }
-        [HttpGet("GetTotalTypeOfTaskInWeekByMember({memberId})")]
-        public async Task<IActionResult> GetTotalTypeOfTaskInWeekByMember(int memberId)
-        {
-            if (!User.IsInRole("Manager") && !User.IsInRole("Admin") && !User.IsInRole("Supervisor"))
-            {
-                return Unauthorized("Bạn không có quyền truy cập");
-            }
-            try
-            {
-                var area = await _farmTaskService.GetTotalTypeOfTaskInWeekByMember(memberId);
-                return Ok(new ApiResponseModel
-                {
-                    Data = area,
-                    Message = "Tìm thấy danh sách nhiệm vụ ",
-                    Success = true,
-                });
-            }
-            catch (Exception e)
-            {
-                return BadRequest(new ApiResponseModel
-                {
-                    Data = null,
-                    Message = e.Message,
-                    Success = true,
-                });
-            }
-        }
 
         [HttpGet("GetTaskPrepareAndDoing/Member({id})")]
         public async Task<IActionResult> GetTaskPrepareAndDoing(int id)
@@ -143,6 +116,35 @@ namespace SomoTaskManagement.Api.Controllers
                 });
             }
         }
+
+        [HttpGet("GetTotalTaskOfFarm/Farm({id})")]
+        public async Task<IActionResult> GetTotalTaskOfFarm(int id)
+        {
+            if (!User.IsInRole("Admin"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+                var area = await _farmTaskService.GetTotalTaskOfFarm(id);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy danh sách nhiệm vụ ",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
 
         [HttpGet("TaskActive/Page({pageIndex})/PageSize({pageSize})")]
         public async Task<IActionResult> GetListActiveWithPagging(int pageIndex, int pageSize)
@@ -232,7 +234,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpGet("PageIndex({pageIndex})/PageSize({pageSize})/Done/Employee({employeeId})")]
-        public async Task<IActionResult> GetTaskByEmployeeDates(int employeeId, DateTime? startDay, DateTime? endDay, int pageIndex, int pageSize)
+        public async Task<IActionResult> GetTaskByEmployeeDates(int employeeId, DateTime? startDay, DateTime? endDay, int pageIndex, int pageSize,int? status)
         {
             if (!User.IsInRole("Manager") && !User.IsInRole("Admin") && !User.IsInRole("Supervisor"))
             {
@@ -240,7 +242,7 @@ namespace SomoTaskManagement.Api.Controllers
             }
             try
             {
-                var area = await _farmTaskService.GetTaskByEmployeeDates(employeeId, startDay, endDay, pageIndex, pageSize);
+                var area = await _farmTaskService.GetTaskByEmployeeDates(employeeId, startDay, endDay, pageIndex, pageSize, status);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
@@ -455,6 +457,36 @@ namespace SomoTaskManagement.Api.Controllers
                 {
                     Data = null,
                     Message = "Cập nhật thành công",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+        [HttpPost("({id})/CreateTaskClone")]
+        public async Task<IActionResult> CreateTaskClone(int id)
+        {
+            if (!User.IsInRole("Manager") )
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+
+                await _farmTaskService.CreateTaskClone(id);
+
+                return Ok(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = "Tạo thành công",
                     Success = true,
                 });
             }

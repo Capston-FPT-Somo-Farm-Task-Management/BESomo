@@ -13,7 +13,7 @@ namespace SomoTaskManagement.Services.Interface
         Task AddMaterial(MaterialCreateUpdateModel material);
         Task DeleteByStatus(int id);
         Task DeleteMaterial(Material material);
-        Task<byte[]> ExportEmployeesToExcel(int farmId);
+        Task<byte[]> ExportMaterialToExcel(int farmId);
         Task<Material> GetMaterial(int id);
         Task ImportMaterialFromExcel(Stream excelFileStream, int farmId);
         Task<IEnumerable<MaterialModel>> ListMaterial();

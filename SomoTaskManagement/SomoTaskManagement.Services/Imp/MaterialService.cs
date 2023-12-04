@@ -50,14 +50,16 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task<IEnumerable<MaterialModel>> ListMaterialActive(int farmid)
         {
+            var farm = await _unitOfWork.RepositoryFarm.GetById(farmid) ?? throw new Exception("Không tìm thấy trang trại");
             var material = await _unitOfWork.RepositoryMaterial.GetData(expression: m => m.Status == 1 && m.FarmId == farmid);
             material = material.OrderBy(x => x.Name).ToList();
+            
             return _mapper.Map<IEnumerable<Material>, IEnumerable<MaterialModel>>(material); ;
         }
 
         public Task<Material> GetMaterial(int id)
         {
-            return _unitOfWork.RepositoryMaterial.GetById(id);
+            return _unitOfWork.RepositoryMaterial.GetById(id) ?? throw new Exception("Không tìm thấy dụng cụ");
         }
 
         public async Task AddMaterial(MaterialCreateUpdateModel material)
@@ -68,7 +70,7 @@ namespace SomoTaskManagement.Services.Imp
                 Status = 1,
                 FarmId = material.FarmId,
             };
-
+            var farm = await _unitOfWork.RepositoryFarm.GetById(material.FarmId)?? throw new Exception("Không tìm thấy trang trại");
             if (material.ImageFile != null)
             {
                 var urlImage = await UploadImageToFirebaseAsync(materialNew, material.ImageFile);
@@ -83,12 +85,12 @@ namespace SomoTaskManagement.Services.Imp
             await _unitOfWork.RepositoryMaterial.Commit();
         }
 
-        public async Task<byte[]> ExportEmployeesToExcel(int farmId)
+        public async Task<byte[]> ExportMaterialToExcel(int farmId)
         {
             using (var package = new ExcelPackage())
             {
                 var worksheetMaterial = package.Workbook.Worksheets.Add("Material");
-                var farm = await _unitOfWork.RepositoryFarm.GetById(farmId);
+                var farm = await _unitOfWork.RepositoryFarm.GetById(farmId) ?? throw new Exception("Không tìm thấy trang trại");
                 worksheetMaterial.Cells["B1:G1"].Merge = true;
                 worksheetMaterial.Cells[1, 2].Value = $"Thông tin dụng cụ trong trang trại {farm.Name}";
                 worksheetMaterial.Cells[1, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;

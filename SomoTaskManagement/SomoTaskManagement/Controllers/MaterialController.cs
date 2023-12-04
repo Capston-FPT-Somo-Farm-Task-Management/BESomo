@@ -32,7 +32,7 @@ namespace SomoTaskManagement.Api.Controllers
                 return Ok(new ApiResponseModel
                 {
                     Data = material,
-                    Message = "Material is found",
+                    Message = "Tìm thành công",
                     Success = true,
                 });
             }
@@ -50,7 +50,7 @@ namespace SomoTaskManagement.Api.Controllers
                 return Ok(new ApiResponseModel
                 {
                     Data = material,
-                    Message = "Material is found",
+                    Message = "Tìm thành công",
                     Success = true,
                 });
             }
@@ -80,11 +80,11 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpGet("Farm({farmid})/Export")]
-        public async Task<IActionResult> ExportEmployeesToExcel(int farmid)
+        public async Task<IActionResult> ExportMaterialToExcel(int farmid)
         {
             try
             {
-                var excelData = await _materialService.ExportEmployeesToExcel(farmid);
+                var excelData = await _materialService.ExportMaterialToExcel(farmid);
 
                 var stream = new MemoryStream(excelData);
 
@@ -146,15 +146,11 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                if (id == 0)
-                {
-                    return NotFound("Material is not found");
-                }
                 var area = await _materialService.GetMaterial(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Material is found",
+                    Message = "Tìm thành công",
                     Success = true,
                 });
             }
@@ -178,7 +174,7 @@ namespace SomoTaskManagement.Api.Controllers
                     var responseData = new ApiResponseModel
                     {
                         Data = material,
-                        Message = "Material is added",
+                        Message = "Thêm thành công",
                         Success = true,
                     };
                     return Ok(responseData);

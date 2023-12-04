@@ -88,6 +88,7 @@ namespace SomoTaskManagement.Services.Imp
             {
                     t => t.Farm,
             };
+            var farm = await _unitOfWork.RepositoryFarm.GetById(farmId) ?? throw new Exception("Không tìm thấy trang trại");
             var zones = await _unitOfWork.RepositoryZone.GetData(z=>z.ZoneTypeId == 1);
             var zoneIds = zones.Select(z=>z.AreaId).ToList();
 
@@ -165,7 +166,7 @@ namespace SomoTaskManagement.Services.Imp
                 FarmId = area.FarmId,
                 Status = 1,
             };
-
+            var farm = await _unitOfWork.RepositoryFarm.GetById(area.FarmId)?? throw new Exception("Không tìm thấy trang trại");
             var existCode = await _unitOfWork.RepositoryArea.GetSingleByCondition(a=>a.Code == area.Code);
             if (existCode != null)
             {
