@@ -88,7 +88,7 @@ namespace SomoTaskManagement.Api.Controllers
 
                 var stream = new MemoryStream(excelData);
 
-                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "EmployeeExport.xlsx");
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Dungcu.xlsx");
             }
             catch (Exception e)
             {
@@ -111,7 +111,7 @@ namespace SomoTaskManagement.Api.Controllers
                     return BadRequest(new ApiResponseModel
                     {
                         Data = null,
-                        Message = "Invalid file format. Please upload an Excel file.",
+                        Message = "Chỉ được truyền file excel",
                         Success = false,
                     });
                 }

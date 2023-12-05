@@ -125,7 +125,7 @@ namespace SomoTaskManagement.Services.Imp
             {
                 using (var package = new ExcelPackage(excelFileStream))
                 {
-                    var farm = await _unitOfWork.RepositoryFarm.GetById(farmId);
+                    var farm = await _unitOfWork.RepositoryFarm.GetById(farmId) ?? throw new Exception("Không tìm thấy trang trại");
                     var worksheet = package.Workbook.Worksheets[0];
                     int rowCount = worksheet.Dimension.Rows;
 

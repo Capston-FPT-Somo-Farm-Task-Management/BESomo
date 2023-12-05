@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.Execution;
 using AutoMapper.Internal;
+using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.ExtendedProperties;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -268,6 +269,44 @@ namespace SomoTaskManagement.Services.Impf
             return taskCounts;
         }
 
+
+        public async Task<TotalTaskOfMonth> GetTotalTaskOfFarmIncurrentMonth(int farmId, int month)
+        {
+            if (month < 0 || month > 12)
+            {
+                throw new Exception("Tháng không hợp lệ ");
+            }
+            var numberOfDaysInMonth = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+
+            var includes = new Expression<Func<FarmTask, object>>[]
+            {
+                t => t.Field,
+            };
+            var farm = await _unitOfWork.RepositoryFarm.GetById(farmId) ?? throw new Exception("Không tìm thấy trang trại");
+
+            var memberOfFarm = await _unitOfWork.RepositoryMember.GetData(m => m.FarmId == farmId && m.RoleId == 3);
+            var memberIds = memberOfFarm.Select(m => m.Id).ToList();
+
+            var farmTasks = (await _unitOfWork.RepositoryFarmTask.GetData(
+                     expression: t => memberIds.Contains(t.SuppervisorId.Value)
+                         && (t.StartDate.Value.Month == month)
+                         && t.Status != 0,
+                     includes: includes
+                 )).ToList();
+
+            return new TotalTaskOfMonth
+            {
+                TaskCount = farmTasks.Count(),
+                TotalTaskOfLivestock = farmTasks.Count(f => f.StartDate.Value.Month == month && (f.Field != null && f.FieldId.HasValue && f.Field.Status == 1)),
+                TotalTaskOfPlant = farmTasks.Count(f => f.StartDate.Value.Month == month && (f.Field != null && f.FieldId.HasValue && f.Field.Status == 0)),
+                TotalTaskOfOther = farmTasks.Count(f => f.StartDate.Value.Month == month && (f.Field == null && !f.FieldId.HasValue)),
+                TotalTaskDoing = farmTasks.Count(f => f.StartDate.Value.Month == month && (f.Status == 3)),
+                TotalTaskToDo = farmTasks.Count(f => f.StartDate.Value.Month == month && (f.Status == 1)),
+                TotalTaskClose = farmTasks.Count(f => f.StartDate.Value.Month == month && (f.Status == 8)),
+                TotalTaskPending = farmTasks.Count(f => f.StartDate.Value.Month == month && (f.Status == 5)),
+            };
+                
+        }
 
 
         public List<object> GetStatusDescriptions()

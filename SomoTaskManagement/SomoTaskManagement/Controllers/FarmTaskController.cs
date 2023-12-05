@@ -146,6 +146,36 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
 
+
+        [HttpGet("GetTotalTaskOfFarmIncurrentMonth/Farm({id})")]
+        public async Task<IActionResult> GetTotalTaskOfFarmIncurrentMonth(int id, int month)
+        {
+            if (!User.IsInRole("Admin"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+                var area = await _farmTaskService.GetTotalTaskOfFarmIncurrentMonth(id, month);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy danh sách nhiệm vụ ",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+
         [HttpGet("TaskActive/Page({pageIndex})/PageSize({pageSize})")]
         public async Task<IActionResult> GetListActiveWithPagging(int pageIndex, int pageSize)
         {

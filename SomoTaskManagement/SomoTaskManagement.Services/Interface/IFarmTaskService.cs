@@ -50,5 +50,6 @@ namespace SomoTaskManagement.Services.Interface
         Task DeleteTaskAssign(int taskId);
         Task CreateTaskClone(int taskId);
         Task<IEnumerable<TaskCountPerDayModel>> GetTotalTaskOfFarm(int farmId);
+        Task<TotalTaskOfMonth> GetTotalTaskOfFarmIncurrentMonth(int farmId, int month);
     }
 }
