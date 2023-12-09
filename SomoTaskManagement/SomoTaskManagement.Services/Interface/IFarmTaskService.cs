@@ -1,4 +1,6 @@
 ﻿using SomoTaskManagement.Domain.Entities;
+using SomoTaskManagement.Domain.Model.Employee;
+using SomoTaskManagement.Domain.Model.Member;
 using SomoTaskManagement.Domain.Model.Task;
 using SomoTaskManagement.Domain.Model.TaskEvidence;
 using System;
@@ -51,5 +53,9 @@ namespace SomoTaskManagement.Services.Interface
         Task CreateTaskClone(int taskId);
         Task<IEnumerable<TaskCountPerDayModel>> GetTotalTaskOfFarm(int farmId);
         Task<TotalTaskOfMonth> GetTotalTaskOfFarmIncurrentMonth(int farmId, int month);
+        Task<string> GetTotalInWeek(int farmId);
+        Task<IEnumerable<object>> GetTopAreaHaveTask(int farmId);
+        Task<CompletionRateModel> CompletionRate(int farmId);
+        Task<IEnumerable<TotalEffortOfEmployeePerWeek>> TopEmployee(int farmId);
     }
 }

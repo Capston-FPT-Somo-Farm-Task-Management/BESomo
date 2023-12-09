@@ -130,15 +130,12 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                if (id <= 0)
-                {
-                    return NotFound("Zone id must be greater than 0");
-                }
+                
                 var area = await _zoneService.GetAllByArea(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Zone is found",
+                    Message = "Tìm thành công",
                     Success = true,
                 });
             }
@@ -240,15 +237,11 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                if (id <= 0)
-                {
-                    return NotFound("Zone id must be greater than 0");
-                }
                 var area = await _zoneService.GetByAreaAndPlant(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Zone is found",
+                    Message = "Tìm thành công",
                     Success = true,
                 });
             }
@@ -268,15 +261,12 @@ namespace SomoTaskManagement.Api.Controllers
         {
             try
             {
-                if (id <= 0)
-                {
-                    return NotFound("Zone id must be greater than 0");
-                }
+               
                 var area = await _zoneService.GetByAreaAndLivestock(id);
                 return Ok(new ApiResponseModel
                 {
                     Data = area,
-                    Message = "Zone is found",
+                    Message = "Tìm thành công",
                     Success = true,
                 });
             }

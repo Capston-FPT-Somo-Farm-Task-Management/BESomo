@@ -58,6 +58,7 @@ namespace SomoTaskManagement.Infrastructure.Configuration
             services.AddScoped<IEmailService, EmailService>();
             services.AddSingleton<WebSocketManager>();
 
+            services.AddHttpContextAccessor();
         }
 
         public static void RegisterCache(this IServiceCollection services, IConfiguration configuration)

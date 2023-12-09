@@ -25,7 +25,7 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task<ZoneType> GetZoneType(int id)
         {
-            return await _unitOfWork.RepositoryZoneType.GetById(id) ?? throw new Exception("Không tìm thấy loại khu vùng");
+            return await _unitOfWork.RepositoryZoneType.GetById(id) ?? throw new Exception("Không tìm thấy loại vùng");
         }
 
         public async Task AddZoneType(ZoneType zoneType)

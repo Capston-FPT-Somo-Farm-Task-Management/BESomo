@@ -152,6 +152,7 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task<IEnumerable<ZoneModel>> GetAllByArea(int id)
         {
+            var area = await _unitOfWork.RepositoryArea.GetById(id)?? throw new Exception("Không tìm thấy khu vực");
             var includes = new Expression<Func<Zone, object>>[]
             {
                 t => t.Area,
@@ -166,12 +167,13 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task<IEnumerable<ZoneModel>> GetByAreaAndPlant(int id)
         {
+            var area = await _unitOfWork.RepositoryArea.GetById(id) ?? throw new Exception("Không tìm thấy khu vực");
+
             var includes = new Expression<Func<Zone, object>>[]
             {
                 t => t.Area,
                 t =>t.ZoneType
             };
-            var area = await _unitOfWork.RepositoryArea.GetById(id) ?? throw new Exception("Không tìm thấy khu vực");
 
             var zones = await _unitOfWork.RepositoryZone
                 .GetData(expression: z => z.AreaId == id && z.ZoneTypeId == 1 && z.Status == 1, includes: includes);
@@ -181,12 +183,12 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task<IEnumerable<ZoneModel>> GetByAreaAndLivestock(int id)
         {
+            var area = await _unitOfWork.RepositoryArea.GetById(id) ?? throw new Exception("Không tìm thấy khu vực");
             var includes = new Expression<Func<Zone, object>>[]
             {
                 t => t.Area,
                 t =>t.ZoneType
             };
-            var area = await _unitOfWork.RepositoryArea.GetById(id) ?? throw new Exception("Không tìm thấy khu vực");
 
             var zones = await _unitOfWork.RepositoryZone
                 .GetData(expression: z => z.AreaId == id && z.ZoneTypeId == 2 && z.Status == 1, includes: includes);
@@ -266,6 +268,7 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task Delete(int zoneId)
         {
+            var zone = await _unitOfWork.RepositoryZone.GetById(zoneId) ?? throw new Exception("Không tìm thấy vùng");
             var fields = await _unitOfWork.RepositoryField.GetData(z => z.ZoneId == zoneId && z.Status == 1);
             if (fields.Count() > 0)
             {

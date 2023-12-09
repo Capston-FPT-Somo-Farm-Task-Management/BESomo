@@ -9,18 +9,18 @@ namespace SomoTaskManagement.Domain.Model.Zone
 {
     public class ZoneCreateUpdateModel
     {
-        [Required(ErrorMessage = "Name is required.")]
-        //[RegularExpression(@"^[\p{L} ]+$", ErrorMessage = "Name must contain only letters and spaces.")]
-        [StringLength(100, ErrorMessage = "Name must not exceed 100 characters.")]
+        [Required(ErrorMessage = "Tên bắt buộc nhập")]
+        //[RegularExpression(@"^[\p{L} ]+$", ErrorMessage = "Tên chỉ được chứa chữ cái")]
+        [StringLength(100, ErrorMessage = "Tên không vượt quá 100 kí tự")]
         public string Name { get; set; }
         [Required]
         public string Code { get; set; }
-        [Required(ErrorMessage = "Area is required.")]
+        [Required(ErrorMessage = "Diện tích bắt buôc nhập")]
         [Range(0.01, double.MaxValue, ErrorMessage = "FarmArea must be greater than 0.")]
         public double FarmArea { get; set; }
-
+        [Required(ErrorMessage = "Loại vùng bắt buộc nhập")]
         public int ZoneTypeId { get; set; }
-
+        [Required(ErrorMessage = "Khu vực bắt buộc nhập")]
         public int AreaId { get; set; }
     }
 }

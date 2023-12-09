@@ -26,7 +26,7 @@ namespace SomoTaskManagement.Infrastructure.Quart
 
             DateTime currentDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
 
-            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => t.IsExpired == false && t.EndDate <= currentDate && (t.Status != 7 && t.Status != 8 && t.Status != 4 && t.Status != 0));
+            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => t.IsExpired == false && t.StartDate < t.CreateDate && t.EndDate <= currentDate && (t.Status != 7 && t.Status != 8 && t.Status != 4 && t.Status != 0));
             if (tasks.Any())
             {
                 foreach (var task in tasks)

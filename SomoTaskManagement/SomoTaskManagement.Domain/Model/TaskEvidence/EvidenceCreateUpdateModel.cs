@@ -12,7 +12,7 @@ namespace SomoTaskManagement.Domain.Model.TaskEvidence
     public class EvidenceCreateUpdateModel
     {
 
-        [Required(ErrorMessage = "Description is required.")]
+        [Required(ErrorMessage = "Mô tả bắt buộc nhập")]
         public string Description { get; set; }
 
 

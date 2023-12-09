@@ -205,7 +205,8 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task DeleteTaskEvidence(int id)
         {
-            var taskEvidence = await _unitOfWork.RepositoryTaskEvidence.GetById(id);
+            
+            var taskEvidence = await _unitOfWork.RepositoryTaskEvidence.GetById(id)?? throw new Exception("Không tìm thấy báo cáo");
             var relatedImages = await _unitOfWork.RepositoryEvidenceImage.GetData(i => i.TaskEvidenceId == taskEvidence.Id);
 
             foreach (var image in relatedImages)

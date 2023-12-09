@@ -168,6 +168,12 @@ namespace SomoTaskManagement.Data.Mapper
     src.Gender ? GenderEnum.Female : GenderEnum.Male))
             .ForMember(dest => dest.NameCode, opt => opt.MapFrom(src => string.Concat($"{src.Code} - ", src.Name).ToString()));
 
+            CreateMap<Employee, TotalEffortOfEmployeePerWeek>()
+           .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetEnumDescription((EmployeeMemberStatus)src.Status)))
+           .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+           .ForMember(dest => dest.Gender, opt => opt.MapFrom(src =>
+   src.Gender ? GenderEnum.Female : GenderEnum.Male))
+           .ForMember(dest => dest.NameCode, opt => opt.MapFrom(src => string.Concat($"{src.Code} - ", src.Name).ToString()));
 
 
 

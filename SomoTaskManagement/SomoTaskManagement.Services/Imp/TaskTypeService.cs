@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿ using AutoMapper;
 using OfficeOpenXml;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
@@ -84,7 +84,7 @@ namespace SomoTaskManagement.Services.Imp
             var taskType = await _unitOfWork.RepositoryTaskTaskType.GetById(taskTypeId) ?? throw new Exception("Không tìm thấy công việc");
             var taskTypeOfTask = await _unitOfWork.RepositoryFarmTask.GetData(t => t.TaskTypeId == taskTypeId);
             var taskTypeOfEmployee = await _unitOfWork.RepositoryEmployee_TaskType.GetData(t => t.TaskTypeId == taskTypeId);
-            if(taskTypeOfEmployee != null || taskTypeOfTask != null)
+            if(taskTypeOfEmployee.Any() || taskTypeOfTask.Any())
             {
                 throw new Exception("Không thể xóa loại công việc đang được sử dụng.");
             }

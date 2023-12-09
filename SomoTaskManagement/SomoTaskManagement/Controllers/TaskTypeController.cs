@@ -111,7 +111,7 @@ namespace SomoTaskManagement.Api.Controllers
 
                 var stream = new MemoryStream(excelData);
 
-                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "TaskType.xlsx");
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "laoicongviec.xlsx");
             }
             catch (Exception e)
             {

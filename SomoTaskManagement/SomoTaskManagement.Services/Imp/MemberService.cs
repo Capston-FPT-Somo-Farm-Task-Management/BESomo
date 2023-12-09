@@ -191,11 +191,11 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task<Member> FindById(int memberId)
         {
-            return await _unitOfWork.RepositoryMember.GetSingleByCondition(m => m.Id == memberId);
+            return await _unitOfWork.RepositoryMember.GetSingleByCondition(m => m.Id == memberId)?? throw new Exception("Không tìm thấy người dùng");
         }
         public async Task<GetMemberModel> GetById(int memberId)
         {
-            var member = await _unitOfWork.RepositoryMember.GetSingleByCondition(m => m.Id == memberId);
+            var member = await _unitOfWork.RepositoryMember.GetSingleByCondition(m => m.Id == memberId)?? throw new Exception("Không tìm thấy nhân viên");
 
             var role = await _unitOfWork.RepositoryRole.GetSingleByCondition(r => r.Id == member.RoleId);
             var farm = await _unitOfWork.RepositoryFarm.GetSingleByCondition(r => r.Id == member.FarmId);
@@ -251,15 +251,16 @@ namespace SomoTaskManagement.Services.Imp
 
         public async Task<IEnumerable<MemberModel>> ListMemberByFarm(int farmId)
         {
+            var farm = await _unitOfWork.RepositoryFarm.GetById(farmId)?? throw new Exception("Không tìm thấy trang trại");
             var includes = new Expression<Func<Member, object>>[]
             {
                 t => t.Role,
                 t => t.Farm,
             };
             var member = await _unitOfWork.RepositoryMember.GetData(expression: m => m.FarmId == farmId , includes: includes);
-            if (member == null)
+            if (!member.Any())
             {
-                throw new Exception("Không tìm thấy người dùng");
+                throw new Exception("Không tìm thấy  danh sách người dùng");
             }
             return _mapper.Map<IEnumerable<Member>, IEnumerable<MemberModel>>(member);
         }

@@ -33,6 +33,7 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task<IEnumerable<HabitantTypeModel>> ListHabitantTypeActive(int farmId)
         {
+            var farm = await _unitOfWork.RepositoryFarm.GetById(farmId)?? throw new Exception("Không tìm thấy trang trại");
             var includes = new Expression<Func<HabitantType, object>>[]
             {
                 t =>t.Farm,
@@ -100,6 +101,7 @@ namespace SomoTaskManagement.Services.Imp
             await _unitOfWork.RepositoryHabitantType.Add(habitantTypeNew);
             await _unitOfWork.RepositoryHabitantType.Commit();
         }
+
         //public async Task UpdateHabitantType(HabitantType habitantType)
         //{
         //    _unitOfWork.RepositoryHabitantType.Update(habitantType);

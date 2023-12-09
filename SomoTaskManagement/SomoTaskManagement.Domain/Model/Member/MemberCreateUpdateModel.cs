@@ -11,18 +11,19 @@ namespace SomoTaskManagement.Domain.Model.Member
     public class MemberCreateUpdateModel
     {
         [Required]
-        //[RegularExpression("^[a-zA-Z ]*$", ErrorMessage = "Name must contain only letters.")]
-        [StringLength(100, ErrorMessage = "Name must not exceed 100 characters.")]
+        [RegularExpression("^[a-zA-Z ]*$", ErrorMessage = "Tên không được chứa kí tự đặc biệt và số")]
+        [StringLength(100, ErrorMessage = "Tên không được quá 100 kí tự")]
         public string Name { get; set; }
+        [Required(ErrorMessage = "Email bắt buộc nhập")]
         public string Code { get; set; }
         //[Required]
         //public int Status { set; get; }
-        [EmailAddress(ErrorMessage = "Invalid email address.")]
-        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        [Required(ErrorMessage = "Email bắt buộc nhập")]
         public string Email { set; get; }
 
-        [StringLength(100, ErrorMessage = "UserName cannot exceed 100 characters.")]
-        [Required(ErrorMessage = "UserName is required.")]
+        [StringLength(100, ErrorMessage = "Tên đăng nhập không được quá 100 kí tự")]
+        [Required(ErrorMessage = "Tên đăng nhập bắt buộc nhập")]
         public string UserName { set; get; }
 
         [Required(ErrorMessage = "Password is required.")]
@@ -30,8 +31,8 @@ namespace SomoTaskManagement.Domain.Model.Member
         //ErrorMessage = "Password must meet the complexity requirements.")]
         public string Password { set; get; }
 
-        [StringLength(10, ErrorMessage = "Phone number must be exactly 10 digits.", MinimumLength = 10)]
-        [RegularExpression("^[0-9]*$", ErrorMessage = "Phone number must contain only digits.")]
+        [StringLength(10, ErrorMessage = "Số điện thoại không hợp lệ.", MinimumLength = 10)]
+        [RegularExpression("^[0-9]*$", ErrorMessage = "Số điện thoại chỉ được chứa số")]
         public string PhoneNumber { set; get; }
 
 

@@ -8,6 +8,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Firebase.Storage;
 using FirebaseAdmin.Messaging;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -19,10 +20,14 @@ using SomoTaskManagement.Data;
 using SomoTaskManagement.Data.Abtract;
 using SomoTaskManagement.Domain.Entities;
 using SomoTaskManagement.Domain.Enum;
+using SomoTaskManagement.Domain.Model.Area;
+using SomoTaskManagement.Domain.Model.Employee;
+using SomoTaskManagement.Domain.Model.Member;
 using SomoTaskManagement.Domain.Model.Reponse;
 using SomoTaskManagement.Domain.Model.SubTask;
 using SomoTaskManagement.Domain.Model.Task;
 using SomoTaskManagement.Domain.Model.TaskEvidence;
+using SomoTaskManagement.Domain.Model.Zone;
 using SomoTaskManagement.Services.Interface;
 using SomoTaskManagement.Services.Scheduler;
 using System;
@@ -32,6 +37,7 @@ using System.Configuration;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -45,12 +51,14 @@ namespace SomoTaskManagement.Services.Impf
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public FarmTaskService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration)
+        public FarmTaskService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
         private async Task<Dictionary<FarmTask, FarmTaskModel>> MapFarmTasks(IEnumerable<FarmTask> farmTasks)
         {
@@ -268,7 +276,193 @@ namespace SomoTaskManagement.Services.Impf
 
             return taskCounts;
         }
+        public async Task<string> GetTotalInWeek(int farmId)
+        {
+            TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
+            DateTime currentDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+            var farm = await _unitOfWork.RepositoryFarm.GetById(farmId) ?? throw new Exception("Không tìm thấy trang trại");
+
+            var startOfWeek = currentDate.AddDays(-(int)currentDate.DayOfWeek);
+            var endOfWeek = startOfWeek.AddDays(6);
+
+            var memberOfFarm = await _unitOfWork.RepositoryMember.GetData(m => m.FarmId == farmId && m.RoleId == 3);
+            var memberIds = memberOfFarm.Select(m => m.Id).ToList();
+
+            var farmTasks = (await _unitOfWork.RepositoryFarmTask.GetData(
+                     expression: t => memberIds.Contains(t.SuppervisorId.Value)
+                         && (t.StartDate >= startOfWeek || t.StartDate <= endOfWeek)
+                         && t.Status != 0
+                 )).ToList();
+
+            var taskIds = farmTasks.Select(f => f.Id).ToList();
+            var subtasks = await _unitOfWork.RepositoryEmployee_Task.GetData(t => taskIds.Contains(t.TaskId));
+
+            var tottalEffortHour = subtasks.Sum(s => s.ActualEffortHour);
+            var tottalEffortMinutes = subtasks.Sum(s => s.ActualEfforMinutes);
+
+            var totalEffortTimeSpan = new TimeSpan(tottalEffortHour, tottalEffortMinutes, 0);
+
+            var formattedTime = $"{(int)totalEffortTimeSpan.TotalHours} giờ {(int)totalEffortTimeSpan.TotalMinutes % 60} phút";
+
+            return formattedTime;
+        }
+
+        public async Task<IEnumerable<object>> GetTopAreaHaveTask(int farmId)
+        {
+            TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
+            DateTime currentDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+            var farm = await _unitOfWork.RepositoryFarm.GetById(farmId) ?? throw new Exception("Không tìm thấy trang trại");
+
+            var areas = await _unitOfWork.RepositoryArea.GetData(a => a.FarmId == farmId);
+            var areaIds = areas.Select(a => a.Id);
+            var zones = await _unitOfWork.RepositoryZone.GetData(z => areaIds.Contains(z.AreaId));
+            var zoneIds = zones.Select(z => z.Id);
+            var fields = await _unitOfWork.RepositoryField.GetData(f => zoneIds.Contains(f.ZoneId));
+            var fieldIds = fields.Select(f => f.Id).ToList();
+
+            var startOfWeek = currentDate.AddDays((int)currentDate.DayOfWeek);
+            var endOfWeek = startOfWeek.AddDays(6);
+
+            var farmTasks = (await _unitOfWork.RepositoryFarmTask.GetData(
+                expression: t => (t.StartDate >= startOfWeek || t.StartDate <= endOfWeek)
+                    && t.Status != 0 && fieldIds.Contains(t.FieldId.Value)
+            )).ToList();
+
+            var taskCount = farmTasks
+                .GroupBy(t => t.FieldId)
+                .Select(group => new
+                {
+                    FieldId = group.Key,
+                    TaskCount = group.Count()
+                });
+
+            var sortedAreas = taskCount.OrderByDescending(a => a.TaskCount).Take(3);
+
+            var topAreas = areas.Where(a => sortedAreas.Select(sa => sa.FieldId).Contains(a.Id));
+
+            // Create a list of anonymous objects
+            var result = topAreas.Select(area => new
+            {
+                Area = area,
+                TaskCount = sortedAreas.FirstOrDefault(sa => sa.FieldId == area.Id)?.TaskCount ?? 0
+            });
+
+            return result;
+        }
+
+        public async Task<IEnumerable<TotalEffortOfEmployeePerWeek>> TopEmployee(int farmId)
+        {
+            TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
+            DateTime currentDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+            var farm = await _unitOfWork.RepositoryFarm.GetById(farmId) ?? throw new Exception("Không tìm thấy trang trại");
+
+            var employees = await _unitOfWork.RepositoryEmployee.GetData(e => e.FarmId == farmId);
+            var employeeIds = employees.Select(e => e.Id);
+
+            var startOfWeek = currentDate.AddDays(-(int)currentDate.DayOfWeek);
+            var endOfWeek = startOfWeek.AddDays(6);
+
+            var subtasks = await _unitOfWork.RepositoryEmployee_Task.GetData(s => employeeIds.Contains(s.EmployeeId) && (s.DaySubmit >= startOfWeek || s.DaySubmit <= endOfWeek));
+
+            var totalEffortPerEmployee = subtasks
+                .GroupBy(s => s.EmployeeId)
+                .Select(group => new
+                {
+                    EmployeeId = group.Key,
+                    TotalEffort = group.Sum(s => s.ActualEffortHour + s.ActualEfforMinutes / 60.0)
+                });
+
+            var topEmployees = totalEffortPerEmployee
+                .OrderByDescending(item => item.TotalEffort)
+                .Take(3);
+
+            var topEmployeeIds = topEmployees.Select(item => item.EmployeeId).ToList();
+            var topEmployeesData = employees.Where(e => topEmployeeIds.Contains(e.Id));
+
+            var topEmployeePerWeek = await _unitOfWork.RepositoryEmployee.GetData(e => topEmployeeIds.Contains(e.Id));
+
+            var map = new Dictionary<Employee, TotalEffortOfEmployeePerWeek>();
+            var employeeModel = _mapper.Map<IEnumerable<Employee>, IEnumerable<TotalEffortOfEmployeePerWeek>>(topEmployeePerWeek);
+
+            foreach (var pair in topEmployeePerWeek.Zip(employeeModel, (ft, ftModel) => new { ft, ftModel }))
+            {
+                map[pair.ft] = pair.ftModel;
+            }
+
+            foreach (var employee in topEmployeePerWeek)
+            {
+                var taskTypeName = await ListTaskTypeEmployee(employee.Id);
+
+                if (taskTypeName != null && map.ContainsKey(employee))
+                {
+                    map[employee].TaskTypeName = string.Join(", ", taskTypeName);
+                }
+
+                var totalEffort = totalEffortPerEmployee.FirstOrDefault(item => item.EmployeeId == employee.Id)?.TotalEffort ?? 0.0;
+                map[employee].TotalEffort = totalEffort;
+            }
+
+            return map.Values;
+
+        }
+
+        public async Task<IEnumerable<string>> ListTaskTypeEmployee(int employeeId)
+        {
+            var employee = await _unitOfWork.RepositoryEmployee.GetById(employeeId);
+            if (employee == null)
+            {
+                throw new Exception("Không tìm thấy nông trại");
+            }
+            var employee_taskType = await _unitOfWork.RepositoryEmployee_TaskType.GetData(expression: e => e.EmployeeId == employee.Id, includes: null);
+            var taskTypeIds = employee_taskType.Select(x => x.TaskTypeId).ToList();
+            if (employee_taskType != null)
+            {
+                var taskType = await _unitOfWork.RepositoryTaskTaskType.GetData(expression: e => taskTypeIds.Contains(e.Id));
+
+                return taskType.Select(e => e.Name);
+            }
+
+            return null;
+        }
+
+        public async Task<CompletionRateModel> CompletionRate(int farmId)
+        {
+            TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
+            DateTime currentDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+            var farm = await _unitOfWork.RepositoryFarm.GetById(farmId) ?? throw new Exception("Không tìm thấy trang trại");
+
+            var startOfWeek = currentDate.AddDays(-(int)currentDate.DayOfWeek);
+            var endOfWeek = startOfWeek.AddDays(6);
+
+            var memberOfFarm = await _unitOfWork.RepositoryMember.GetData(m => m.FarmId == farmId && m.RoleId == 3);
+            var memberIds = memberOfFarm.Select(m => m.Id).ToList();
+
+            var farmTasks = (await _unitOfWork.RepositoryFarmTask.GetData(
+                     expression: t => memberIds.Contains(t.SuppervisorId.Value) &&
+                         (t.StartDate >= startOfWeek || t.StartDate <= endOfWeek)
+                         && t.Status != 0
+                 )).ToList();
+            var totalTask = farmTasks.Count();
+            var taskDone = farmTasks.Count(f => f.Status == 8);
+
+            var completionRate = (taskDone / (double)totalTask) * 100;
+            var formattedCompletionRate = completionRate.ToString("0.00");
+
+            return new CompletionRateModel
+            {
+                StartDay = startOfWeek,
+                EndDay = endOfWeek,
+                Time = $"{formattedCompletionRate}%"
+            };
+        }
 
         public async Task<TotalTaskOfMonth> GetTotalTaskOfFarmIncurrentMonth(int farmId, int month)
         {
@@ -305,7 +499,7 @@ namespace SomoTaskManagement.Services.Impf
                 TotalTaskClose = farmTasks.Count(f => f.StartDate.Value.Month == month && (f.Status == 8)),
                 TotalTaskPending = farmTasks.Count(f => f.StartDate.Value.Month == month && (f.Status == 5)),
             };
-                
+
         }
 
 
@@ -546,18 +740,21 @@ namespace SomoTaskManagement.Services.Impf
 
             if (status == 8 || status == 7)
             {
-                farmTasks = farmTasks.OrderByDescending(t => t.StartDate).ToList()
+                farmTasks = farmTasks.OrderByDescending(t => t.StartDate?.Year).ThenByDescending(t => t.StartDate?.Month).ThenByDescending(t => t.StartDate?.Day).ThenByDescending(t => t.Priority).ThenByDescending(t => t.CreateDate)
                     .Skip(skipCount)
                     .Take(pageSize)
-                    .ToList(); ;
+                    .ToList();
             }
             else
             {
-                farmTasks = farmTasks.OrderBy(t => t.StartDate).ThenBy(t => t.Priority).ThenByDescending(t => t.CreateDate)
-                .Skip(skipCount)
-                .Take(pageSize)
-                .ToList();
-
+                farmTasks = farmTasks.OrderBy(t => t.StartDate?.Year)
+                                     .ThenBy(t => t.StartDate?.Month)
+                                     .ThenBy(t => t.StartDate?.Day)
+                                     .ThenByDescending(t => t.Priority)
+                                     .ThenByDescending(t => t.CreateDate)
+                                     .Skip(skipCount)
+                                     .Take(pageSize)
+                                     .ToList();
             }
 
             var map = await MapFarmTasks(farmTasks);
@@ -654,23 +851,30 @@ namespace SomoTaskManagement.Services.Impf
                     farmTasks = farmTasks.Where(t => t.Name.Unidecode().IndexOf(taskName.Unidecode(), StringComparison.OrdinalIgnoreCase) >= 0);
                 }
 
+                int skipCount = (pageIndex - 1) * pageSize;
 
                 var totalTaskCount = farmTasks.Count();
                 var totalPages = (int)Math.Ceiling((double)totalTaskCount / pageSize);
 
                 if (status == 8 || status == 7)
                 {
-                    farmTasks = farmTasks.OrderByDescending(t => t.StartDate).ToList()
-                        .Skip((pageIndex - 1) * pageSize)
-                                    .Take(pageSize)
-                                    .ToList();
+                    farmTasks = farmTasks.OrderByDescending(t => t.StartDate?.Year)
+                                         .ThenByDescending(t => t.StartDate?.Month)
+                                         .ThenByDescending(t => t.StartDate?.Day).ThenByDescending(t => t.Priority).ThenByDescending(t => t.CreateDate)
+                                         .Skip((pageIndex - 1) * pageSize)
+                                         .Take(pageSize)
+                                         .ToList();
                 }
                 else
                 {
-                    farmTasks = farmTasks.OrderBy(t => t.StartDate).ThenBy(t => t.Priority).ThenByDescending(t => t.CreateDate)
-                                    .Skip((pageIndex - 1) * pageSize)
-                                    .Take(pageSize)
-                                    .ToList();
+                    farmTasks = farmTasks.OrderBy(t => t.StartDate?.Year)
+                                         .ThenBy(t => t.StartDate?.Month)
+                                         .ThenBy(t => t.StartDate?.Day)
+                                         .ThenByDescending(t => t.Priority)
+                                         .ThenByDescending(t => t.CreateDate)
+                                         .Skip(skipCount)
+                                         .Take(pageSize)
+                                         .ToList();
                 }
 
                 var map = await MapFarmTasks(farmTasks);
@@ -767,9 +971,9 @@ namespace SomoTaskManagement.Services.Impf
                 {
                     throw new Exception("Ngày bắt đầu không được lớn hơn ngày kết thúc");
                 }
-                if (endDate < currentTime)
+                if (endDate.Value.Date < currentTime && startDate.Value.Date < currentTime)
                 {
-                    throw new Exception("Ngày kết thúc không được bé hơn ngày hiện tại");
+                    throw new Exception("Ngày kết thúc và ngày bắt đầu không được bé hơn ngày hiện tại");
                 }
                 var plant = await _unitOfWork.RepositoryPlant.GetById(taskDraftModel.PlantId);
                 if (plant?.Status == 0)
@@ -1172,8 +1376,8 @@ namespace SomoTaskManagement.Services.Impf
             if (task.SuppervisorId.HasValue)
             {
                 memberIds.Add(task.SuppervisorId.Value);
-                var managerTokens = await GetTokenByMemberId(task.SuppervisorId.Value);
-                await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+                var token = await GetTokenByMemberId(task.SuppervisorId.Value);
+                await SendNotificationToDeviceAndMembers(token, message, memberIds, task.Id);
 
             }
             await _unitOfWork.RepositoryFarmTask.Commit();
@@ -1290,9 +1494,9 @@ namespace SomoTaskManagement.Services.Impf
                     throw new Exception("Ngày bắt đầu không được lớn hơn ngày kết thúc");
                 }
 
-                if (endDate < vietnamTime)
+                if (endDate.Value.Date < vietnamTime && startDate.Value.Date < vietnamTime)
                 {
-                    throw new Exception("Ngày kết thúc không được bé hơn ngày hiện tại");
+                    throw new Exception("Ngày kết thúc và ngày bắt đầu không được bé hơn ngày hiện tại");
                 }
 
                 var plant = await _unitOfWork.RepositoryPlant.GetById(taskToDoModel.PlantId);
@@ -1503,7 +1707,7 @@ namespace SomoTaskManagement.Services.Impf
                 {
                     throw new Exception($"{plant.Name} đã ở trạng thái inactive");
                 }
-                if (taskModel.EndDate > vietnamTime)
+                if (taskModel.EndDate < vietnamTime)
                 {
                     throw new Exception("Ngày kết thúc không được bé hơn ngày hiện tại");
                 }
@@ -1906,6 +2110,31 @@ namespace SomoTaskManagement.Services.Impf
                 task.Status = 0;
                 await _unitOfWork.RepositoryFarmTask.Commit();
             }
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var currentDateTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+            var existingTasks = await _unitOfWork.RepositoryFarmTask.GetData(t => t.OriginalTaskId == id);
+
+            if (existingTasks.Any())
+            {
+                foreach (var existingTask in existingTasks)
+                {
+                    if (existingTask.StartDate <= currentDateTime)
+                    {
+                        throw new Exception("Cập nhật lại ngày bắt đầu nó không được bé hơn ngày hiện tại");
+                    }
+                    existingTask.Status = 1;
+                    existingTask.IsRepeat = false;
+                    await _unitOfWork.RepositoryFarmTask.Commit();
+                }
+            }
+
+            var notifications = await _unitOfWork.RepositoryNotifycation.GetData(a => a.TaskId == id);
+            foreach (var notification in notifications)
+            {
+                _unitOfWork.RepositoryNotifycation.Delete(notification);
+                await _unitOfWork.RepositoryNotifycation.Commit();
+            }
         }
 
         public async Task Delete(FarmTask farmTask)
@@ -2141,7 +2370,7 @@ namespace SomoTaskManagement.Services.Impf
                     task.Status = 6;
                     _unitOfWork.RepositoryFarmTask.Update(task);
                     await _unitOfWork.RepositoryFarmTask.Commit();
-
+                    if (description == null) throw new Exception("Mô tả bắt buộc phải nhập");
                     var taskEvidence = new TaskEvidence
                     {
                         Status = 1,
@@ -2191,7 +2420,7 @@ namespace SomoTaskManagement.Services.Impf
                 },
                 Data = new Dictionary<string, string>
                 {
-                    { "TaskId", taskId.ToString() }
+                    { "taskId", taskId.ToString() }
                 }
             }).ToList();
 
@@ -2509,12 +2738,18 @@ namespace SomoTaskManagement.Services.Impf
 
         }
 
-
-
         public async Task DisDisagreeTask(int id)
         {
+            var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst("Id")?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                throw new Exception("Không thể xác định người dùng từ token hoặc người dùng không có giá trị là một số nguyên.");
+            }
 
             var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
+           
+
             if (task != null)
             {
                 if (task.Status == 6)
@@ -2522,7 +2757,6 @@ namespace SomoTaskManagement.Services.Impf
                     task.Status = 1;
                     _unitOfWork.RepositoryFarmTask.Update(task);
                     await _unitOfWork.RepositoryFarmTask.Commit();
-
                 }
                 else
                 {
@@ -2531,7 +2765,19 @@ namespace SomoTaskManagement.Services.Impf
             }
             else
             {
-                throw new Exception("Không tìm thấy nhiệm vụ ");
+                throw new Exception("Không tìm thấy nhiệm vụ");
+            }
+            var member = await _unitOfWork.RepositoryMember.GetById(userId);
+            if (member.RoleId == 1)
+            {
+                string message = $"Công việc '{task.Name}' không được chấp nhận từ chối";
+                List<int> memberIds = new List<int>();
+                if (task.SuppervisorId.HasValue)
+                {
+                    memberIds.Add(task.SuppervisorId.Value);
+                    var managerTokens = await GetTokenByMemberId(task.SuppervisorId.Value);
+                    await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+                }
             }
             var evidences = await _unitOfWork.RepositoryTaskEvidence.GetData(e => e.TaskId == id);
             foreach (var evidence in evidences)
@@ -2539,7 +2785,6 @@ namespace SomoTaskManagement.Services.Impf
                 _unitOfWork.RepositoryTaskEvidence.Delete(evidence);
                 await _unitOfWork.RepositoryTaskEvidence.Commit();
             }
-
         }
 
         public async Task ChangeStatusToClose(int id)

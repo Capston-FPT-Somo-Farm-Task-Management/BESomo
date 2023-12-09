@@ -61,6 +61,120 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
+        [HttpGet("CompletionRate/Farm({farmId})")]
+        public async Task<IActionResult> CompletionRate(int farmId)
+        {
+            if (!User.IsInRole("Manager") && !User.IsInRole("Admin") && !User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+                var area = await _farmTaskService.CompletionRate(farmId);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy danh sách nhiệm vụ ",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+        [HttpGet("TopEmployee/Farm({farmId})")]
+        public async Task<IActionResult> TopEmployee(int farmId)
+        {
+            if (!User.IsInRole("Manager") && !User.IsInRole("Admin") && !User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+                var area = await _farmTaskService.TopEmployee(farmId);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy danh sách nhiệm vụ ",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+
+        [HttpGet("GetTotalInWeek/Farm({farmId})")]
+        public async Task<IActionResult> GetTotalInWeek(int farmId)
+        {
+            if (!User.IsInRole("Manager") && !User.IsInRole("Admin") && !User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+                var area = await _farmTaskService.GetTotalInWeek(farmId);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy danh sách nhiệm vụ ",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+        [HttpGet("GetTopAreaHaveTask/Farm({farmId})")]
+        public async Task<IActionResult> GetTopAreaHaveTask(int farmId)
+        {
+            if (!User.IsInRole("Manager") && !User.IsInRole("Admin") && !User.IsInRole("Supervisor"))
+            {
+                return Unauthorized("Bạn không có quyền truy cập");
+            }
+            try
+            {
+                var area = await _farmTaskService.GetTopAreaHaveTask(farmId);
+                return Ok(new ApiResponseModel
+                {
+                    Data = area,
+                    Message = "Tìm thấy danh sách nhiệm vụ ",
+                    Success = true,
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponseModel
+                {
+                    Data = null,
+                    Message = e.Message,
+                    Success = true,
+                });
+            }
+        }
+
+
         [HttpGet("GetTotalTaskOfWeekByMember({memberId})")]
         public async Task<IActionResult> GetTotalTaskOfWeekByMember(int memberId)
         {

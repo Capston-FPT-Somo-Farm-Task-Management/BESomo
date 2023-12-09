@@ -8,13 +8,9 @@ namespace SomoTaskManagement.Domain.Model.SubTask
 {
     public class SubTaskUpdateModel
     {
-        //public int TaskId { set; get; }
-
         public int EmployeeId { set; get; }
-
         public string? Description { set; get; }
         public DateTime? DaySubmit { get; set; }
-
         public string Name { set; get; }
         public int OverallEfforMinutes { set; get; }
         public int OverallEffortHour { set; get; }

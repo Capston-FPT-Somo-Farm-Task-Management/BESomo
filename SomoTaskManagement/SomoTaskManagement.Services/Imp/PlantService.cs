@@ -198,7 +198,7 @@ namespace SomoTaskManagement.Services.Imp
         }
         public async Task Update(int id, PlantCreateModel plant)
         {
-            var plantUpdate = await _unitOfWork.RepositoryPlant.GetSingleByCondition(p => p.Id == id);
+            var plantUpdate = await _unitOfWork.RepositoryPlant.GetSingleByCondition(p => p.Id == id)?? throw new Exception("Không tìm thấy trang trại");
             if (plantUpdate != null)
             {
                 var initialExternalId = plantUpdate.ExternalId;

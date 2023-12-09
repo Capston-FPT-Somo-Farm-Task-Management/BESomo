@@ -103,7 +103,7 @@ namespace SomoTaskManagement.Api.Controllers
                 return Ok(new ApiResponseModel
                 {
                     Data = member,
-                    Message = "Member is founded",
+                    Message = "Tìm thành công",
                     Success = true,
                 });
             }
@@ -127,7 +127,7 @@ namespace SomoTaskManagement.Api.Controllers
                 return Ok(new ApiResponseModel
                 {
                     Data = supervisor,
-                    Message = "Supervisor is founded",
+                    Message = "Tìm thành công",
                     Success = true,
                 });
             }
@@ -150,7 +150,7 @@ namespace SomoTaskManagement.Api.Controllers
                 return Ok(new ApiResponseModel
                 {
                     Data = supervisor,
-                    Message = "Supervisor is founded",
+                    Message = "Tìm thành công",
                     Success = true,
                 });
             }

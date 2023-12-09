@@ -101,7 +101,10 @@ namespace SomoTaskManagement.Services.Imp
             _unitOfWork.RepositoryFarm.Update(farmUpdate);
             await _unitOfWork.RepositoryFarm.Commit();
 
-            farmUpdate.UrlImage = await UploadImageToFirebaseAsync(farmUpdate, farm.ImageFile);
+            var urlImage = farm.ImageFile != null
+                ? await UploadImageToFirebaseAsync(farmUpdate, farm.ImageFile)
+                : farmUpdate.UrlImage;
+            farmUpdate.UrlImage = urlImage;
 
             _unitOfWork.RepositoryFarm.Update(farmUpdate);
             await _unitOfWork.RepositoryFarm.Commit();

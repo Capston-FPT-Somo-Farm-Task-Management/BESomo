@@ -488,7 +488,7 @@ namespace SomoTaskManagement.Services.Imp
 
             using (var package = new ExcelPackage())
             {
-                var employee = await _unitOfWork.RepositoryEmployee.GetById(emplopyeeId);
+                var employee = await _unitOfWork.RepositoryEmployee.GetById(emplopyeeId)?? throw new Exception("Không tìm thấy nhân viên");
                 var worksheet = package.Workbook.Worksheets.Add("EmployeeImportTemplate");
 
                 worksheet.Cells["D1:N1"].Merge = true;
@@ -852,6 +852,7 @@ namespace SomoTaskManagement.Services.Imp
             {
                 throw new Exception("Không tìm thấy loại công việc");
             }
+            var farm = await _unitOfWork.RepositoryFarm.GetById(farmId)??throw new Exception("Không tìm thấy trang trại ");
             var employee_taskType = await _unitOfWork.RepositoryEmployee_TaskType.GetData(expression: e => e.TaskTypeId == taskType.Id, includes: null);
             var employeeIds = employee_taskType.Select(x => x.EmployeeId).ToList();
             if (employee_taskType != null)

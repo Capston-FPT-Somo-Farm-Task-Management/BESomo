@@ -10,15 +10,15 @@ namespace SomoTaskManagement.Domain.Model.TaskType
     public class TaskTypeCreateUpdateModel
     {
 
-        [Required(ErrorMessage = "Name is required.")]
+        [Required(ErrorMessage = "Tên bắt buộc nhập")]
         [RegularExpression(@"^[\p{L} ]+$", ErrorMessage = "Name must contain only letters and spaces.")]
         [StringLength(100, ErrorMessage = "Name must not exceed 100 characters.")]
         public string Name { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Trạng thái bắt buộc nhập")]
         public int Status { set; get; }
 
-        [Required(ErrorMessage = "Description is required.")]
+        [Required(ErrorMessage = "Mô tả bắt buộc nhập")]
         public string Description { set; get; }
     }
 }
