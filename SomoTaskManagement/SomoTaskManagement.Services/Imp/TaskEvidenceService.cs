@@ -9,6 +9,7 @@ using SomoTaskManagement.Domain.Enum;
 using SomoTaskManagement.Domain.Model.Employee;
 using SomoTaskManagement.Domain.Model.EvidenceImage;
 using SomoTaskManagement.Domain.Model.TaskEvidence;
+using SomoTaskManagement.Services.Common;
 using SomoTaskManagement.Services.Interface;
 using SomoTaskManagement.Socket;
 using System;
@@ -26,13 +27,17 @@ namespace SomoTaskManagement.Services.Imp
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
         private readonly IServiceProvider _serviceProvider;
+        private readonly NotificationFCM _notificationFCM;
+        private readonly UploadImageToFirebase _uploadImageToFirebase;
 
-        public TaskEvidenceService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, IServiceProvider serviceProvider)
+        public TaskEvidenceService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, IServiceProvider serviceProvider, NotificationFCM notificationFCM, UploadImageToFirebase uploadImageToFirebase)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _configuration = configuration;
             _serviceProvider = serviceProvider;
+            _notificationFCM = notificationFCM;
+            _uploadImageToFirebase  = uploadImageToFirebase;
         }
         public Task<IEnumerable<TaskEvidence>> ListTaskEvidence()
         {
@@ -85,7 +90,7 @@ namespace SomoTaskManagement.Services.Imp
                 await _unitOfWork.RepositoryTaskEvidence.Add(taskEvidenceCreate);
                 await _unitOfWork.RepositoryTaskEvidence.Commit();
 
-                var uploadedImages = await UploadEvidenceImages(taskEvidenceCreate.Id, taskEvidence);
+                var uploadedImages = await _uploadImageToFirebase.UploadEvidenceImages(taskEvidenceCreate.Id, taskEvidence);
 
                 foreach (var uploadedImage in uploadedImages)
                 {
@@ -96,7 +101,15 @@ namespace SomoTaskManagement.Services.Imp
                 await _unitOfWork.RepositoryEvidenceImage.Commit();
                 //var evidenceCount = await CountEvidenceOfTask(taskEvidence.TaskId);
 
-
+                var task = await _unitOfWork.RepositoryFarmTask.GetById(taskEvidenceCreate.TaskId);
+                string message = $"Công việc '{task.Name}' có một báo cáo";
+                List<int> memberIds = new List<int>();
+                if (task.ManagerId.HasValue)
+                {
+                    memberIds.Add(task.ManagerId.Value);
+                    var managerTokens = await _notificationFCM.GetTokenByMemberIds(memberIds);
+                    await _notificationFCM.SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+                }
             }
             catch (Exception ex)
             {
@@ -105,54 +118,7 @@ namespace SomoTaskManagement.Services.Imp
             }
         }
 
-
-        public async Task<List<EvidenceImage>> UploadEvidenceImages(int id, EvidenceCreateUpdateModel evidenceCreateUpdateModel)
-        {
-            var uploadedImages = new List<EvidenceImage>();
-
-            if (evidenceCreateUpdateModel.ImageFile != null)
-            {
-                foreach (var imageFile in evidenceCreateUpdateModel.ImageFile)
-                {
-                    var imageEvidence = new EvidenceImage
-                    {
-                        TaskEvidenceId = id,
-                    };
-
-                    if (imageFile != null && imageFile.Length > 0)
-                    {
-                        string fileName = Guid.NewGuid().ToString();
-                        string fileExtension = Path.GetExtension(imageFile.FileName);
-
-                        var options = new FirebaseStorageOptions
-                        {
-                            AuthTokenAsyncFactory = () => Task.FromResult(_configuration["Firebase:apiKey"])
-                        };
-
-                        var firebaseStorage = new FirebaseStorage(_configuration["Firebase:Bucket"], options)
-                            .Child("images")
-                            .Child(fileName + fileExtension);
-
-                        await firebaseStorage.PutAsync(imageFile.OpenReadStream());
-
-                        string imageUrl = await firebaseStorage.GetDownloadUrlAsync();
-
-                        imageEvidence.ImageUrl = imageUrl;
-                    }
-                    else
-                    {
-                        imageEvidence.ImageUrl = null;
-                    }
-
-                    uploadedImages.Add(imageEvidence);
-                }
-            }
-
-            return uploadedImages;
-        }
-
        
-
         public async Task AddTaskEvidencee(TaskEvidence taskEvidence)
         {
 
@@ -175,7 +141,7 @@ namespace SomoTaskManagement.Services.Imp
 
             _unitOfWork.RepositoryEvidenceImage.Delete(expression: i => i.TaskEvidenceId == id);
 
-            var uploadedImages = await UploadEvidenceImages(taskEvidenceUpdate.Id, taskEvidence);
+            var uploadedImages = await _uploadImageToFirebase.UploadEvidenceImages(taskEvidenceUpdate.Id, taskEvidence);
 
             foreach (var uploadedImage in uploadedImages)
             {

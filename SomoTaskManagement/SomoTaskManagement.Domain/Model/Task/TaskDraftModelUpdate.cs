@@ -31,5 +31,6 @@ namespace SomoTaskManagement.Domain.Model.Task
         public string? AddressDetail { get; set; }
         [Required]
         public int? Remind { get; set; }
+        public bool? IsImportant { get; set; } = null;
     }
 }

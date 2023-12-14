@@ -526,7 +526,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPut("Task({id})/Refuse")]
-        public async Task<IActionResult> DisDisagreeTask(int id)
+        public async Task<IActionResult> DisDisagreeTask(int id, bool? isImportant)
         {
             if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
             {
@@ -535,7 +535,7 @@ namespace SomoTaskManagement.Api.Controllers
             try
             {
 
-                await _farmTaskService.DisDisagreeTask(id);
+                await _farmTaskService.DisDisagreeTask(id, isImportant);
 
                 return Ok(new ApiResponseModel
                 {
@@ -1269,7 +1269,7 @@ namespace SomoTaskManagement.Api.Controllers
         }
 
         [HttpPut("({id})/ChangeStatusFromDoneToDoing")]
-        public async Task<IActionResult> ChangeStatusFromDoneToDoing(int id,[FromBody] string reason, int managerId)
+        public async Task<IActionResult> ChangeStatusFromDoneToDoing(int id,[FromBody] string reason, int managerId, DateTime endDay)
         {
             if (!User.IsInRole("Manager") && !User.IsInRole("Supervisor"))
             {
@@ -1278,7 +1278,7 @@ namespace SomoTaskManagement.Api.Controllers
             try
             {
 
-                await _farmTaskService.ChangeStatusFromDoneToDoing(id, reason, managerId);
+                await _farmTaskService.ChangeStatusFromDoneToDoing(id, reason, managerId, endDay);
 
                 var responseData = new ApiResponseModel
                 {

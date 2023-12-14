@@ -191,6 +191,8 @@ namespace SomoTaskManagement.Data
                 entity.Property(e => e.IsPlant);
                 entity.Property(e => e.IsSpecific);
                 entity.Property(e => e.IsExpired);
+                entity.Property(e => e.IsImportant);
+                entity.Property(e => e.IsStartLate);
 
                 entity.HasOne(d => d.Plant).WithMany(p => p.Tasks).HasForeignKey(d => d.PlantId).HasConstraintName("FK_Plant_FarmTask").OnDelete(DeleteBehavior.NoAction);
                 entity.HasOne(d => d.LiveStrock).WithMany(p => p.Tasks).HasForeignKey(d => d.LiveStockId).HasConstraintName("FK_LiveStock_FarmTask").OnDelete(DeleteBehavior.NoAction);
@@ -273,7 +275,7 @@ namespace SomoTaskManagement.Data
             //Employee_Task
             modelBuilder.Entity<Employee_Task>(entity =>
             {
-                entity.ToTable("SubTask");
+                entity.ToTable("Activites");
                 entity.HasKey(e => e.SubtaskId);
                 entity.Property(e => e.SubtaskId).ValueGeneratedOnAdd();
                 entity.Property(e => e.ActualEfforMinutes);

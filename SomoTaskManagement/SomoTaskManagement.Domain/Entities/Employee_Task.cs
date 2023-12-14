@@ -9,12 +9,13 @@ using System.Threading.Tasks;
 
 namespace SomoTaskManagement.Domain.Entities
 {
-    [Table("SubTask")]
+    [Table("Activites")]
 
     public class Employee_Task
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
+        [Column("Id")]
         public int SubtaskId { get; set; } 
         
         public int TaskId { set; get; }

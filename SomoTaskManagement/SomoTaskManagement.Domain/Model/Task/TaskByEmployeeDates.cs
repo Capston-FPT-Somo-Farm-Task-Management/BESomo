@@ -67,5 +67,6 @@ namespace SomoTaskManagement.Domain.Model.Task
         public string? AddressDetail { get; set; }
         public string EffortOfTask {  set; get; }
         public string TotaslEmployee { set; get; }
+        public bool IsStartLate { set; get; }
     }
 }

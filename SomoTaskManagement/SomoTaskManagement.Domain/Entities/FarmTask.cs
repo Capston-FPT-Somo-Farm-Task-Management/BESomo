@@ -50,6 +50,8 @@ namespace SomoTaskManagement.Domain.Entities
         public bool IsSpecific {  get; set; }
         public int OriginalTaskId {  set; get; }
         public bool IsExpired {  set; get; }
+        public bool? IsStartLate { set; get; } = null;
+        public bool? IsImportant { set; get; } = null;
 
         [JsonIgnore]
         public virtual Member? Manager { set; get; }

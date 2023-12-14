@@ -28,6 +28,7 @@ using SomoTaskManagement.Domain.Model.SubTask;
 using SomoTaskManagement.Domain.Model.Task;
 using SomoTaskManagement.Domain.Model.TaskEvidence;
 using SomoTaskManagement.Domain.Model.Zone;
+using SomoTaskManagement.Services.Common;
 using SomoTaskManagement.Services.Interface;
 using SomoTaskManagement.Services.Scheduler;
 using System;
@@ -52,13 +53,15 @@ namespace SomoTaskManagement.Services.Impf
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly NotificationFCM _notificationFCM;
 
-        public FarmTaskService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        public FarmTaskService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, NotificationFCM notificationFCM)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
+            _notificationFCM = notificationFCM;
         }
         private async Task<Dictionary<FarmTask, FarmTaskModel>> MapFarmTasks(IEnumerable<FarmTask> farmTasks)
         {
@@ -621,6 +624,7 @@ namespace SomoTaskManagement.Services.Impf
                 IsExpired = farmTask.IsExpired,
                 AvatarSupervisor = supervisorAvatar,
                 AvatarManager = member != null ? member.Avatar : null,
+                IsStartLate = farmTask.IsStartLate,
             };
             if (farmTask.OriginalTaskId == 0)
             {
@@ -971,7 +975,7 @@ namespace SomoTaskManagement.Services.Impf
                 {
                     throw new Exception("Ngày bắt đầu không được lớn hơn ngày kết thúc");
                 }
-                if (endDate.Value.Date < currentTime && startDate.Value.Date < currentTime)
+                if (startDate.Value.Day < currentTime.Day)
                 {
                     throw new Exception("Ngày kết thúc và ngày bắt đầu không được bé hơn ngày hiện tại");
                 }
@@ -1147,7 +1151,15 @@ namespace SomoTaskManagement.Services.Impf
                     if (task.Status == 6)
                     {
                         await UpdateTask(taskId, taskModel, dates, materialIds);
+                        var subtasks = await _unitOfWork.RepositoryFarmTask.GetData(f => f.OriginalTaskId == taskId);
+                        foreach (var subtask in subtasks)
+                        {
+                            subtask.Status = 1;
+                            _unitOfWork.RepositoryFarmTask.Update(subtask);
+                            //await _unitOfWork.RepositoryFarmTask.Commit();
+                        }
                         task.Status = 1;
+                        task.IsImportant = taskModel.IsImportant;
                         _unitOfWork.RepositoryFarmTask.Update(task);
                         await _unitOfWork.RepositoryFarmTask.Commit();
 
@@ -1156,8 +1168,8 @@ namespace SomoTaskManagement.Services.Impf
                         if (task.SuppervisorId.HasValue)
                         {
                             memberIds.Add(task.SuppervisorId.Value);
-                            var managerTokens = await GetTokenByMemberId(task.SuppervisorId.Value);
-                            await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+                            var managerTokens = await _notificationFCM.GetTokenByMemberIds(memberIds);
+                            await _notificationFCM.SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
                         }
 
                     }
@@ -1200,13 +1212,15 @@ namespace SomoTaskManagement.Services.Impf
                 var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 var currentDateTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
 
-                var taskRepeats = await _unitOfWork.RepositoryFarmTask.GetData(t => t.OriginalTaskId == farmTask.Id);
-                var repeatDates = taskRepeats.Select(t => t.StartDate).ToList();
+                //var taskRepeats = await _unitOfWork.RepositoryFarmTask.GetData(t => t.OriginalTaskId == farmTask.Id);
+                var taskParent = await _unitOfWork.RepositoryFarmTask.GetById(farmTask.OriginalTaskId);
 
-                if (taskModel.EndDate < currentDateTime || taskModel.EndDate < taskModel.StartDate)
-                {
-                    throw new Exception("Ngày kết thúc không được bé hơn ngày hiện tại và ngày bắt đầu");
-                }
+                //var repeatDates = taskRepeats.Select(t => t.StartDate).ToList();
+                //if (taskModel.EndDate < currentDateTime || taskModel.EndDate < taskModel.StartDate)
+                //{
+                //    throw new Exception("Ngày kết thúc không được bé hơn ngày hiện tại và ngày bắt đầu");
+                //}
+
                 await UpdateFarmTask(farmTask, taskModel.StartDate?.Date, taskModel, materialIds);
 
                 if (farmTask.OriginalTaskId == 0)
@@ -1240,6 +1254,10 @@ namespace SomoTaskManagement.Services.Impf
                             }
                         }
                     }
+                    else
+                    {
+                        farmTask.IsRepeat = false;
+                    }
 
                     _unitOfWork.RepositoryFarmTask.Delete(t => dates == null || !dates.Contains(t.StartDate.Value.Date) && t.OriginalTaskId == farmTask.Id);
                     await _unitOfWork.RepositoryFarmTask.Commit();
@@ -1248,8 +1266,25 @@ namespace SomoTaskManagement.Services.Impf
                 {
                     await UpdateFarmTask(farmTask, farmTask.StartDate?.Date, taskModel, materialIds);
                     farmTask.OriginalTaskId = 0;
+                    if (dates != null && dates.Any())
+                    {
+                        foreach (var date in dates)
+                        {
+                            var newTask = CreateNewFarmTask(date, farmTask, taskModel);
+                            await _unitOfWork.RepositoryFarmTask.Add(newTask);
+                            await CreateTaskForDate(newTask, materialIds);
+                        }
+                    }
+                    await _unitOfWork.RepositoryFarmTask.Commit();
+
+                    var taskRepeats = await _unitOfWork.RepositoryFarmTask.GetData(t => t.OriginalTaskId == taskParent.Id);
+                    if (taskRepeats.Count() == 0)
+                    {
+                        taskParent.IsRepeat = false;
+                    }
                     await _unitOfWork.RepositoryFarmTask.Commit();
                 }
+
                 _unitOfWork.CommitTransaction();
             }
             catch (Exception ex)
@@ -1353,9 +1388,8 @@ namespace SomoTaskManagement.Services.Impf
             var currentDateTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
             await UpdateTask(taskId, taskModel, dates, materialIds);
             task.Status = 1;
-            task.IsRepeat = true;
+            //task.IsRepeat = true;
             var existingTasks = await _unitOfWork.RepositoryFarmTask.GetData(t => t.OriginalTaskId == taskId);
-
             if (existingTasks.Any())
             {
                 foreach (var existingTask in existingTasks)
@@ -1364,11 +1398,11 @@ namespace SomoTaskManagement.Services.Impf
                     {
                         throw new Exception("Cập nhật lại ngày bắt đầu nó không được bé hơn ngày hiện tại");
                     }
+                    task.IsRepeat = true;
                     existingTask.Status = 1;
                     existingTask.IsRepeat = false;
                     await _unitOfWork.RepositoryFarmTask.Commit();
                 }
-
             }
 
             string message = $"Công việc '{task.Name}' đã được giao";
@@ -1376,8 +1410,8 @@ namespace SomoTaskManagement.Services.Impf
             if (task.SuppervisorId.HasValue)
             {
                 memberIds.Add(task.SuppervisorId.Value);
-                var token = await GetTokenByMemberId(task.SuppervisorId.Value);
-                await SendNotificationToDeviceAndMembers(token, message, memberIds, task.Id);
+                var token = await _notificationFCM.GetTokenByMemberIds(memberIds);
+                await _notificationFCM.SendNotificationToDeviceAndMembers(token, message, memberIds, task.Id);
 
             }
             await _unitOfWork.RepositoryFarmTask.Commit();
@@ -1494,7 +1528,7 @@ namespace SomoTaskManagement.Services.Impf
                     throw new Exception("Ngày bắt đầu không được lớn hơn ngày kết thúc");
                 }
 
-                if (endDate.Value.Date < vietnamTime && startDate.Value.Date < vietnamTime)
+                if (startDate.Value.Day < vietnamTime.Day)
                 {
                     throw new Exception("Ngày kết thúc và ngày bắt đầu không được bé hơn ngày hiện tại");
                 }
@@ -1618,36 +1652,36 @@ namespace SomoTaskManagement.Services.Impf
                     }
                 }
 
-                if (farmTaskNew.EndDate.HasValue && farmTaskNew.EndDate <= vietnamTime)
+                //if (farmTaskNew.EndDate.HasValue && farmTaskNew.EndDate <= vietnamTime)
+                //{
+                //    farmTaskNew.IsExpired = true;
+                //    await _unitOfWork.RepositoryFarmTask.Commit();
+                //}
+                //else
+                //{
+                if (farmTaskNew.EndDate.HasValue && farmTaskNew.EndDate > vietnamTime)
                 {
-                    farmTaskNew.IsExpired = true;
-                    await _unitOfWork.RepositoryFarmTask.Commit();
-                }
-                else
-                {
-                    if (farmTaskNew.EndDate.HasValue && farmTaskNew.EndDate > vietnamTime)
-                    {
-                        var remainingMilliseconds = (int)(farmTaskNew.EndDate.Value - vietnamTime).TotalMilliseconds;
+                    var remainingMilliseconds = (int)(farmTaskNew.EndDate.Value - vietnamTime).TotalMilliseconds;
 
-                        if (remainingMilliseconds == 0)
+                    if (remainingMilliseconds == 0)
+                    {
+                        farmTaskNew.IsExpired = true;
+                        await _unitOfWork.RepositoryFarmTask.Commit();
+                    }
+                    else if (remainingMilliseconds > 0)
+                    {
+                        var timer = new System.Timers.Timer(remainingMilliseconds);
+                        timer.Elapsed += async (sender, e) =>
                         {
                             farmTaskNew.IsExpired = true;
                             await _unitOfWork.RepositoryFarmTask.Commit();
-                        }
-                        else if (remainingMilliseconds > 0)
-                        {
-                            var timer = new System.Timers.Timer(remainingMilliseconds);
-                            timer.Elapsed += async (sender, e) =>
-                            {
-                                farmTaskNew.IsExpired = true;
-                                await _unitOfWork.RepositoryFarmTask.Commit();
-                                timer.Dispose();
-                            };
-                            timer.AutoReset = false;
-                            timer.Start();
-                        }
+                            timer.Dispose();
+                        };
+                        timer.AutoReset = false;
+                        timer.Start();
                     }
                 }
+                //}
 
             }
 
@@ -1836,8 +1870,8 @@ namespace SomoTaskManagement.Services.Impf
                     if (farmTaskNew.ManagerId.HasValue)
                     {
                         memberIds.Add(farmTaskNew.SuppervisorId.Value);
-                        var managerTokens = await GetTokenByMemberId(farmTaskNew.SuppervisorId.Value);
-                        await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, farmTaskNew.Id);
+                        var managerTokens = await _notificationFCM.GetTokenByMemberIds(memberIds);
+                        await _notificationFCM.SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, farmTaskNew.Id);
                     }
                 }
                 await CreateEmployeeMaterialForTask(farmTaskNew, materialIds, employeeIds);
@@ -2363,98 +2397,96 @@ namespace SomoTaskManagement.Services.Impf
         public async Task CreateDisagreeTask(int id, string description)
         {
             var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
-            if (task != null)
+
+            if (task.Status == 1 && (task.IsImportant == false || !task.IsImportant.HasValue))
             {
-                if (task.Status == 1)
+                task.Status = 6;
+                _unitOfWork.RepositoryFarmTask.Update(task);
+                await _unitOfWork.RepositoryFarmTask.Commit();
+                if (description == null) throw new Exception("Mô tả bắt buộc phải nhập");
+                var taskEvidence = new TaskEvidence
                 {
-                    task.Status = 6;
-                    _unitOfWork.RepositoryFarmTask.Update(task);
-                    await _unitOfWork.RepositoryFarmTask.Commit();
-                    if (description == null) throw new Exception("Mô tả bắt buộc phải nhập");
-                    var taskEvidence = new TaskEvidence
-                    {
-                        Status = 1,
-                        SubmitDate = DateTime.Now,
-                        Description = description,
-                        TaskId = id,
-                        EvidenceType = 1,
-                    };
+                    Status = 1,
+                    SubmitDate = DateTime.Now,
+                    Description = description,
+                    TaskId = id,
+                    EvidenceType = 1,
+                };
 
-                    await _unitOfWork.RepositoryTaskEvidence.Add(taskEvidence);
-                    await _unitOfWork.RepositoryTaskEvidence.Commit();
+                await _unitOfWork.RepositoryTaskEvidence.Add(taskEvidence);
+                await _unitOfWork.RepositoryTaskEvidence.Commit();
 
-                    string message = $"Công việc '{task.Name}' đã bị từ chối";
-                    List<int> memberIds = new List<int>();
-                    if (task.ManagerId.HasValue)
-                    {
-                        memberIds.Add(task.ManagerId.Value);
-                        var managerTokens = await GetTokenByMemberId(task.ManagerId.Value);
-                        await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
-                    }
-                }
-                else
+                string message = $"Công việc '{task.Name}' đã bị từ chối";
+                List<int> memberIds = new List<int>();
+                if (task.ManagerId.HasValue)
                 {
-                    throw new Exception("Không thể từ chối");
+                    memberIds.Add(task.ManagerId.Value);
+                    var managerTokens = await _notificationFCM.GetTokenByMemberIds(memberIds);
+                    await _notificationFCM.SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
                 }
-
             }
             else
             {
-                throw new Exception("Không tìm thấy nhiệm vụ");
+                throw new Exception("Người quản lý không cho từ chối");
             }
+
+            //else
+            //{
+            //    throw new Exception("Không tìm thấy nhiệm vụ");
+            //}
         }
 
-        public async Task SendNotificationToDeviceAndMembers(List<string> deviceTokens, string message, List<int> memberIds, int taskId)
-        {
-            TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+        //public async Task SendNotificationToDeviceAndMembers(List<string> deviceTokens, string message, List<int> memberIds, int taskId)
+        //{
+        //    TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        //    DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
 
-            var task = await _unitOfWork.RepositoryFarmTask.GetById(taskId);
-            var deviceMessages = deviceTokens.Select(token => new Message
-            {
-                Token = token,
-                Notification = new FirebaseAdmin.Messaging.Notification
-                {
-                    Title = $"{task.Name}",
-                    Body = message
-                },
-                Data = new Dictionary<string, string>
-                {
-                    { "taskId", taskId.ToString() }
-                }
-            }).ToList();
+        //    var task = await _unitOfWork.RepositoryFarmTask.GetById(taskId);
+        //    var deviceMessages = deviceTokens.Select(token => new Message
+        //    {
+        //        Token = token,
+        //        Notification = new FirebaseAdmin.Messaging.Notification
+        //        {
+        //            Title = $"{task.Name}",
+        //            Body = message
+        //        },
+        //        Data = new Dictionary<string, string>
+        //        {
+        //            { "taskId", taskId.ToString() }
+        //        }
+        //    }).ToList();
 
-            foreach (var deviceMessage in deviceMessages)
-            {
-                await SendNotificationToDevices(new List<string> { deviceMessage.Token }, deviceMessage);
-            }
+        //    foreach (var deviceMessage in deviceMessages)
+        //    {
+        //        await SendNotificationToDevices(new List<string> { deviceMessage.Token }, deviceMessage);
+        //    }
 
-            foreach (var memberId in memberIds)
-            {
-                var individualNotification = new Domain.Entities.Notification
-                {
-                    Message = message,
-                    MessageType = "Individual",
-                    NotificationDateTime = vietnamTime,
-                    IsRead = false,
-                    IsNew = true,
-                    TaskId = taskId
-                };
-                await _unitOfWork.RepositoryNotifycation.Add(individualNotification);
-                await _unitOfWork.RepositoryNotifycation.Commit();
+        //    foreach (var memberId in memberIds)
+        //    {
+        //        var individualNotification = new Domain.Entities.Notification
+        //        {
+        //            Message = message,
+        //            MessageType = "Individual",
+        //            NotificationDateTime = vietnamTime,
+        //            IsRead = false,
+        //            IsNew = true,
+        //            TaskId = taskId
+        //        };
+        //        await _unitOfWork.RepositoryNotifycation.Add(individualNotification);
+        //        await _unitOfWork.RepositoryNotifycation.Commit();
 
-                var member_notify = new Notification_Member
-                {
-                    NotificationId = individualNotification.Id,
-                    MemberId = memberId,
-                };
-                await _unitOfWork.RepositoryNotifycation_Member.Add(member_notify);
-                await _unitOfWork.RepositoryNotifycation_Member.Commit();
-            }
-        }
+        //        var member_notify = new Notification_Member
+        //        {
+        //            NotificationId = individualNotification.Id,
+        //            MemberId = memberId,
+        //        };
+        //        await _unitOfWork.RepositoryNotifycation_Member.Add(member_notify);
+        //        await _unitOfWork.RepositoryNotifycation_Member.Commit();
+        //    }
+        //}
 
 
-        public async Task ChangeStatusFromDoneToDoing(int id, string description, int managerId)
+        public async Task ChangeStatusFromDoneToDoing(int id, string description, int managerId, DateTime endDay)
         {
             await _unitOfWork.BeginTransactionAsync();
             try
@@ -2468,6 +2500,11 @@ namespace SomoTaskManagement.Services.Impf
                     if (task.Status == 4)
                     {
                         task.Status = 3;
+                        if (endDay < task.EndDate)
+                        {
+                            throw new Exception("Không được nhỏ hơn ngày kết thúc cũ");
+                        }
+                        task.EndDate = endDay;
                         _unitOfWork.RepositoryFarmTask.Update(task);
                         await _unitOfWork.RepositoryFarmTask.Commit();
 
@@ -2489,8 +2526,8 @@ namespace SomoTaskManagement.Services.Impf
                         if (task.SuppervisorId.HasValue)
                         {
                             memberIds.Add(task.SuppervisorId.Value);
-                            var managerTokens = await GetTokenByMemberId(task.SuppervisorId.Value);
-                            await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+                            var managerTokens = await _notificationFCM.GetTokenByMemberIds(memberIds);
+                            await _notificationFCM.SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
                         }
 
                     }
@@ -2556,8 +2593,8 @@ namespace SomoTaskManagement.Services.Impf
 
                             await AddTaskEvidenceeWithImage(taskEvidence, taskEvidenceType, managerId.Value, id);
 
-                            var managerTokens = await GetTokenByMemberId(task.SuppervisorId.Value);
-                            await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+                            var managerTokens = await _notificationFCM.GetTokenByMemberIds(memberIds);
+                            await _notificationFCM.SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
 
                         }
                         else
@@ -2570,7 +2607,7 @@ namespace SomoTaskManagement.Services.Impf
 
                             var managerTokens = await GetTokenAllManger();
 
-                            await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+                            await _notificationFCM.SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
 
                         }
                     }
@@ -2723,7 +2760,7 @@ namespace SomoTaskManagement.Services.Impf
 
                         var managerTokens = await GetTokenAllManger();
 
-                        await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+                        await _notificationFCM.SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
                     }
                 }
                 else
@@ -2738,7 +2775,7 @@ namespace SomoTaskManagement.Services.Impf
 
         }
 
-        public async Task DisDisagreeTask(int id)
+        public async Task DisDisagreeTask(int id, bool? isImportant)
         {
             var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst("Id")?.Value;
 
@@ -2748,13 +2785,12 @@ namespace SomoTaskManagement.Services.Impf
             }
 
             var task = await _unitOfWork.RepositoryFarmTask.GetById(id);
-           
-
             if (task != null)
             {
                 if (task.Status == 6)
                 {
                     task.Status = 1;
+                    task.IsImportant = isImportant;
                     _unitOfWork.RepositoryFarmTask.Update(task);
                     await _unitOfWork.RepositoryFarmTask.Commit();
                 }
@@ -2775,8 +2811,8 @@ namespace SomoTaskManagement.Services.Impf
                 if (task.SuppervisorId.HasValue)
                 {
                     memberIds.Add(task.SuppervisorId.Value);
-                    var managerTokens = await GetTokenByMemberId(task.SuppervisorId.Value);
-                    await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+                    var managerTokens = await _notificationFCM.GetTokenByMemberIds(memberIds);
+                    await _notificationFCM.SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
                 }
             }
             var evidences = await _unitOfWork.RepositoryTaskEvidence.GetData(e => e.TaskId == id);
@@ -2823,7 +2859,7 @@ namespace SomoTaskManagement.Services.Impf
 
                         var managerTokens = await GetTokenAllManger();
 
-                        await SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
+                        await _notificationFCM.SendNotificationToDeviceAndMembers(managerTokens, message, memberIds, task.Id);
                     }
                 }
                 else
@@ -2937,7 +2973,12 @@ namespace SomoTaskManagement.Services.Impf
                     map[farmTask].TotaslEmployee = $"{employeeIdOftask.Count()} người";
                 }
             }
+            if (effortMinutesOfEmployee >= 60)
+            {
+                effortHoursOfEmployee += effortMinutesOfEmployee / 60;
 
+                effortMinutesOfEmployee %= 60;
+            }
             return new TaskByEmployeeDatesEffort
             {
                 TaskByEmployeeDates = map.Values,

@@ -22,6 +22,6 @@ namespace SomoTaskManagement.Domain.Model.Farm
 
         public string Description { get; set; }
         [FromForm]
-        public IFormFile ImageFile { get; set; }
+        public IFormFile? ImageFile { get; set; }
     }
 }

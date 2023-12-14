@@ -16,6 +16,7 @@ using SomoTaskManagement.Services.Impf;
 using SomoTaskManagement.Services.Interface;
 using StackExchange.Redis;
 using SomoTaskManagement.Socket;
+using SomoTaskManagement.Services.Common;
 
 namespace SomoTaskManagement.Infrastructure.Configuration
 {
@@ -57,6 +58,8 @@ namespace SomoTaskManagement.Infrastructure.Configuration
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddSingleton<WebSocketManager>();
+            services.AddScoped<NotificationFCM>();
+            services.AddScoped<UploadImageToFirebase>();
 
             services.AddHttpContextAccessor();
         }
@@ -85,11 +88,25 @@ namespace SomoTaskManagement.Infrastructure.Configuration
 
                 var farmTaskJobKey = new JobKey(nameof(FarmTaskBackgroundJob));
                 var subTaskJobKey = new JobKey(nameof(SubTaskBackGroundJob));
+                var lateStartBackgroundJob = new JobKey(nameof(LateStartBackgroundJob));
 
                 options.AddJob<FarmTaskBackgroundJob>(farmTaskJobKey)
                     .AddTrigger(trigger => trigger
                         .ForJob(farmTaskJobKey)
                         .WithCronSchedule("0 0 0/12 * * ?"));
+
+                options.AddJob<LateStartBackgroundJob>(lateStartBackgroundJob)
+                    .AddTrigger(trigger => trigger
+                        .ForJob(lateStartBackgroundJob)
+                        .WithCronSchedule("0 0 0/1 * * ?"));
+                //options.AddJob<LateStartBackgroundJob>(lateStartBackgroundJob)
+                //      .AddTrigger(trigger => trigger
+                //            .ForJob(lateStartBackgroundJob)
+                //            .WithSimpleSchedule(schedule => schedule
+                //                .WithIntervalInMinutes(5)
+                //                .RepeatForever()));
+
+
 
                 options.AddJob<SubTaskBackGroundJob>(subTaskJobKey)
                     .AddTrigger(trigger => trigger

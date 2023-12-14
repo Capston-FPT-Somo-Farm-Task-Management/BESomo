@@ -80,5 +80,7 @@ namespace SomoTaskManagement.Domain.Model.Task
         public bool IsSpecific { get; set; }
         public bool IsHaveSubtask { get; set; }
         public bool IsExpired { set; get; }
+        public bool IsImportant { set; get; }
+        public bool IsStartLate { set; get; }
     }
 }

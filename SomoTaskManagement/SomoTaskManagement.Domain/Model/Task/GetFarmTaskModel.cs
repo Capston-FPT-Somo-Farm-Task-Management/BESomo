@@ -78,5 +78,6 @@ namespace SomoTaskManagement.Domain.Model.Task
         public bool IsExpired { set; get; }
         public string? AvatarManager { get; set; }
         public string? AvatarSupervisor { get; set; }
+        public bool? IsStartLate { set; get; }
     }
 }

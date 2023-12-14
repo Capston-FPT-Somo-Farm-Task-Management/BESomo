@@ -29,7 +29,7 @@ namespace SomoTaskManagement.Services.Interface
         Task<int> CheckRoleMember(int id);
         Task CreateAsignTask(TaskCreateAsignModel taskModel, List<int>? materialIds, List<int>? employeeIds);
         Task CreateDisagreeTask(int id, string description);
-        Task DisDisagreeTask(int id);
+        Task DisDisagreeTask(int id, bool? isImportant);
         Task<TaskByEmployeeDatesEffort> GetTaskByEmployeeDates(int employeeId, DateTime? startDay, DateTime? endDay, int pageIndex, int pageSize, int? status);
         Task<FarmTaskPageResult> GetAllTaskByMemberDate(int id, DateTime? date, int pageIndex, int pageSize, int? checkTaskParent, string? taskName);
         Task DeleteTask(int farmTaskId);
@@ -44,7 +44,7 @@ namespace SomoTaskManagement.Services.Interface
         Task AddEmployeeToTaskAsign(int taskId, List<int>? employeeIds, int? overallEfforMinutes, int? overallEffortHour);
         Task ChangeStatusToDoing(int id);
         Task ChangeStatusToPendingAndCancel(int id, EvidencePendingAndCancel taskEvidence, int status, int? managerId);
-        Task ChangeStatusFromDoneToDoing(int id, string description, int managerId);
+        Task ChangeStatusFromDoneToDoing(int id, string description, int managerId, DateTime endDay);
         Task ChangeStatusToClose(int id);
         Task ChangeStatusToDone(int id);
         Task UpdateTaskDisagreeAndChangeToToDo(int taskId, TaskDraftModelUpdate taskModel, List<DateTime>? dates, List<int> materialIds);

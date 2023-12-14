@@ -13,11 +13,11 @@ namespace SomoTaskManagement.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = "Manager,Supervisor")]
-    public class FarmSubTaskController : ControllerBase
+    public class ActivitiesController : ControllerBase
     {
         private readonly ISubTaskService _subTaskService;
 
-        public FarmSubTaskController(ISubTaskService subTaskService)
+        public ActivitiesController(ISubTaskService subTaskService)
         {
             _subTaskService = subTaskService;
         }
@@ -118,7 +118,7 @@ namespace SomoTaskManagement.Api.Controllers
             }
         }
 
-        [HttpGet("EmployeeNoSubtask({taskId})")]
+        [HttpGet("EmployeeNoActivities({taskId})")]
         public async Task<IActionResult> GetEmployeesNoSubtask(int taskId)
         {
             try

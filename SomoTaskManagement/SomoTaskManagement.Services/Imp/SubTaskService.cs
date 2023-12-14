@@ -94,6 +94,30 @@ namespace SomoTaskManagement.Services.Imp
             {
                 throw new Exception("Không tìm thấy công việc con");
             }
+            var employee = await _unitOfWork.RepositoryEmployee.GetById(subTask.EmployeeId);
+
+            var efffortOfEmployeeInSubmitDay = await _unitOfWork.RepositoryEmployee_Task.GetData(s => s.EmployeeId == subTask.EmployeeId && s.DaySubmit == subTask.DaySubmit);
+            var tottalEffortHour = efffortOfEmployeeInSubmitDay.Sum(s => s.ActualEffortHour);
+            var tottalEffortHourAfter = efffortOfEmployeeInSubmitDay.Sum(s => s.ActualEffortHour) + subTask.OverallEffortHour;
+
+            var tottalEffortMinutes = efffortOfEmployeeInSubmitDay.Sum(s => s.ActualEfforMinutes);
+            var tottalEffortMinutesAfter = efffortOfEmployeeInSubmitDay.Sum(s => s.ActualEfforMinutes) + subTask.OverallEfforMinutes;
+
+            if (tottalEffortMinutesAfter >= 60)
+            {
+                tottalEffortHourAfter += tottalEffortMinutesAfter / 60;
+
+                tottalEffortMinutesAfter %= 60;
+            }
+            if (tottalEffortMinutes >= 60)
+            {
+                tottalEffortHour += tottalEffortMinutes / 60;
+
+                tottalEffortMinutes %= 60;
+            }
+
+            if (tottalEffortHourAfter >= 24)
+                throw new Exception($"Nhân viên {employee.Name} trong ngày {subTask.DaySubmit.Value.ToString("dd/MM/yyyy")} đã làm {tottalEffortHour} giờ {tottalEffortMinutes} phút");
 
             subtaskUpdate.Description = subTask.Description;
             subtaskUpdate.Name = subTask.Name;
@@ -296,6 +320,30 @@ namespace SomoTaskManagement.Services.Imp
                             {
                                 throw new Exception($"Không tìm thấy subtask cho employee có ID {employeeEffortTime.EmployeeId}");
                             }
+                            var employee = await _unitOfWork.RepositoryEmployee.GetById(employeeEffortTime.EmployeeId);
+
+                            var efffortOfEmployeeInSubmitDay = await _unitOfWork.RepositoryEmployee_Task.GetData(s => s.EmployeeId == employeeEffortTime.EmployeeId && s.DaySubmit == employeeEffortTime.DaySubmit);
+                            var tottalEffortHour = efffortOfEmployeeInSubmitDay.Sum(s => s.ActualEffortHour);
+                            var tottalEffortHourAfter = efffortOfEmployeeInSubmitDay.Sum(s => s.ActualEffortHour) + employeeEffortTime.ActualEffortHour;
+
+                            var tottalEffortMinutes = efffortOfEmployeeInSubmitDay.Sum(s => s.ActualEfforMinutes);
+                            var tottalEffortMinutesAfter = efffortOfEmployeeInSubmitDay.Sum(s => s.ActualEfforMinutes) + employeeEffortTime.ActualEfforMinutes;
+
+                            if (tottalEffortMinutesAfter >= 60)
+                            {
+                                tottalEffortHourAfter += tottalEffortMinutesAfter / 60;
+
+                                tottalEffortMinutesAfter %= 60;
+                            }
+                            if (tottalEffortMinutes >= 60) 
+                            {
+                                tottalEffortHour += tottalEffortMinutes / 60;
+
+                                tottalEffortMinutes %= 60;
+                            }
+
+                            if (tottalEffortHourAfter >= 24)
+                                throw new Exception($"Nhân viên {employee.Name} trong ngày {employeeEffortTime.DaySubmit.ToString("dd/MM/yyyy")} đã làm {tottalEffortHour} giờ {tottalEffortMinutes} phút");
 
                             existingSubTask.ActualEfforMinutes = employeeEffortTime.ActualEfforMinutes;
                             existingSubTask.ActualEffortHour = employeeEffortTime.ActualEffortHour;
@@ -374,7 +422,7 @@ namespace SomoTaskManagement.Services.Imp
                 },
                 Data = new Dictionary<string, string>
                 {
-                    { "TaskId", taskId.ToString() }
+                    { "taskId", taskId.ToString() }
                 }
             }).ToList();
 
@@ -484,7 +532,7 @@ namespace SomoTaskManagement.Services.Imp
 
             var taskIds = subtasks.Select(s => s.TaskId);
 
-            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id) && (t.Status == 8 ||t.Status == 7));
+            var tasks = await _unitOfWork.RepositoryFarmTask.GetData(t => taskIds.Contains(t.Id) && (t.Status == 8 || t.Status == 7));
 
             var totalTask = tasks.Count();
 

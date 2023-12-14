@@ -110,7 +110,8 @@ namespace SomoTaskManagement.Data.Migrations
                 {
                     b.Property<int>("SubtaskId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubtaskId"), 1L, 1);
 
@@ -147,7 +148,7 @@ namespace SomoTaskManagement.Data.Migrations
 
                     b.HasIndex("TaskId");
 
-                    b.ToTable("SubTask", (string)null);
+                    b.ToTable("Activites", (string)null);
                 });
 
             modelBuilder.Entity("SomoTaskManagement.Domain.Entities.Employee_TaskType", b =>
@@ -257,6 +258,9 @@ namespace SomoTaskManagement.Data.Migrations
                     b.Property<bool>("IsExpired")
                         .HasColumnType("bit");
 
+                    b.Property<bool?>("IsImportant")
+                        .HasColumnType("bit");
+
                     b.Property<bool?>("IsPlant")
                         .HasColumnType("bit");
 
@@ -264,6 +268,9 @@ namespace SomoTaskManagement.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsSpecific")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("IsStartLate")
                         .HasColumnType("bit");
 
                     b.Property<int?>("LiveStockId")
